@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% if page %}
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  {% else %}
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# website: http://ogp.me/ns/website#">
+  {% endif %}
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  {# font #}
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  {# icons #}
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="{{ get_url(path="favicon.ico", trailing_slash=false) | safe }}"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="{{ get_url(path="/icon/apple-touch-icon.png", trailing_slash=false) | safe }}" />
+  <link rel="icon" type="image/png" href=href="{{ get_url(path="/icon/android-chrome-192x192.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  {# css #}
+  <link rel ="stylesheet" href="{{ get_url(path="main.css", trailing_slash=false) | safe }}"/>
+
+  {# ogp #}
+  {# description #}
+  {# ogp_type #}
+  <meta property="og:site_name" content="{{config.title}}" />
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:image" content="{{config.base_url}}/icon/og-image.png" />
+
+  {% block head %}{% endblock %}
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    {% block content %} {% endblock %}
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;<a href='/about/'>kosh</a>&nbsp;2021-2024</div>
+    {% if config.extra.dev%}
+    <div class="item">[dev mode: on]</div>
+    {% endif %}
+  </footer>
+  
+  {% if not config.extra.dev%}
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="{{ get_url(path="/js/google_analytics.js", trailing_slash=false) | safe }}"></script>
+  {% endif %}
+
+</body>
+
+</html>

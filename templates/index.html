@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% import "macro/utils.html" as utils %}
+
+{%- block head %}
+<title> kosh.dev</title>
+<meta name="description" content="Welcome to kosh.dev 🥞" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{ config.base_url }}" />
+{% endblock -%}
+
+{% block content %}
+<div class="small-title">Latest</div>
+
+{% set limit = 6 %}
+{% set article = get_section(path="article/_index.md") %}
+{% for page in article.pages %}
+  {% if loop.index <= limit %}
+    {{ utils::card(page=page) }}
+  {% endif %}
+{% endfor %}
+
+<div><a href="/article/">+ See all</a></div>
+
+<div class="small-title">Tag</div>
+<div id="htags" class="tag-box">
+  {% set tags = get_taxonomy(kind="tags", lang=lang) %}
+      {% for term in tags.items %}
+        <div class="htag"><a href="{{ get_taxonomy_url(kind="tags", name=term.name) | safe }}">{{ term.name }}</a></div>
+  {% endfor %}
+</div>
+
+{% endblock content %}

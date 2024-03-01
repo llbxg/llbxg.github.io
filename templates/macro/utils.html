@@ -1,0 +1,31 @@
+{% macro card(page, ignore_tag="null") %}
+    <div class='card'>
+        <div class="title">
+            <a href="{{page.path | safe}}">{{ page.title | safe}}</a>
+        </div>
+        <div class="info">
+            <div class="created">{{ page.date | safe}}</div>
+            {% for tag in page.taxonomies.tags %}
+            {% if tag != ignore_tag %}
+            <div class="htag"><a href="{{ get_taxonomy_url(kind="tags", name=tag) | safe }}">{{ tag }}</a></div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endmacro menu %}
+
+{%- macro toc(toc) %}
+<div class="toc" id="toc"><ol>
+    {% for h1 in toc %}
+        <li><a href="{{ h1.permalink | safe }}">{{ h1.title }}</a></li> 
+    {% endfor %} 
+</ol></div> 
+{%- endmacro %}
+
+{%- macro replace_toc(resource) %}
+	{%- set content = resource.content %}
+	{%- if content is containing("[TOC]") %}
+		{%- set content = content | replace(from="[TOC]", to=self::toc(toc=resource.toc)) %}
+	{%- endif -%}
+	{{ content | safe }}
+{%- endmacro %}

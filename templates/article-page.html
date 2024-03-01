@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% import "macro/utils.html" as utils %}
+
+{%- block head %}
+<title>{{ page.title | safe}} | kosh.dev</title>
+<meta name="description" content="{{ page.description | safe }}" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="{{ config.base_url }}/article/{{page.slug}}/" />
+{% endblock -%}
+
+{% block content %}
+
+<div class="article">
+    <h1 class="title">{{ page.title }}</h1>
+    <div class='info'>
+        <div class='date'>{{ page.date | safe }}</div>
+        {% for tag in page.taxonomies.tags %}
+            {% if tag != "katex"%}
+            <div class="htag"><a href="{{ get_taxonomy_url(kind="tags", name=tag) | safe }}">{{ tag }}</a></div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+{# {{ page.content | safe }} #}
+{{ utils::replace_toc(resource=page)}}
+</div>
+
+{% if "katex" in page.taxonomies.tags %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.16/dist/katex.min.css" integrity="sha384-6LkG2wmY8FK9E0vU9OOr8UvLwsaqUg9SETfpq4uTCN1agNe8HRdE9ABlk+fVx6gZ" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.16/dist/katex.min.js" integrity="sha384-31El76TwmbHj4rF9DyLsygbq6xoIobG0W+jqXim+a3dU9W53tdH3A/ngRPxOzzaB" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.16/dist/contrib/auto-render.min.js" integrity="sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl" crossorigin="anonymous"></script>
+<script src="{{ get_url(path="/js/math_rendering.js", trailing_slash=false) | safe }}"></script>
+{% endif %}
+
+{% endblock content %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% import "macro/utils.html" as utils %}
+
+{%- block head %}
+<title>#{{term.name | safe}} | kosh.dev</title>
+<meta name="description" content="Tag: #{{term.name | safe}}" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{ config.base_url }}/tags/{{term.name | lower }}" />
+{% endblock -%}
+
+{% block content %}
+
+<div class="small-title">#{{term.name | safe}}</div>
+
+{% for page in term.pages %}
+  {{ utils::card(page=page, ignore_tag=term.name) }}
+{% endfor %}
+
+{% endblock content %}

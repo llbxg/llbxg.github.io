@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% import "macro/utils.html" as utils %}
+
+{%- block head %}
+<title> 🍳 All | kosh.dev</title>
+<meta name="description" content="🍳 All articles" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{ config.base_url }}/article/" />
+{% endblock -%}
+
+
+{% block content %}
+<div class="small-title">All</div>
+
+
+{% set article = get_section(path="article/_index.md") %}
+{% for page in article.pages %}
+    {{ utils::card(page=page) }}
+{% endfor %}
+
+{% endblock content %}

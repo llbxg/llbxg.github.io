@@ -1,0 +1,180 @@
+$color_black: #000000;
+$color_white: #fff;
+$color_red: #ff4c4c;
+$color_dark_red: #bf616a;
+$color_orange: #ff825c;
+$color_blue: #00a2ff;
+$color_dark_blue: #5c8ac4;
+$color_gray: #c7d2da;
+
+.z-code {
+    color: $color_white;
+    background-color: $color_black;
+}
+
+.z-variable.z-parameter.z-function {
+    color: $color_white;
+}
+
+.z-comment, .z-punctuation.z-definition.z-comment {
+    color: $color_gray;
+}
+
+.z-punctuation.z-definition.z-string, .z-punctuation.z-definition.z-variable, .z-punctuation.z-definition.z-string, .z-punctuation.z-definition.z-parameters, .z-punctuation.z-definition.z-string, .z-punctuation.z-definition.z-array {
+    color: $color_white;
+}
+
+.z-none {
+    color: $color_white;
+}
+
+.z-keyword.z-operator {
+    color: $color_white;
+}
+
+.z-keyword {
+    color: $color_dark_blue;
+}
+
+.z-variable {
+    color: $color_red;
+}
+
+.z-entity.z-name.z-function, .z-meta.z-require, .z-support.z-function.z-any-method {
+    color: #8fa1b3;
+}
+
+.z-support.z-class, .z-entity.z-name.z-class, .z-entity.z-name.z-type.z-class {
+    color: #ebcb8b;
+}
+
+.z-meta.z-class {
+    color: #eff1f5;
+}
+
+.z-keyword.z-other.z-special-method {
+    color: #8fa1b3;
+}
+
+.z-storage {
+    color: $color_blue;
+}
+
+.z-support.z-function {
+    color: #96b5b4;
+}
+
+.z-string, .z-constant.z-other.z-symbol, .z-entity.z-other.z-inherited-class {
+    color: $color_dark_blue;
+}
+
+.z-constant.z-numeric {
+    color: $color_orange;
+}
+
+.z-none {
+    color: $color_orange;
+}
+
+.z-none {
+    color: $color_orange;
+}
+
+.z-constant {
+    color: $color_orange;
+}
+
+.z-entity.z-name.z-tag {
+    color: $color_dark_red;
+}
+
+.z-entity.z-other.z-attribute-name {
+    color: $color_orange;
+}
+
+.z-entity.z-other.z-attribute-name.z-id, .z-punctuation.z-definition.z-entity {
+    color: #8fa1b3;
+}
+
+.z-meta.z-selector {
+    color: $color_blue;
+}
+
+.z-none {
+    color: $color_orange;
+}
+
+.z-markup.z-heading .z-punctuation.z-definition.z-heading, .z-entity.z-name.z-section {
+    color: #8fa1b3;
+}
+
+.z-keyword.z-other.z-unit {
+    color: $color_orange;
+}
+
+.z-markup.z-bold, .z-punctuation.z-definition.z-bold {
+    color: #ebcb8b;
+    font-weight: bold;
+}
+
+.z-markup.z-italic, .z-punctuation.z-definition.z-italic {
+    color: $color_blue;
+    font-style: italic;
+}
+
+.z-markup.z-raw.z-inline {
+    color: #a3be8c;
+}
+
+.z-string.z-other.z-link {
+    color: $color_dark_red;
+}
+
+.z-meta.z-link {
+    color: #d08770;
+}
+
+.z-markup.z-list {
+    color: $color_dark_red;
+}
+
+.z-markup.z-quote {
+    color: #d08770;
+}
+
+.z-meta.z-separator {
+    color: $color_white;
+    background-color: #4f5b66;
+}
+
+.z-markup.z-inserted, .z-markup.z-inserted.z-git_gutter {
+    color: #a3be8c;
+}
+
+.z-markup.z-deleted, .z-markup.z-deleted.z-git_gutter {
+    color: $color_dark_red;
+}
+
+.z-markup.z-changed, .z-markup.z-changed.z-git_gutter {
+    color: $color_blue;
+}
+
+.z-markup.z-ignored, .z-markup.z-ignored.z-git_gutter {
+    color: #4f5b66;
+}
+
+.z-markup.z-untracked, .z-markup.z-untracked.z-git_gutter {
+    color: #4f5b66;
+}
+
+.z-constant.z-other.z-color {
+    color: #96b5b4;
+}
+
+.z-string.z-regexp {
+    color: #96b5b4;
+}
+
+.z-constant.z-character.z-escape {
+    color: #96b5b4;
+}

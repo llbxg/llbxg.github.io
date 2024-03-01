@@ -1,0 +1,21 @@
+base_url = "https://kosh.dev"
+
+compile_sass = true
+title = "kosh.dev"
+description = ""
+
+build_search_index = false
+
+generate_feed = true
+feed_filename = "atom.xml"
+
+taxonomies = [
+  { name = "tags", feed = true},
+]
+
+[markdown]
+highlight_code = true
+highlight_theme = "css"
+
+[extra]
+dev = true

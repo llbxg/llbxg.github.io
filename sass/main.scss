@@ -1,0 +1,386 @@
+@import url("code.css");
+
+$color_on_background: black;
+$color_gray: #e8e8e8aa;
+$theme_color_1: #e1ff36;
+
+$height_header: 64px;
+$height_footer: 58px;
+
+html {
+  font-family: "Noto Sans JP", "Noto Emoji", sans-serif;
+  font-size: 14px;
+  -ms-overflow-style: none; /* IE, Edge 対応 */
+  scrollbar-width: none; /* Firefox 対応 */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari 対応 */
+}
+
+hr {
+  margin-top: 30px;
+}
+
+img {
+  width: 100%;
+}
+
+::selection {
+  background: $theme_color_1;
+}
+
+#colorbar{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: calc(#{$height_header} * 0.1);
+  background-color: $theme_color_1;
+}
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: $height_header;
+
+  width: 100%;
+
+  z-index: 10;
+
+  .items {
+    display: flex;
+    max-width: 720px;
+    margin: auto;
+    position: relative;
+  }
+
+  .logo {
+    height: 40px;
+    margin-top: 4px;
+    font-weight: 700;
+  }
+
+  .item {
+    padding: 0 8px;
+    padding-top: 19px;
+  }
+  .item:nth-child(2) {
+    margin-left: auto;
+  }
+}
+
+.header-pinned {
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+  transition: transform 0.5s ease, -webkit-transform 0.5s ease;
+}
+
+.header-unpinned {
+  -webkit-transform: translateY(-90%);
+  transform: translateY(-90%);
+  transition: transform 1.0s ease, -webkit-transform 1.0s ease;
+}
+
+footer {
+  height: $height_footer;
+  font-size: 0.8em;
+  padding: 0 8px;
+  display: flex;
+  .item {
+    display: flex;
+    margin: auto 10px 20px 0;
+  }
+}
+
+main {
+  min-height: calc(100vh - #{$height_header} - #{$height_footer});
+  margin-top: $height_header;
+  padding: 0 8px;
+  h1 {
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  h2 {
+    word-break: break-all;
+    font-size: 1.1em;
+    font-weight: 700;
+    padding-top: 1em;
+  }
+  .htag{
+    margin-left: 0em;
+    margin-right: 0.5em;
+    margin-bottom: 0.5em;
+    &::before{
+      content: '#';
+        color: $color_on_background;
+        text-decoration: none;
+        display: inline-block;
+        margin-right: .1em;
+    }
+  }
+  h3 {
+    padding-top: 0.5em;
+  }
+  .date{
+    margin-right: 0.5em;
+  }
+
+  .update, .created{
+    margin-right: 0.5em;
+  }
+
+  .tag-box{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .small-title{
+    font-size: 1.0em;
+    margin-bottom: 10px;
+    margin-top: 20px;
+    display: flex;
+  }
+
+  .card{
+    margin: 16px 0;
+
+    .title{
+      font-size:1.0em;
+    }
+
+    .info{
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+  }
+
+  .article{
+    h3{
+      word-break: break-all;
+      font-size: 1.0em;
+      font-weight: 700;
+    }
+    .info{
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .article-h2-title{
+      display: flex;
+      margin: -.5em;
+      margin-top: 40px;
+    }
+    
+    .article-h2-number{
+      margin-top: 10px;
+      font-size: 12px;
+      margin-right: 4px;
+      margin-left: -4px;
+    }
+  }
+
+  #prev-and-next{
+    margin-top: 50px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-wrap: wrap;
+
+    #next{
+      margin-left: auto;
+      text-align: right;
+      .date{
+        margin-left:auto;
+      }
+    }
+  }
+}
+
+body {
+  max-width: 720px;
+  margin: auto;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+@media screen and (max-width: 768px) {
+  body {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  header {
+    .item:first-child {
+      margin-left: 16px;
+    }
+    .item:last-child {
+      margin-right: 16px;
+    }
+  }
+}
+
+strong{
+  font-weight: 400;
+  background:linear-gradient(transparent 70%, $theme_color_1 60%);
+}
+
+code:not([class]){
+  font-family: 'Noto Sans Mono', monospace;
+  font-size: 0.8em;
+
+  padding: 0.1em 0.5em;
+  margin: 0 0.3em;
+  background: $color_gray;
+}
+
+a{
+  text-decoration: none;
+  color: $color_on_background;
+}
+a:not(.no-decoration):hover{
+  text-decoration: underline;
+}
+
+#toc{
+  margin-top: 30px;
+  margin-bottom: 40px;
+  counter-reset: item;
+
+  ol{
+    padding: 0;
+  }
+
+  li{
+    list-style:none;
+    margin-bottom: 6px;
+    padding: 0;
+    overflow-x: scroll;
+
+    &:before{
+      counter-increment: item;
+      content: counter(item);
+      display: inline-block;
+      padding-right: 0.5em;
+    }
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+/* about */
+.prof{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.prof-icon{
+  width:80px;
+  border-radius: 50%;
+  margin: 10px;
+}
+/* about */
+
+th,td {
+  border-top: solid 1px;
+  border-bottom: solid 1px;
+  padding: 7px;
+  text-align: center;
+}
+
+table {
+  border-collapse:  collapse;
+  margin: 30px 0px;
+  overflow-x: auto;
+  display: block;
+  max-width: 100%;
+  width: 100%;
+  scrollbar-width: none; /* Firefox向け */
+  -ms-overflow-style: none; /* IE 10+ 向け */
+}
+
+table::-webkit-scrollbar {
+  display: none; /* WebKit (Safari, Chromeなど)向け */
+}
+
+ul{
+  padding-left: 1.3em;
+  li{
+    padding-bottom: 1em;
+  }
+}
+
+.footnote{
+  margin-top: 60px;
+}
+
+pre.z-code{
+    font-size: 12px;
+    padding: 30px 28px;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    overflow-x: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+pre::-webkit-scrollbar{
+    display:none;
+}
+span::selection {
+  background: $color_gray;
+}
+
+.footnote-definition {
+  display: flex;
+  align-items: center;
+
+  .footnote-definition-label {
+    position: relative;
+    left: 0;
+  }
+
+  p {
+    margin-left: 1em; // ラベルと本文の間隔を調整するための余白
+  }
+}
+
+// カウンターの初期化
+body {
+  counter-reset: h2-counter h3-counter;
+}
+
+h2 {
+  counter-reset: h3-counter; // h2ごとにh3カウンターをリセット
+  counter-increment: h2-counter; // h2カウンターをインクリメント
+  position: relative; // 相対位置指定
+
+  // 番号と内容の表示
+  &::before {
+    content: counter(h2-counter) ". ";
+    position: absolute; // 絶対位置指定
+    top: 0.5em; // 上端に配置
+    left: -1em; // 左側に配置
+    font-size: 0.8em; // 文字サイズを小さく
+    font-weight: bold;
+  }
+}
+
+h3 {
+  counter-increment: h3-counter; // h3カウンターをインクリメント
+  position: relative; // 相対位置指定
+
+  // 番号と内容の表示
+  &::before {
+    content: counter(h2-counter) "." counter(h3-counter) " ";
+    position: absolute; // 絶対位置指定
+    top: -0.5em; // 上端に配置
+    left: -1em; // 左側に配置
+    font-size: 0.7em; // 文字サイズをさらに小さく
+    font-weight: normal;
+  }
+}
