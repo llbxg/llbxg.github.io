@@ -294,22 +294,26 @@ th,td {
 }
 
 table {
-  border-collapse:  collapse;
-  margin: 30px 0px;
-  overflow-x: auto;
-  display: block;
+  margin: 30px auto;
+  border-collapse: collapse;
   max-width: 100%;
-  width: 100%;
-  scrollbar-width: none; /* Firefox向け */
-  -ms-overflow-style: none; /* IE 10+ 向け */
+  width: auto;
+  padding: 10px;
+}
+
+thead th {
+  font-weight: bold;
+  border-bottom: 2px solid $color_on_background;
 }
 
 table::-webkit-scrollbar {
-  display: none; /* WebKit (Safari, Chromeなど)向け */
+  display: none;
 }
+
 
 ul{
   padding-left: 1.3em;
+  padding-top: 1em;
   li{
     padding-bottom: 1em;
   }
@@ -383,4 +387,10 @@ h3 {
     font-size: 0.7em; // 文字サイズをさらに小さく
     font-weight: normal;
   }
+}
+
+blockquote {
+  border-left: 1px solid $color_on_background;
+  padding-left: 15px;
+  margin: 20px 0;
 }
