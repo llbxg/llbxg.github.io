@@ -2,10 +2,9 @@
 {% import "macro/utils.html" as utils %}
 
 {%- block head %}
-<title>#{{term.name | safe}} | kosh.dev</title>
-<meta name="description" content="Tag: #{{term.name | safe}}" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="{{ config.base_url }}/tags/{{term.name | lower }}" />
+{%- set tag = term.name | safe %}
+{{ utils::og(title="#{{ tag }}", description="Tag: #{{ tag }}", type="website", url="tags/{{term.name | lower }}") }}
+<title>#{{ tag }} | kosh.dev</title>
 {% endblock -%}
 
 {% block content %}

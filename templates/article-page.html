@@ -2,10 +2,8 @@
 {% import "macro/utils.html" as utils %}
 
 {%- block head %}
-<title>{{ page.title | safe}} | kosh.dev</title>
-<meta name="description" content="{{ page.description | safe }}" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="{{ config.base_url | safe }}/article/{{page.slug}}/" />
+{{ utils::og(title=page.title, description=page.description, type="article", url="article/{{page.slug}}/") }}
+<title> {{ page.title | safe }}| kosh.dev</title>
 {% endblock -%}
 
 {% block content %}

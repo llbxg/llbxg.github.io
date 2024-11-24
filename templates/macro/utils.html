@@ -29,3 +29,11 @@
 	{%- endif -%}
 	{{ content | safe }}
 {%- endmacro %}
+
+{%- macro og(title, description, type, url) %}
+  <meta property="og:url" content="{{ config.base_url | safe }}/{{ url }}" />
+  <meta property="og:title" content="{{ title }}"/>
+  <meta name="description" content="{{ description }}" />
+  <meta property="description" content="{{ description }}" />
+  <meta property="og:type" content="{{ type }}" />
+{%- endmacro %}
