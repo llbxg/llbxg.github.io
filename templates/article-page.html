@@ -5,7 +5,7 @@
 <title>{{ page.title | safe}} | kosh.dev</title>
 <meta name="description" content="{{ page.description | safe }}" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="{{ config.base_url }}/article/{{page.slug}}/" />
+<meta property="og:url" content="{{ config.base_url | safe }}/article/{{page.slug}}/" />
 {% endblock -%}
 
 {% block content %}
