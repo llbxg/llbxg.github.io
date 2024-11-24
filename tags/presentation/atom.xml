@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>kosh.dev - presentation</title>
+    <link href="https://www.kosh.dev/tags/presentation/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://www.kosh.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2024-10-29T00:00:00+00:00</updated>
+    <id>https://www.kosh.dev/tags/presentation/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Device Management and Delta Update for Embedded Devices with SWUpdate and TUF</title>
+        <published>2024-10-29T00:00:00+00:00</published>
+        <updated>2024-10-29T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://www.kosh.dev/article/21/" type="text/html"/>
+        <id>https://www.kosh.dev/article/21/</id>
+        
+        <content type="html">&lt;p&gt;&amp;quot;Open Source Summit + AI_dev Japan 2024&amp;quot; &lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; で発表しました。&lt;&#x2F;p&gt;
+&lt;p&gt;SWUpdateとTUFを統合し、デバイス管理を利用したデルタアップデートについて説明しています。
+去年&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#2&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;の続き的な立ち位置です。&lt;&#x2F;p&gt;
+&lt;div  class=&quot;youtube&quot;&gt;
+    &lt;iframe
+        src=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;embed&#x2F;Hrk5WpA7jBA&quot;
+        webkitallowfullscreen
+        mozallowfullscreen
+        allowfullscreen&gt;
+    &lt;&#x2F;iframe&gt;
+&lt;&#x2F;div&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;sched.co&#x2F;1jKEx&quot;&gt;→ 🧑‍🚀 発表の概要とパワポ | sched.com&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;1&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;events.linuxfoundation.org&#x2F;open-source-summit-japan&#x2F;&quot;&gt;Open Source Summit Japan | LF Events&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;2&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a href=&quot;&#x2F;article&#x2F;20&#x2F;&quot;&gt;Secure Software Update for Embedded Devices with SWUpdate and TUF&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Secure Software Update for Embedded Devices with SWUpdate and TUF</title>
+        <published>2023-12-06T00:00:00+00:00</published>
+        <updated>2023-12-06T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://www.kosh.dev/article/20/" type="text/html"/>
+        <id>https://www.kosh.dev/article/20/</id>
+        
+        <content type="html">&lt;p&gt;&amp;quot;Open Source Summit Japan 2023&amp;quot; &lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; で発表しました。&lt;&#x2F;p&gt;
+&lt;p&gt;SWUpdateとTUFを組み合わせて、OTAアップデートのセキュリティを強化する方法について検討しています。&lt;&#x2F;p&gt;
+&lt;div  class=&quot;youtube&quot;&gt;
+    &lt;iframe
+        src=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;embed&#x2F;8pzURi-oZFY&quot;
+        webkitallowfullscreen
+        mozallowfullscreen
+        allowfullscreen&gt;
+    &lt;&#x2F;iframe&gt;
+&lt;&#x2F;div&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;sched.co&#x2F;1Tyr9&quot;&gt;→ 🧑‍🚀 発表の概要とパワポ | sched.com&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;1&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;events.linuxfoundation.org&#x2F;archive&#x2F;2023&#x2F;open-source-summit-japan&#x2F;&quot;&gt;Open Source Summit Japan 2023 | LF Events&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+        
+    </entry>
+</feed>
