@@ -19,3 +19,4 @@ highlight_theme = "css"
 
 [extra]
 dev = true
+repo_main_url = "https://github.com/llbxg/llbxg.github.io/blob/main/content"

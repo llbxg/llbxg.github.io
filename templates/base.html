@@ -48,7 +48,10 @@
   </main>
 
   <footer>
-    <div class="item">©&nbsp;<a href='/about/'>kosh</a>&nbsp;2021-2024</div>
+    <div class="item">©&nbsp;kosh&nbsp;2021-2024</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    {% block footer %}{% endblock %}
     {% if config.extra.dev%}
     <div class="item">[dev mode: on]</div>
     {% endif %}

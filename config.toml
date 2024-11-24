@@ -16,3 +16,6 @@ taxonomies = [
 [markdown]
 highlight_code = true
 highlight_theme = "css"
+
+[extra]
+repo_main_url = "https://github.com/llbxg/llbxg.github.io/blob/main/content"

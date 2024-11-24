@@ -33,3 +33,8 @@
 {% endif %}
 
 {% endblock content %}
+
+
+{% block footer %}
+<div class="item"><a href="{{config.extra.repo_main_url | safe}}/article/{{page.slug}}.md">(Edit on GitHub)</a></div>
+{% endblock footer %}
