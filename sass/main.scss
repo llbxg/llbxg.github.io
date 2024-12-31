@@ -293,17 +293,22 @@ th,td {
   text-align: center;
 }
 
-table {
-  margin: 30px auto;
-  border-collapse: collapse;
-  max-width: 100%;
-  width: auto;
-  padding: 10px;
-}
-
 thead th {
   font-weight: bold;
   border-bottom: 2px solid $color_on_background;
+}
+
+table {
+  width: 100%;
+  max-width: 100%;
+  margin: 30px auto;
+  border-collapse: collapse;
+  padding: 10px;
+
+  overflow-x: auto;
+  display: block; // スクロールを有効にするためにブロック要素化
+  border-collapse: collapse; // セルの境界線を統一
+  white-space: nowrap; // テキストの折り返しを防止
 }
 
 table::-webkit-scrollbar {
