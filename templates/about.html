@@ -11,10 +11,19 @@
 <div class="prof">
     <img class="prof-icon" src="https://avatars.githubusercontent.com/u/64259962?v=4">
     <div class="prof-box">
-        <div class="prof-text"><p>{ Hi(👋), I'm kosh.</p></div>
+        <div class="prof-text"><p>{ Hi(👋), I'm kosh (Koshiro Onuki).</p></div>
         <div class="prof-text"><a href="https://github.com/llbxg">llbxg | GitHub</a></div>
     </div>
 </div>
+
+<div class="small-title">Publications</div>
+{% set article = get_section(path="article/_index.md") %}
+{% for page in article.pages %}
+    {% if "presentation" in page.taxonomies.tags or "paper" in page.taxonomies.tags %}
+    {{ utils::card(page=page) }}
+    {% endif %}
+{% endfor %}
+
 
 <br><hr>
 
