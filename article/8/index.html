@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="容量次元 w&#x2F; calc_dimension_capacity"/>
+  <meta name="description" content="容量次元についてです。" />
+  <meta property="description" content="容量次元についてです。" />
+  <meta property="og:type" content="article" />
+<title> 容量次元 w/ calc_dimension_capacity| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">容量次元 w&#x2F; calc_dimension_capacity</h1>
+    <div class='info'>
+        <div class='date'>2022-03-07</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/chaos/">chaos</a></div>
+            
+        
+            
+        
+    </div>
+<div class="contents">
+
+<p>容量次元についてです。</p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/8/#enonxie-xiang">エノン写像</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/8/#rong-liang-ci-yuan">容量次元</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/8/#hundun-exploration-calc-dimension-capacity">hundun.exploration.calc_dimension_capacity</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/8/#can-kao-wen-xian">参考文献</a></li> 
+     
+</ol></div></p>
+<h2 id="enonxie-xiang">エノン写像</h2>
+<p>例として、以下の方程式より得られるエノン写像(Henon map)を使用します。</p>
+<p>$$$
+\begin{array}{l}
+x_{t+1}=y_t +1-ax_t^2 \\
+y_{t+1}=bx_t
+\end{array}
+$$$</p>
+<p>今回は$a=1.4,~b=0.3$とし、得られた5,000,000点のデータを使用します。
+(4段4次のルンゲクッタにより数値積分しています。刻み幅は0.01です。)</p>
+<p>計算した結果を示します。</p>
+<p><img src="/image/008/henonmap.png" alt="Henon map (5,000,000 step)" /></p>
+<p>得られた2次元の時系列データは三日月型のアトラクタを有していることが確認できます。</p>
+<p>このアトラクタに対して容量次元を計算していきます。</p>
+<h2 id="rong-liang-ci-yuan">容量次元</h2>
+<p>エノン写像の容量次元を計算していきます。</p>
+<p>(容量次元はフラクタル次元、ボックスカウント次元とも呼ばれています。)</p>
+<br>
+<p>$n$次元時系列データに対する<strong>容量次元</strong>$D_0$は以下の式より求められます。</p>
+<p>$$$
+D_0=\lim_{\epsilon \to 0}~\Biggl( \frac{\ln N(\epsilon)}{\ln \frac{1}{\epsilon}}\Biggr)
+$$$</p>
+<p>ただし、$N(\epsilon)$はデータ(アトラクタ)を長さ$\epsilon$のグリッドで分割した際に、データを含むセル数のことです。</p>
+<p>エノン写像を$\epsilon=0.1$のグリッドで分割し、データを含むセルに色をつけると以下のようになり、$N(0.1)=83$となります。</p>
+<p><img src="/image/008/henongrid.png" alt="エノン写像とグリッド" /></p>
+<p>長さ$\epsilon$を徐々に小さくしていった際の変化をアニメーションにしてみます。</p>
+<p><img src="/image/008/epsilon.gif" alt="$\epsilon$に対するセル" /></p>
+<p>抽象的な状態から上記で示したアトラクタ(Fig.1)に近い状態に推移していく様子を確認することができます。</p>
+<p>この時$\ln 1 / \epsilon$ (=<code>ep</code>)に対する$\ln N(\epsilon)$ (=<code>N</code>)の変化を確認します。</p>
+<p><img src="/image/008/ep-N.png" alt="epに対するNの変化" /></p>
+<p>横軸(<code>ep</code>)の左側ではグリッドサイズが大きいためギザギザしている一方で、右側では直線的(相関係数が1に近い)になっています。</p>
+<br>
+<p>この結果から$D_0$を求めるにはいくつかの方法が検討できます。</p>
+<p>最小二乗法を用いて1次近似した際の傾きを採用する。または、特定の条件下における$\frac{\ln N(\epsilon)}{\ln \frac{1}{\epsilon}}$の平均値を採用するなどです。</p>
+<br>
+<p>hundunで採用した計算方法は、</p>
+<p><code>ep</code>における区間(バッチサイズ)ごとに直線の相関係数を計算し、最も相関係数が高かった区間における$\frac{\ln N(\epsilon)}{\ln \frac{1}{\epsilon}}$の平均値を計算する手法です。</p>
+<p>上記結果(Fig.4)においてバッチサイズを10とした時の採用される区間と実際の$D_0$ (=<code>Ave(N/ep)</code>)を示します。</p>
+<p><img src="/image/008/ep-N-2.png" alt="epに対するNの変化 - 採用区間/値" /></p>
+<p>最終的に容量次元は$D_0=1.29450$と求まります。</p>
+<h2 id="hundun-exploration-calc-dimension-capacity">hundun.exploration.calc_dimension_capacity</h2>
+<p>hundunでは$D_0$の計算に際して得られた情報をプロットすることで値の妥当性を確認できるようにしています。</p>
+<p><a href="https://github.com/llbxg/hundun/wiki/Calculate-the-generalized-dimension#calc_dimension_capacity">calc_dimension_capacity | hundun | GitHub</a></p>
+<p>実際の使用例を確認します。</p>
+<pre data-lang="python" class="language-python z-code"><code class="language-python" data-lang="python"><span class="z-source z-python"><span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-from z-python">from</span></span><span class="z-meta z-statement z-import z-python"><span class="z-meta z-import-source z-python"> <span class="z-meta z-import-path z-python"><span class="z-meta z-import-name z-python">hundun</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-import-name z-python">equations</span></span> <span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-python">import</span></span></span></span><span class="z-meta z-statement z-import z-python"></span><span class="z-meta z-statement z-import z-python"> <span class="z-meta z-generic-name z-python">Henon</span></span>
+<span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-from z-python">from</span></span><span class="z-meta z-statement z-import z-python"><span class="z-meta z-import-source z-python"> <span class="z-meta z-import-path z-python"><span class="z-meta z-import-name z-python">hundun</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-import-name z-python">exploration</span></span> <span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-python">import</span></span></span></span><span class="z-meta z-statement z-import z-python"></span><span class="z-meta z-statement z-import z-python"> <span class="z-meta z-generic-name z-python">calc_dimension_capacity</span></span>
+
+<span class="z-meta z-statement z-loop z-while z-python"><span class="z-keyword z-control z-loop z-while z-python">while</span> <span class="z-constant z-language z-python">True</span><span class="z-punctuation z-section z-block z-loop z-while z-python">:</span></span>
+    <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">henon</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">Henon</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">on_attractor</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+    <span class="z-meta z-statement z-conditional z-if z-python"><span class="z-keyword z-control z-conditional z-if z-python">if</span> <span class="z-keyword z-operator z-logical z-python">not</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">henon</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">inf</span></span><span class="z-punctuation z-section z-block z-conditional z-if z-python">:</span></span>
+        <span class="z-keyword z-control z-flow z-break z-python">break</span>
+
+<span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">_</span></span>, <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">u_seq</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">henon</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">solve_n_times</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-constant z-numeric z-integer z-decimal z-python">5000000</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+
+<span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">D_0</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">calc_dimension_capacity</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">u_seq</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+
+<span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">print</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">D_0</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span></code></pre>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">1.294497548368281</span></span>
+</span></code></pre>
+<p><img src="/image/008/calc_dimension_capacity.png" alt="calc_dimension_capacityによる結果" /></p>
+<p>$D_0$を決定するには、まず(e)より相関係数が一定値以上(デフォルトでは<code>0.999</code>)である区間が存在することを確認します。</p>
+<p>次に、(c)における青色のプロットがしっかりと収束しているかを確認する必要があります。</p>
+<br>
+<h3 id="gurahunituite">グラフについて</h3>
+<p>左側3つのグラフが全ての$\epsilon$に対する結果で、右側3つのグラフは採用した区間付近における結果を示しています。</p>
+<h4 id="a-b">(a), (b)</h4>
+<p>上記(Fig.4, Fig.5)で示した図と同様で、$\ln \frac{1}{\epsilon}$に対する$\ln N(\epsilon)$のプロットです。</p>
+<p>青色は実際のプロットで、オレンジ色のプロットは採用した点です。</p>
+<p>オレンジ色の直線は最終的な値$D_0$を重ねて表示した結果です。</p>
+<h4 id="c-d">(c), (d)</h4>
+<p>$\ln \frac{1}{\epsilon}$に対する$D_0$のプロットです。</p>
+<p>青色のプロットは各区間における$\frac{\ln N(\epsilon)}{\ln \frac{1}{\epsilon}}$の平均値を示しています。</p>
+<p>緑色のプロットは参考として、各区間における最小二乗法を用いて1次近似した際の傾きを示しています。</p>
+<p>オレンジ色の点線が最終的な値$D_0$を表しています。</p>
+<h4 id="e-f">(e), (f)</h4>
+<p>$\ln \frac{1}{\epsilon}$に対する相関係数のプロットです。</p>
+<p>オレンジ色の点が最大の相関係数を示します。</p>
+<h2 id="can-kao-wen-xian">参考文献</h2>
+<h3 id="annotations">Annotations</h3>
+<p>グラフ内に矢印を書くために参考にしました。</p>
+<p><a href="https://matplotlib.org/stable/tutorials/text/annotations.html">Annotations | matplotlib</a></p>
+<p><a href="https://matplotlib.org/stable/gallery/userdemo/connectionstyle_demo.html">Connection styles for annotations | matplotlib</a></p>
+
+</div>
+
+</div>
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.16/dist/katex.min.css" integrity="sha384-6LkG2wmY8FK9E0vU9OOr8UvLwsaqUg9SETfpq4uTCN1agNe8HRdE9ABlk+fVx6gZ" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.16/dist/katex.min.js" integrity="sha384-31El76TwmbHj4rF9DyLsygbq6xoIobG0W+jqXim+a3dU9W53tdH3A/ngRPxOzzaB" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.16/dist/contrib/auto-render.min.js" integrity="sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl" crossorigin="anonymous"></script>
+<script src="https://www.kosh.dev/js/math_rendering.js"></script>
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/8.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

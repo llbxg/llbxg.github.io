@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>kosh.dev - chaos</title>
+    <link href="https://www.kosh.dev/tags/chaos/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://www.kosh.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2022-11-17T00:00:00+00:00</updated>
+    <id>https://www.kosh.dev/tags/chaos/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Secret-Key Exchange Through Synchronization of Randomized Chaotic Oscillators Aided by Logistic Hash Function</title>
+        <published>2022-11-17T00:00:00+00:00</published>
+        <updated>2022-11-17T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://www.kosh.dev/article/22/" type="text/html"/>
+        <id>https://www.kosh.dev/article/22/</id>
+        
+        <content type="html">&lt;p&gt;カオスとは、 周期性、 位相推移性、 および、 長期予測不可能性で特徴つけられる複雑な動的振る舞いです。
+2つのカオス振動子系を結合することにより各々の系はカオス的挙動を示しますが、それらの状態が各時点において等価となることがPecoraらによって発見されました &lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#2&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#3&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;。
+この現象はカオス同期と呼ばれ、暗号技術に応用されてきました &lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#4&quot;&gt;3&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#5&quot;&gt;4&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#6&quot;&gt;5&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#7&quot;&gt;6&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;gai-yao&quot;&gt;概要&lt;&#x2F;h2&gt;
+&lt;p&gt;ベースのアイディアは以下の図のように、一部の変数を相互に送信し、自身の変数と置換して利用することで同期させるものです。
+これにより、事前の秘密情報共有なしに、乱数生成機(として利用可能なアトラクター)を共有できます。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;022&#x2F;alice_bob.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;　&lt;&#x2F;p&gt;
+&lt;p&gt;ただし、従来のカオス暗号では、信号を直接送信するため、盗聴者が振動子の内部状態を推定可能となる問題がありました。&lt;&#x2F;p&gt;
+&lt;p&gt;今回はLorenz振動子を物理乱数でランダム化し、ランダム化されたカオス時系列を交換することで、Lorenz振動子系が安全に同期することを示しました。
+そして、秘密鍵共有への応用方法を示しました。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;lun-wen&quot;&gt;論文&lt;&#x2F;h2&gt;
+&lt;p&gt;以下の論文&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1&quot;&gt;7&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;では「ランダム化されたローレンツ方程式の同期現象を利用した秘密鍵交換」と「ロジスティック写像をベースとしたハッシュ関数」を提案しています。　&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bibtex&quot; class=&quot;language-bibtex z-code&quot;&gt;&lt;code class=&quot;language-bibtex&quot; data-lang=&quot;bibtex&quot;&gt;&lt;span class=&quot;z-text z-bibtex&quot;&gt;&lt;span class=&quot;z-meta z-entry z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-keyword z-other z-entry-type z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-keyword z-bibtex&quot;&gt;@&lt;&#x2F;span&gt;ARTICLE&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-entry z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type z-entry-key z-bibtex&quot;&gt;9684247&lt;&#x2F;span&gt;,
+  &lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;author&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;Onuki, Koshiro and Cho, Kenichiro and Horio, Yoshihiko and Miyano, Takaya&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+  &lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;journal&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;IEEE Transactions on Circuits and Systems I: Regular Papers&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;, 
+  &lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;title&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;Secret-Key Exchange Through Synchronization of Randomized Chaotic Oscillators Aided by Logistic Hash Function&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;, 
+  &lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;year&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;2022&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+  &lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;volume&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;69&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+  &lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;number&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;4&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+  &lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;pages&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;1655-1667&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+  &lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;keywords&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;Oscillators;Cryptography;Ciphers;Synchronization;Chaotic communication;Logistics;Hash functions;Cryptography;secret-key exchange;chaotic synchronization;chaos-based stream cipher;hash function&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+  &lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;doi&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;10.1109&#x2F;TCSI.2022.3140762&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-entry z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;fa-biao&quot;&gt;発表&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;bibtex&quot; class=&quot;language-bibtex z-code&quot;&gt;&lt;code class=&quot;language-bibtex&quot; data-lang=&quot;bibtex&quot;&gt;&lt;span class=&quot;z-text z-bibtex&quot;&gt;&lt;span class=&quot;z-meta z-entry z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-keyword z-other z-entry-type z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-keyword z-bibtex&quot;&gt;@&lt;&#x2F;span&gt;inproceedings&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-entry z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type z-entry-key z-bibtex&quot;&gt;sita44-731&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;author&lt;&#x2F;span&gt;    &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;大抜倖司朗 and 堀尾喜彦 and 宮野尚哉&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;title&lt;&#x2F;span&gt;     &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;ランダム化された結合Lorenz振動子系における同期に基づく秘密鍵共有&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;booktitle&lt;&#x2F;span&gt; &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;情報理論とその応用シンポジウム予稿集&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;volume&lt;&#x2F;span&gt;    &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;44&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;number&lt;&#x2F;span&gt;    &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;7.3.1&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;pages&lt;&#x2F;span&gt;     &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;419-424&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;address&lt;&#x2F;span&gt;   &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;広島&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;month&lt;&#x2F;span&gt;     &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;12月&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;year&lt;&#x2F;span&gt;      &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;2021&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;note&lt;&#x2F;span&gt;      &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;2021年12月10日, 西宮市, 関西学院会館&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-entry z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+
+&lt;span class=&quot;z-meta z-entry z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-keyword z-other z-entry-type z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-keyword z-bibtex&quot;&gt;@&lt;&#x2F;span&gt;inproceedings&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-entry z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type z-entry-key z-bibtex&quot;&gt;nlp2021-39&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;author&lt;&#x2F;span&gt;    &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;大抜倖司朗 and 宮野尚哉&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;title&lt;&#x2F;span&gt;     &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;ランダム化された結合Lorenz振動子系における同期&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;booktitle&lt;&#x2F;span&gt; &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;信学技報&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;volume&lt;&#x2F;span&gt;    &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;121&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;number&lt;&#x2F;span&gt;    &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;258&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;series&lt;&#x2F;span&gt;    &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;NLP2021-39&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;pages&lt;&#x2F;span&gt;     &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;19-22&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;address&lt;&#x2F;span&gt;   &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;広島&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;month&lt;&#x2F;span&gt;     &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;11月&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;year&lt;&#x2F;span&gt;      &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;2021&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;note&lt;&#x2F;span&gt;      &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;2021年11月19日(金) 広島工業大学広島校舎201号室 (NLP)&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-entry z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+
+&lt;span class=&quot;z-meta z-entry z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-keyword z-other z-entry-type z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-keyword z-bibtex&quot;&gt;@&lt;&#x2F;span&gt;inproceedings&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-entry z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type z-entry-key z-bibtex&quot;&gt;nlp2021-106&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;author&lt;&#x2F;span&gt;    &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;大抜倖司朗 and 長健一郎 and 堀尾喜彦 and 宮野尚哉&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;title&lt;&#x2F;span&gt;     &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;ランダム化されたLorenz振動子系における同期現象を用いた秘密鍵交換&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;booktitle&lt;&#x2F;span&gt; &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;信学技報&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;volume&lt;&#x2F;span&gt;    &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;121&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;number&lt;&#x2F;span&gt;    &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;335&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;series&lt;&#x2F;span&gt;    &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;NLP2021-106, MICT2021-81, MBE2021-67&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;pages&lt;&#x2F;span&gt;     &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;155-158&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;address&lt;&#x2F;span&gt;   &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;ONLINE&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;month&lt;&#x2F;span&gt;     &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;1月&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;year&lt;&#x2F;span&gt;      &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;2022&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;,
+	&lt;span class=&quot;z-meta z-key-assignment z-bibtex&quot;&gt;&lt;span class=&quot;z-string z-unquoted z-key z-bibtex&quot;&gt;note&lt;&#x2F;span&gt;      &lt;span class=&quot;z-punctuation z-separator z-key-value z-bibtex&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-string z-quoted z-other z-braces z-bibtex&quot;&gt;&lt;span class=&quot;z-punctuation z-definition z-string z-begin z-bibtex&quot;&gt;{&lt;&#x2F;span&gt;2022年1月21日(金)-1月23日(日) オンライン開催 (NLP, MICT, MBE, NC)&lt;span class=&quot;z-punctuation z-definition z-string z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-entry z-end z-bibtex&quot;&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;can-kao&quot;&gt;参考&lt;&#x2F;h2&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;2&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;journals.aps.org&#x2F;prl&#x2F;abstract&#x2F;10.1103&#x2F;PhysRevLett.64.821&quot;&gt;Synchronization in chaotic systems | Phys. Rev. Lett.&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;3&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;journals.aps.org&#x2F;pra&#x2F;abstract&#x2F;10.1103&#x2F;PhysRevA.44.2374&quot;&gt;Driving systems with chaotic signals | Phys. Rev. A&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;4&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;3&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;journals.aps.org&#x2F;prl&#x2F;abstract&#x2F;10.1103&#x2F;PhysRevLett.71.65&quot;&gt;Circuit implementation of synchronized chaos with applications to communications | Phys. Rev. Lett.&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;5&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;4&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;ieeexplore.ieee.org&#x2F;document&#x2F;246163&quot;&gt;Synchronization of Lorenz-based chaotic circuits with applications to communications | IEEE Journals &amp;amp; Magazine | IEEE Xplore&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;6&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;5&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.science.org&#x2F;doi&#x2F;10.1126&#x2F;science.279.5354.1198&quot;&gt;Communication with Chaotic Lasers | Science&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;7&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;6&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.nature.com&#x2F;articles&#x2F;nature04275&quot;&gt;Chaos-based communications at high bit rates using commercial fibre-optic links | Nature&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;1&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;7&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;doi.org&#x2F;10.1109&#x2F;TCSI.2022.3140762&quot;&gt;Secret-Key Exchange Through Synchronization of Randomized Chaotic Oscillators Aided by Logistic Hash Function - doi.org&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>hundunっていうPythonライブラリを作ってみた</title>
+        <published>2022-03-08T00:00:00+00:00</published>
+        <updated>2022-03-08T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://www.kosh.dev/article/7/" type="text/html"/>
+        <id>https://www.kosh.dev/article/7/</id>
+        
+        <content type="html">&lt;p&gt;なんとなくカオス解析用のPythonライブラリを作成しました。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;007&#x2F;hundun-header.png&quot; alt=&quot;hundun header&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;[TOC]&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;hundun&quot;&gt;hundun&lt;&#x2F;h2&gt;
+&lt;p&gt;最近書いていたコードが溜まってきたので、一箇所にまとめるついでにライブラリにしてみました。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;llbxg&#x2F;hundun&quot;&gt;hundun | GitHub&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;正直コードとか綺麗ではないんですけど、PyPIに登録してpipでインストールしてみたかったので試してみました。カオスの解析ってあんまり需要なさそうなんですけど、気がつくとtotalダウンロード数が4000を超えていました。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;pepy.tech&#x2F;project&#x2F;hundun&quot;&gt;hundun | PePy&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;p&gt;関数等の解説はwikiにまとめました。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;llbxg&#x2F;hundun&#x2F;wiki&quot;&gt;hundun.wiki | GitHub&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Pythonライブラリなら&amp;quot;Docstringを書いて、Sphinxでドキュメント化&amp;quot;が一般的なんですが、なんとなくGitHubのwiki使いたかったので使ってみました。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;shi-zhuang-nei-rong&quot;&gt;実装内容&lt;&#x2F;h2&gt;
+&lt;p&gt;基本的な実装内容は&lt;strong&gt;時系列データに対する解析&lt;&#x2F;strong&gt;と&lt;strong&gt;式に対する解析&lt;&#x2F;strong&gt;です。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;shi-xi-lie-deta&quot;&gt;時系列データ&lt;&#x2F;h3&gt;
+&lt;p&gt;時系列の方は基本的なカオス解析に必要な機能と次元の計算・推定をメインにしています。&lt;&#x2F;p&gt;
+&lt;p&gt;自分は実際の研究ではほとんど使わなかったので、少し雑な実装が多いです。&lt;&#x2F;p&gt;
+&lt;p&gt;時系列からのリアプノフスペクトラムの推定だけ後で追加で実装する予定です。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;llbxg&#x2F;hundun&#x2F;wiki&#x2F;Exploration&quot;&gt;Exploration | hundun.wiki&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;li-xue-xi-shi&quot;&gt;力学系（式）&lt;&#x2F;h3&gt;
+&lt;p&gt;基本的には写像(離散力学系)と方程式(連続力学系)のリアプノフスペクトラムの推定がメインです。&lt;&#x2F;p&gt;
+&lt;p&gt;それに伴う計算方法の追加とか、可視化等いろいろ実装している感じです。&lt;&#x2F;p&gt;
+&lt;p&gt;たとえばhenon写像のパラメーターに対するリアプノフスペクトラムの計算結果を示します。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;007&#x2F;calc_les-Henon.png&quot; alt=&quot;パラメータに対するリアプノフスペクトラム&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;p&gt;使用している関数の説明とかサンプルコードはこちらです。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;llbxg&#x2F;hundun&#x2F;wiki&#x2F;Lyapunov-exponents#henon-map-2&quot;&gt;Example - Henon map | hundun.wiki&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;kaosujie-xi&quot;&gt;カオス解析&lt;&#x2F;h2&gt;
+&lt;p&gt;実装したものに関して解説記事を書いたら、下記に追記していきます。&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;article&#x2F;8&quot;&gt;[容量次元 w&#x2F; calc_dimension_capacity]&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>容量次元 w&#x2F; calc_dimension_capacity</title>
+        <published>2022-03-07T00:00:00+00:00</published>
+        <updated>2022-03-07T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://www.kosh.dev/article/8/" type="text/html"/>
+        <id>https://www.kosh.dev/article/8/</id>
+        
+        <content type="html">&lt;p&gt;容量次元についてです。&lt;&#x2F;p&gt;
+&lt;p&gt;[TOC]&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;enonxie-xiang&quot;&gt;エノン写像&lt;&#x2F;h2&gt;
+&lt;p&gt;例として、以下の方程式より得られるエノン写像(Henon map)を使用します。&lt;&#x2F;p&gt;
+&lt;p&gt;$$$
+\begin{array}{l}
+x_{t+1}=y_t +1-ax_t^2 \\
+y_{t+1}=bx_t
+\end{array}
+$$$&lt;&#x2F;p&gt;
+&lt;p&gt;今回は$a=1.4,~b=0.3$とし、得られた5,000,000点のデータを使用します。
+(4段4次のルンゲクッタにより数値積分しています。刻み幅は0.01です。)&lt;&#x2F;p&gt;
+&lt;p&gt;計算した結果を示します。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;008&#x2F;henonmap.png&quot; alt=&quot;Henon map (5,000,000 step)&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;得られた2次元の時系列データは三日月型のアトラクタを有していることが確認できます。&lt;&#x2F;p&gt;
+&lt;p&gt;このアトラクタに対して容量次元を計算していきます。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;rong-liang-ci-yuan&quot;&gt;容量次元&lt;&#x2F;h2&gt;
+&lt;p&gt;エノン写像の容量次元を計算していきます。&lt;&#x2F;p&gt;
+&lt;p&gt;(容量次元はフラクタル次元、ボックスカウント次元とも呼ばれています。)&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;p&gt;$n$次元時系列データに対する&lt;strong&gt;容量次元&lt;&#x2F;strong&gt;$D_0$は以下の式より求められます。&lt;&#x2F;p&gt;
+&lt;p&gt;$$$
+D_0=\lim_{\epsilon \to 0}~\Biggl( \frac{\ln N(\epsilon)}{\ln \frac{1}{\epsilon}}\Biggr)
+$$$&lt;&#x2F;p&gt;
+&lt;p&gt;ただし、$N(\epsilon)$はデータ(アトラクタ)を長さ$\epsilon$のグリッドで分割した際に、データを含むセル数のことです。&lt;&#x2F;p&gt;
+&lt;p&gt;エノン写像を$\epsilon=0.1$のグリッドで分割し、データを含むセルに色をつけると以下のようになり、$N(0.1)=83$となります。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;008&#x2F;henongrid.png&quot; alt=&quot;エノン写像とグリッド&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;長さ$\epsilon$を徐々に小さくしていった際の変化をアニメーションにしてみます。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;008&#x2F;epsilon.gif&quot; alt=&quot;$\epsilon$に対するセル&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;抽象的な状態から上記で示したアトラクタ(Fig.1)に近い状態に推移していく様子を確認することができます。&lt;&#x2F;p&gt;
+&lt;p&gt;この時$\ln 1 &#x2F; \epsilon$ (=&lt;code&gt;ep&lt;&#x2F;code&gt;)に対する$\ln N(\epsilon)$ (=&lt;code&gt;N&lt;&#x2F;code&gt;)の変化を確認します。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;008&#x2F;ep-N.png&quot; alt=&quot;epに対するNの変化&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;横軸(&lt;code&gt;ep&lt;&#x2F;code&gt;)の左側ではグリッドサイズが大きいためギザギザしている一方で、右側では直線的(相関係数が1に近い)になっています。&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;p&gt;この結果から$D_0$を求めるにはいくつかの方法が検討できます。&lt;&#x2F;p&gt;
+&lt;p&gt;最小二乗法を用いて1次近似した際の傾きを採用する。または、特定の条件下における$\frac{\ln N(\epsilon)}{\ln \frac{1}{\epsilon}}$の平均値を採用するなどです。&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;p&gt;hundunで採用した計算方法は、&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;ep&lt;&#x2F;code&gt;における区間(バッチサイズ)ごとに直線の相関係数を計算し、最も相関係数が高かった区間における$\frac{\ln N(\epsilon)}{\ln \frac{1}{\epsilon}}$の平均値を計算する手法です。&lt;&#x2F;p&gt;
+&lt;p&gt;上記結果(Fig.4)においてバッチサイズを10とした時の採用される区間と実際の$D_0$ (=&lt;code&gt;Ave(N&#x2F;ep)&lt;&#x2F;code&gt;)を示します。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;008&#x2F;ep-N-2.png&quot; alt=&quot;epに対するNの変化 - 採用区間&#x2F;値&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;最終的に容量次元は$D_0=1.29450$と求まります。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;hundun-exploration-calc-dimension-capacity&quot;&gt;hundun.exploration.calc_dimension_capacity&lt;&#x2F;h2&gt;
+&lt;p&gt;hundunでは$D_0$の計算に際して得られた情報をプロットすることで値の妥当性を確認できるようにしています。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;llbxg&#x2F;hundun&#x2F;wiki&#x2F;Calculate-the-generalized-dimension#calc_dimension_capacity&quot;&gt;calc_dimension_capacity | hundun | GitHub&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;実際の使用例を確認します。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; class=&quot;language-python z-code&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;z-source z-python&quot;&gt;&lt;span class=&quot;z-meta z-statement z-import z-python&quot;&gt;&lt;span class=&quot;z-keyword z-control z-import z-from z-python&quot;&gt;from&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-statement z-import z-python&quot;&gt;&lt;span class=&quot;z-meta z-import-source z-python&quot;&gt; &lt;span class=&quot;z-meta z-import-path z-python&quot;&gt;&lt;span class=&quot;z-meta z-import-name z-python&quot;&gt;hundun&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-accessor z-dot z-python&quot;&gt;.&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-import-name z-python&quot;&gt;equations&lt;&#x2F;span&gt;&lt;&#x2F;span&gt; &lt;span class=&quot;z-meta z-statement z-import z-python&quot;&gt;&lt;span class=&quot;z-keyword z-control z-import z-python&quot;&gt;import&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-statement z-import z-python&quot;&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-statement z-import z-python&quot;&gt; &lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;Henon&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;z-meta z-statement z-import z-python&quot;&gt;&lt;span class=&quot;z-keyword z-control z-import z-from z-python&quot;&gt;from&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-statement z-import z-python&quot;&gt;&lt;span class=&quot;z-meta z-import-source z-python&quot;&gt; &lt;span class=&quot;z-meta z-import-path z-python&quot;&gt;&lt;span class=&quot;z-meta z-import-name z-python&quot;&gt;hundun&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-accessor z-dot z-python&quot;&gt;.&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-import-name z-python&quot;&gt;exploration&lt;&#x2F;span&gt;&lt;&#x2F;span&gt; &lt;span class=&quot;z-meta z-statement z-import z-python&quot;&gt;&lt;span class=&quot;z-keyword z-control z-import z-python&quot;&gt;import&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-statement z-import z-python&quot;&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-statement z-import z-python&quot;&gt; &lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;calc_dimension_capacity&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+
+&lt;span class=&quot;z-meta z-statement z-loop z-while z-python&quot;&gt;&lt;span class=&quot;z-keyword z-control z-loop z-while z-python&quot;&gt;while&lt;&#x2F;span&gt; &lt;span class=&quot;z-constant z-language z-python&quot;&gt;True&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-block z-loop z-while z-python&quot;&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+    &lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;henon&lt;&#x2F;span&gt;&lt;&#x2F;span&gt; &lt;span class=&quot;z-keyword z-operator z-assignment z-python&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-meta z-function-call z-python&quot;&gt;&lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;Henon&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-punctuation z-accessor z-dot z-python&quot;&gt;.&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-variable z-function z-python&quot;&gt;&lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;on_attractor&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-function-call z-arguments z-python&quot;&gt;&lt;span class=&quot;z-punctuation z-section z-arguments z-begin z-python&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-arguments z-end z-python&quot;&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+    &lt;span class=&quot;z-meta z-statement z-conditional z-if z-python&quot;&gt;&lt;span class=&quot;z-keyword z-control z-conditional z-if z-python&quot;&gt;if&lt;&#x2F;span&gt; &lt;span class=&quot;z-keyword z-operator z-logical z-python&quot;&gt;not&lt;&#x2F;span&gt; &lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;henon&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-accessor z-dot z-python&quot;&gt;.&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;inf&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-block z-conditional z-if z-python&quot;&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+        &lt;span class=&quot;z-keyword z-control z-flow z-break z-python&quot;&gt;break&lt;&#x2F;span&gt;
+
+&lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-variable z-language z-python&quot;&gt;_&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;, &lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;u_seq&lt;&#x2F;span&gt;&lt;&#x2F;span&gt; &lt;span class=&quot;z-keyword z-operator z-assignment z-python&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-meta z-function-call z-python&quot;&gt;&lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;henon&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-punctuation z-accessor z-dot z-python&quot;&gt;.&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-variable z-function z-python&quot;&gt;&lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;solve_n_times&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-function-call z-arguments z-python&quot;&gt;&lt;span class=&quot;z-punctuation z-section z-arguments z-begin z-python&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-integer z-decimal z-python&quot;&gt;5000000&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-arguments z-end z-python&quot;&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+
+&lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;D_0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt; &lt;span class=&quot;z-keyword z-operator z-assignment z-python&quot;&gt;=&lt;&#x2F;span&gt; &lt;span class=&quot;z-meta z-function-call z-python&quot;&gt;&lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-variable z-function z-python&quot;&gt;&lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;calc_dimension_capacity&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-function-call z-arguments z-python&quot;&gt;&lt;span class=&quot;z-punctuation z-section z-arguments z-begin z-python&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;u_seq&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-arguments z-end z-python&quot;&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+
+&lt;span class=&quot;z-meta z-function-call z-python&quot;&gt;&lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-variable z-function z-python&quot;&gt;&lt;span class=&quot;z-support z-function z-builtin z-python&quot;&gt;print&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-function-call z-arguments z-python&quot;&gt;&lt;span class=&quot;z-punctuation z-section z-arguments z-begin z-python&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-meta z-qualified-name z-python&quot;&gt;&lt;span class=&quot;z-meta z-generic-name z-python&quot;&gt;D_0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-section z-arguments z-end z-python&quot;&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; class=&quot;language-bash z-code&quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;z-source z-shell z-bash&quot;&gt;&lt;span class=&quot;z-meta z-function-call z-shell&quot;&gt;&lt;span class=&quot;z-variable z-function z-shell&quot;&gt;1.294497548368281&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;008&#x2F;calc_dimension_capacity.png&quot; alt=&quot;calc_dimension_capacityによる結果&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;$D_0$を決定するには、まず(e)より相関係数が一定値以上(デフォルトでは&lt;code&gt;0.999&lt;&#x2F;code&gt;)である区間が存在することを確認します。&lt;&#x2F;p&gt;
+&lt;p&gt;次に、(c)における青色のプロットがしっかりと収束しているかを確認する必要があります。&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;h3 id=&quot;gurahunituite&quot;&gt;グラフについて&lt;&#x2F;h3&gt;
+&lt;p&gt;左側3つのグラフが全ての$\epsilon$に対する結果で、右側3つのグラフは採用した区間付近における結果を示しています。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;a-b&quot;&gt;(a), (b)&lt;&#x2F;h4&gt;
+&lt;p&gt;上記(Fig.4, Fig.5)で示した図と同様で、$\ln \frac{1}{\epsilon}$に対する$\ln N(\epsilon)$のプロットです。&lt;&#x2F;p&gt;
+&lt;p&gt;青色は実際のプロットで、オレンジ色のプロットは採用した点です。&lt;&#x2F;p&gt;
+&lt;p&gt;オレンジ色の直線は最終的な値$D_0$を重ねて表示した結果です。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;c-d&quot;&gt;(c), (d)&lt;&#x2F;h4&gt;
+&lt;p&gt;$\ln \frac{1}{\epsilon}$に対する$D_0$のプロットです。&lt;&#x2F;p&gt;
+&lt;p&gt;青色のプロットは各区間における$\frac{\ln N(\epsilon)}{\ln \frac{1}{\epsilon}}$の平均値を示しています。&lt;&#x2F;p&gt;
+&lt;p&gt;緑色のプロットは参考として、各区間における最小二乗法を用いて1次近似した際の傾きを示しています。&lt;&#x2F;p&gt;
+&lt;p&gt;オレンジ色の点線が最終的な値$D_0$を表しています。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;e-f&quot;&gt;(e), (f)&lt;&#x2F;h4&gt;
+&lt;p&gt;$\ln \frac{1}{\epsilon}$に対する相関係数のプロットです。&lt;&#x2F;p&gt;
+&lt;p&gt;オレンジ色の点が最大の相関係数を示します。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;can-kao-wen-xian&quot;&gt;参考文献&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;annotations&quot;&gt;Annotations&lt;&#x2F;h3&gt;
+&lt;p&gt;グラフ内に矢印を書くために参考にしました。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;matplotlib.org&#x2F;stable&#x2F;tutorials&#x2F;text&#x2F;annotations.html&quot;&gt;Annotations | matplotlib&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;matplotlib.org&#x2F;stable&#x2F;gallery&#x2F;userdemo&#x2F;connectionstyle_demo.html&quot;&gt;Connection styles for annotations | matplotlib&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

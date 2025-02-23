@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="hundunっていうPythonライブラリを作ってみた"/>
+  <meta name="description" content="なんとなくカオス解析用のPythonライブラリを作成しました。" />
+  <meta property="description" content="なんとなくカオス解析用のPythonライブラリを作成しました。" />
+  <meta property="og:type" content="article" />
+<title> hundunっていうPythonライブラリを作ってみた| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">hundunっていうPythonライブラリを作ってみた</h1>
+    <div class='info'>
+        <div class='date'>2022-03-08</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/chaos/">chaos</a></div>
+            
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/python/">Python</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p>なんとなくカオス解析用のPythonライブラリを作成しました。</p>
+<p><img src="/image/007/hundun-header.png" alt="hundun header" /></p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/7/#hundun">hundun</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/7/#shi-zhuang-nei-rong">実装内容</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/7/#kaosujie-xi">カオス解析</a></li> 
+     
+</ol></div></p>
+<h2 id="hundun">hundun</h2>
+<p>最近書いていたコードが溜まってきたので、一箇所にまとめるついでにライブラリにしてみました。</p>
+<p><a href="https://github.com/llbxg/hundun">hundun | GitHub</a></p>
+<p>正直コードとか綺麗ではないんですけど、PyPIに登録してpipでインストールしてみたかったので試してみました。カオスの解析ってあんまり需要なさそうなんですけど、気がつくとtotalダウンロード数が4000を超えていました。</p>
+<p><a href="https://pepy.tech/project/hundun">hundun | PePy</a></p>
+<br>
+<p>関数等の解説はwikiにまとめました。</p>
+<p><a href="https://github.com/llbxg/hundun/wiki">hundun.wiki | GitHub</a></p>
+<p>Pythonライブラリなら&quot;Docstringを書いて、Sphinxでドキュメント化&quot;が一般的なんですが、なんとなくGitHubのwiki使いたかったので使ってみました。</p>
+<h2 id="shi-zhuang-nei-rong">実装内容</h2>
+<p>基本的な実装内容は<strong>時系列データに対する解析</strong>と<strong>式に対する解析</strong>です。</p>
+<h3 id="shi-xi-lie-deta">時系列データ</h3>
+<p>時系列の方は基本的なカオス解析に必要な機能と次元の計算・推定をメインにしています。</p>
+<p>自分は実際の研究ではほとんど使わなかったので、少し雑な実装が多いです。</p>
+<p>時系列からのリアプノフスペクトラムの推定だけ後で追加で実装する予定です。</p>
+<p><a href="https://github.com/llbxg/hundun/wiki/Exploration">Exploration | hundun.wiki</a></p>
+<h3 id="li-xue-xi-shi">力学系（式）</h3>
+<p>基本的には写像(離散力学系)と方程式(連続力学系)のリアプノフスペクトラムの推定がメインです。</p>
+<p>それに伴う計算方法の追加とか、可視化等いろいろ実装している感じです。</p>
+<p>たとえばhenon写像のパラメーターに対するリアプノフスペクトラムの計算結果を示します。</p>
+<p><img src="/image/007/calc_les-Henon.png" alt="パラメータに対するリアプノフスペクトラム" /></p>
+<br>
+<p>使用している関数の説明とかサンプルコードはこちらです。</p>
+<p><a href="https://github.com/llbxg/hundun/wiki/Lyapunov-exponents#henon-map-2">Example - Henon map | hundun.wiki</a></p>
+<h2 id="kaosujie-xi">カオス解析</h2>
+<p>実装したものに関して解説記事を書いたら、下記に追記していきます。</p>
+<ul>
+<li><a href="/article/8">[容量次元 w/ calc_dimension_capacity]</a></li>
+</ul>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/7.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

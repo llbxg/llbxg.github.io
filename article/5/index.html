@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="TrueRNG v3を使って[0,1)の一様乱数を生成する"/>
+  <meta name="description" content="TrueRNG v3を使って0から1の一様乱数を生成します。" />
+  <meta property="description" content="TrueRNG v3を使って0から1の一様乱数を生成します。" />
+  <meta property="og:type" content="article" />
+<title> TrueRNG v3を使って[0,1)の一様乱数を生成する| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">TrueRNG v3を使って[0,1)の一様乱数を生成する</h1>
+    <div class='info'>
+        <div class='date'>2021-08-20</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/python/">Python</a></div>
+            
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/random/">random</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p>TrueRNG v3を使って0から1の一様乱数を生成します。</p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/5/#truerng-v3">TrueRNG v3</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/5/#dong-zuo-que-ren">動作確認</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/5/#luan-shu-nosheng-cheng">乱数の生成</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/5/#omake">おまけ</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/5/#can-kao-wen-xian">参考文献</a></li> 
+     
+</ol></div></p>
+<h2 id="truerng-v3">TrueRNG v3</h2>
+<p><img src="/image/005/truerngv3.png" alt="TrueRNG v3" /></p>
+<p>TrueRNGは<strong>ハードウェア乱数生成器</strong>です。</p>
+<blockquote>
+<p>半導体接合のアバランシェ効果を使用して、真の乱数を生成します。
+生成速度が400 kbits/secondを超える低コストのUSBハードウェア乱数ジェネレーターです。</p>
+<p><a href="https://ubld.it/truerng_v3">TrueRNG v3 | ubld.it</a></p>
+</blockquote>
+<h2 id="dong-zuo-que-ren">動作確認</h2>
+<p>公式ページのコード<sup class="footnote-reference"><a href="#1">1</a></sup>とTrueRNG Utilities<sup class="footnote-reference"><a href="#2">2</a></sup>を参考に動作を確認します。</p>
+<p>外部モジュールとして <a href="https://pyserial.readthedocs.io/en/latest/index.html">pySerial</a> を使います。</p>
+<pre data-lang="python" class="language-python z-code"><code class="language-python" data-lang="python"><span class="z-source z-python"><span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-from z-python">from</span></span><span class="z-meta z-statement z-import z-python"><span class="z-meta z-import-source z-python"> <span class="z-meta z-import-path z-python"><span class="z-meta z-import-name z-python">serial</span></span> <span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-python">import</span></span></span></span><span class="z-meta z-statement z-import z-python"></span><span class="z-meta z-statement z-import z-python"> <span class="z-meta z-generic-name z-python">Serial</span></span>
+<span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-from z-python">from</span></span><span class="z-meta z-statement z-import z-python"><span class="z-meta z-import-source z-python"> <span class="z-meta z-import-path z-python"><span class="z-meta z-import-name z-python">serial</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-import-name z-python">tools</span></span> <span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-python">import</span></span></span></span><span class="z-meta z-statement z-import z-python"></span><span class="z-meta z-statement z-import z-python"> <span class="z-meta z-generic-name z-python">list_ports</span></span>
+</span></code></pre>
+<h3 id="debaisunojie-sok-que-ren">デバイスの接続確認</h3>
+<p>シリアルポート一覧からデバイスが認識しているかを確認します。</p>
+<pre data-lang="python" class="language-python z-code"><code class="language-python" data-lang="python"><span class="z-source z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ports_avaiable</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">list_ports</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">comports</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span></code></pre>
+<p>戻り値は<code>ListPortInfo</code>オブジェクトを含むリストです。</p>
+<p>このオブジェクトはシリアルポートに関する情報を持っています。<a href="https://www.kosh.dev/article/5/#listportinfonoindetukusu">[*1]</a></p>
+<br>
+<p>デバイスの確認には<code>.hwid</code>を使います。TrueRNGは<code>VID:PID=04D8:F5FE</code>らしいです。</p>
+<p>また、ポートの確認には<code>.device</code>を使います。(<code>.port</code>は存在しません。)</p>
+<pre data-lang="python" class="language-python z-code"><code class="language-python" data-lang="python"><span class="z-source z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">devices</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-sequence z-list z-python"><span class="z-punctuation z-section z-sequence z-begin z-python">[</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">p</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">device</span></span> <span class="z-meta z-expression z-generator z-python"><span class="z-keyword z-control z-loop z-for z-generator z-python">for</span> <span class="z-meta z-generic-name z-python">p</span> <span class="z-keyword z-control z-loop z-for z-in z-python">in</span></span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ports_avaiable</span></span> <span class="z-keyword z-control z-conditional z-if z-python">if</span> <span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&#39;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python">04D8:F5FE<span class="z-punctuation z-definition z-string z-end z-python">&#39;</span></span></span> <span class="z-keyword z-operator z-logical z-python">in</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">p</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">hwid</span></span><span class="z-punctuation z-section z-sequence z-end z-python">]</span></span>
+<span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">port</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">devices</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-constant z-numeric z-integer z-decimal z-python">0</span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span> <span class="z-meta z-statement z-conditional z-if z-python"><span class="z-keyword z-control z-conditional z-if z-python">if</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">devices</span></span> <span class="z-keyword z-control z-conditional z-else z-python">else</span> <span class="z-constant z-language z-python">None</span></span>
+</span></code></pre>
+<p>複数のデバイスを検知した場合に備え<code>device[0]</code>でアクセスしています。</p>
+<p><code>list_ports.comports()</code>による返り値は特定の順番で返ってくる訳ではないので注意が必要です。</p>
+<br>
+<h3 id="dong-zuo-que-ren-1">動作確認</h3>
+<p><code>serial.Serial</code>を使ってTrueRNGとシリアル通信を行っていきます。</p>
+<pre data-lang="python" class="language-python z-code"><code class="language-python" data-lang="python"><span class="z-source z-python"><span class="z-meta z-statement z-with z-python"><span class="z-keyword z-control z-flow z-with z-python">with</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">Serial</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-variable z-parameter z-python">port</span><span class="z-keyword z-operator z-assignment z-python">=</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">port</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-variable z-parameter z-python">timeout</span><span class="z-keyword z-operator z-assignment z-python">=</span><span class="z-constant z-numeric z-integer z-decimal z-python">10</span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-variable z-parameter z-python">dsrdtr</span><span class="z-keyword z-operator z-assignment z-python">=</span><span class="z-constant z-language z-python">True</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span> <span class="z-meta z-statement z-with z-python"><span class="z-keyword z-control z-flow z-with z-as z-python">as</span></span></span><span class="z-meta z-statement z-with z-python"> <span class="z-meta z-generic-name z-python">ser</span><span class="z-punctuation z-section z-block z-with z-python">:</span></span>
+
+    <span class="z-comment z-line z-number-sign z-python"><span class="z-punctuation z-definition z-comment z-python">#</span> Open the serial port if it isn&#39;t open
+</span>    <span class="z-meta z-statement z-conditional z-if z-python"><span class="z-keyword z-control z-conditional z-if z-python">if</span> <span class="z-keyword z-operator z-logical z-python">not</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ser</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">isOpen</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span><span class="z-punctuation z-section z-block z-conditional z-if z-python">:</span></span>
+        <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ser</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">open</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+
+    <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ser</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">reset_input_buffer</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>  <span class="z-comment z-line z-number-sign z-python"><span class="z-punctuation z-definition z-comment z-python">#</span> ノイズデータがある場合があるのでバッファをクリア
+</span>
+    <span class="z-meta z-statement z-exception z-try z-python"><span class="z-keyword z-control z-exception z-try z-python">try</span><span class="z-punctuation z-section z-block z-exception z-try z-python">:</span></span>
+        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">before</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">time</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">perf_counter</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">x</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ser</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">read</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-constant z-numeric z-integer z-decimal z-python">102400</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>  <span class="z-comment z-line z-number-sign z-python"><span class="z-punctuation z-definition z-comment z-python">#</span> &lt;- (1) データの取得
+</span>        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">after</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">time</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">perf_counter</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+
+    <span class="z-meta z-statement z-exception z-catch z-python"><span class="z-keyword z-control z-exception z-catch z-python">except</span><span class="z-punctuation z-section z-block z-exception z-catch z-python">:</span></span>
+        <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">print</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&#39;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python">Read Failed!<span class="z-punctuation z-definition z-string z-end z-python">&#39;</span></span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+
+    <span class="z-meta z-statement z-conditional z-else z-python"><span class="z-keyword z-control z-conditional z-else z-python">else</span><span class="z-punctuation z-section z-block z-conditional z-else z-python">:</span></span>  <span class="z-comment z-line z-number-sign z-python"><span class="z-punctuation z-definition z-comment z-python">#</span> then
+</span>        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">kbps</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-constant z-numeric z-integer z-decimal z-python">8</span><span class="z-keyword z-operator z-arithmetic z-python">*</span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">len</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">x</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span> <span class="z-keyword z-operator z-arithmetic z-python">/</span> <span class="z-meta z-group z-python"><span class="z-punctuation z-section z-group z-begin z-python">(</span><span class="z-meta z-group z-python"><span class="z-punctuation z-section z-group z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">after</span></span> <span class="z-keyword z-operator z-arithmetic z-python">-</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">before</span></span><span class="z-punctuation z-section z-group z-end z-python">)</span></span> <span class="z-keyword z-operator z-arithmetic z-python">*</span> <span class="z-constant z-numeric z-integer z-decimal z-python">1000</span><span class="z-punctuation z-section z-group z-end z-python">)</span></span>
+        <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">print</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-storage z-type z-string z-python">f</span><span class="z-meta z-string z-interpolated z-python"><span class="z-string z-quoted z-single z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&#39;</span></span></span><span class="z-meta z-string z-interpolated z-python"><span class="z-meta z-interpolation z-python"><span class="z-punctuation z-section z-interpolation z-begin z-python">{</span><span class="z-source z-python z-embedded"><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">round</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">kbps</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-constant z-numeric z-integer z-decimal z-python">2</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span></span></span><span class="z-meta z-interpolation z-python"><span class="z-punctuation z-section z-interpolation z-end z-python">}</span></span><span class="z-string z-quoted z-single z-python"> kbit/s<span class="z-punctuation z-definition z-string z-end z-python">&#39;</span></span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span></code></pre>
+<p>(1) TrueRNGから<code>read()</code>を使って、値を取得します。bytesが返ってきます。</p>
+<pre class="z-code"><code><span class="z-text z-plain">b&#39;\xf2\xb62$\x94y .... \x88&#39;
+</span></code></pre>
+<p>100回の試行結果をまとめました。</p>
+<table><thead><tr><th>func</th><th>kbit/s</th></tr></thead><tbody>
+<tr><td>mean</td><td>403.106</td></tr>
+<tr><td>max</td><td>403.180</td></tr>
+<tr><td>min</td><td>403.032</td></tr>
+</tbody></table>
+<p>生成速度が400kbit/sを超えると書いてあるので、<strong>読み取り自体は問題なさそう</strong>です。</p>
+<h2 id="luan-shu-nosheng-cheng">乱数の生成</h2>
+<p>0から1の一様乱数を生成します。</p>
+<p>TrueRNGから得られる値は<code>bytes</code>であり、これを変換していく必要があります。</p>
+<p>今回は<code>random.SystemRandom</code>を参考にしていきます。</p>
+<br>
+<h3 id="systemrandom">SystemRandom</h3>
+<p><code>random.SystemRandom.random</code>は0から1の一様乱数を返します。</p>
+<pre data-lang="python" class="language-python z-code"><code class="language-python" data-lang="python"><span class="z-source z-python"><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">print</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">SystemRandom</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">random</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+
+<span class="z-keyword z-operator z-comparison z-python">&gt;</span><span class="z-keyword z-operator z-comparison z-python">&gt;</span><span class="z-keyword z-operator z-comparison z-python">&gt;</span> <span class="z-constant z-numeric z-float z-decimal z-python">0<span class="z-punctuation z-separator z-decimal z-python">.</span>6643365002539736</span>
+</span></code></pre>
+<p><code>random.SystemRandom</code>の実装を確認します。</p>
+<pre data-lang="python" class="language-python z-code"><code class="language-python" data-lang="python"><span class="z-source z-python"><span class="z-comment z-line z-number-sign z-python"><span class="z-punctuation z-definition z-comment z-python">#</span> random.py
+</span>
+<span class="z-constant z-language z-python">...</span>
+
+<span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-from z-python">from</span></span><span class="z-meta z-statement z-import z-python"><span class="z-meta z-import-source z-python"> <span class="z-meta z-import-path z-python"><span class="z-meta z-import-name z-python">os</span></span> <span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-python">import</span></span></span></span><span class="z-meta z-statement z-import z-python"></span><span class="z-meta z-statement z-import z-python"> <span class="z-meta z-generic-name z-python">urandom</span> <span class="z-keyword z-control z-import z-as z-python">as</span> <span class="z-meta z-generic-name z-python">_urandom</span></span>
+
+<span class="z-constant z-language z-python">...</span>
+
+<span class="z-meta z-qualified-name z-python"><span class="z-variable z-other z-constant z-python">BPF</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-constant z-numeric z-integer z-decimal z-python">53</span>        <span class="z-comment z-line z-number-sign z-python"><span class="z-punctuation z-definition z-comment z-python">#</span> Number of bits in a float
+</span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-other z-constant z-python">RECIP_BPF</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-constant z-numeric z-integer z-decimal z-python">2</span><span class="z-keyword z-operator z-arithmetic z-python">*</span><span class="z-keyword z-operator z-arithmetic z-python">*</span><span class="z-keyword z-operator z-arithmetic z-python">-</span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-other z-constant z-python">BPF</span></span>
+
+<span class="z-constant z-language z-python">...</span>
+
+<span class="z-meta z-class z-python"><span class="z-storage z-type z-class z-python"><span class="z-keyword z-declaration z-class z-python">class</span></span> <span class="z-entity z-name z-class z-python"><span class="z-meta z-generic-name z-python">SystemRandom</span></span><span class="z-meta z-class z-inheritance z-python"><span class="z-punctuation z-section z-inheritance z-begin z-python">(</span></span></span><span class="z-meta z-class z-inheritance z-python"><span class="z-entity z-other z-inherited-class z-python">Random</span><span class="z-punctuation z-section z-inheritance z-end z-python">)</span></span><span class="z-meta z-class z-python"><span class="z-punctuation z-section z-class z-begin z-python">:</span></span>
+<span class="z-meta z-function z-python">    <span class="z-storage z-type z-function z-python"><span class="z-keyword z-declaration z-function z-python">def</span></span> <span class="z-entity z-name z-function z-python"><span class="z-meta z-generic-name z-python">random</span></span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-section z-parameters z-begin z-python">(</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-variable z-parameter z-python">self</span><span class="z-punctuation z-section z-parameters z-end z-python">)</span></span><span class="z-meta z-function z-python"><span class="z-punctuation z-section z-function z-begin z-python">:</span></span>
+        <span class="z-keyword z-control z-flow z-return z-python">return</span> <span class="z-meta z-group z-python"><span class="z-punctuation z-section z-group z-begin z-python">(</span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">int</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">from_bytes</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">_urandom</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-constant z-numeric z-integer z-decimal z-python">7</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&#39;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python">big<span class="z-punctuation z-definition z-string z-end z-python">&#39;</span></span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span> <span class="z-keyword z-operator z-comparison z-python">&gt;</span><span class="z-keyword z-operator z-comparison z-python">&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-python">3</span><span class="z-punctuation z-section z-group z-end z-python">)</span></span> <span class="z-keyword z-operator z-arithmetic z-python">*</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-other z-constant z-python">RECIP_BPF</span></span>  <span class="z-comment z-line z-number-sign z-python"><span class="z-punctuation z-definition z-comment z-python">#</span> &lt;- (1)
+</span></span></code></pre>
+<p>(1) <code>os.urandom</code>を使用し、乱数の生成を行っていることがわかります。</p>
+<br>
+<h3 id="shi-zhuang">実装</h3>
+<p><code>os.urandom(size)</code>はsize バイトからなるランダムな文字列(<code>bytes</code>)を返します。</p>
+<p>つまり、<code>os.urandom(7)</code>の代わりに<code>ser.read(7)</code>することで、0から1の一様乱数を生成できます。</p>
+<pre data-lang="Python" class="language-Python z-code"><code class="language-Python" data-lang="Python"><span class="z-source z-python"><span class="z-meta z-statement z-with z-python"><span class="z-keyword z-control z-flow z-with z-python">with</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">Serial</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-variable z-parameter z-python">port</span><span class="z-keyword z-operator z-assignment z-python">=</span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">port</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span><span class="z-variable z-parameter z-python">timeout</span><span class="z-keyword z-operator z-assignment z-python">=</span><span class="z-constant z-numeric z-integer z-decimal z-python">1</span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-variable z-parameter z-python">dsrdtr</span><span class="z-keyword z-operator z-assignment z-python">=</span><span class="z-constant z-language z-python">True</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span> <span class="z-meta z-statement z-with z-python"><span class="z-keyword z-control z-flow z-with z-as z-python">as</span></span></span><span class="z-meta z-statement z-with z-python"> <span class="z-meta z-generic-name z-python">ser</span><span class="z-punctuation z-section z-block z-with z-python">:</span></span>
+    <span class="z-constant z-language z-python">...</span>
+
+    <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">data</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ser</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">read</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-constant z-numeric z-integer z-decimal z-python">7</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+
+    <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">r</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-group z-python"><span class="z-punctuation z-section z-group z-begin z-python">(</span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">int</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">from_bytes</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">data</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&#39;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python">big<span class="z-punctuation z-definition z-string z-end z-python">&#39;</span></span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span> <span class="z-keyword z-operator z-comparison z-python">&gt;</span><span class="z-keyword z-operator z-comparison z-python">&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-python">3</span><span class="z-punctuation z-section z-group z-end z-python">)</span></span> <span class="z-keyword z-operator z-arithmetic z-python">*</span> <span class="z-constant z-numeric z-integer z-decimal z-python">2</span><span class="z-keyword z-operator z-arithmetic z-python">*</span><span class="z-keyword z-operator z-arithmetic z-python">*</span><span class="z-keyword z-operator z-arithmetic z-python">-</span><span class="z-constant z-numeric z-integer z-decimal z-python">53</span>
+
+    <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">print</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">r</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+
+
+<span class="z-keyword z-operator z-comparison z-python">&gt;</span><span class="z-keyword z-operator z-comparison z-python">&gt;</span><span class="z-keyword z-operator z-comparison z-python">&gt;</span> <span class="z-constant z-numeric z-float z-decimal z-python">0<span class="z-punctuation z-separator z-decimal z-python">.</span>23952311969869522</span>
+</span></code></pre>
+<h3 id="jie-shuo">解説</h3>
+<pre data-lang="Python" class="language-Python z-code"><code class="language-Python" data-lang="Python"><span class="z-source z-python"><span class="z-meta z-group z-python"><span class="z-punctuation z-section z-group z-begin z-python">(</span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">int</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">from_bytes</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">_urandom</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-constant z-numeric z-integer z-decimal z-python">7</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&#39;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python">big<span class="z-punctuation z-definition z-string z-end z-python">&#39;</span></span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span> <span class="z-keyword z-operator z-comparison z-python">&gt;</span><span class="z-keyword z-operator z-comparison z-python">&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-python">3</span><span class="z-punctuation z-section z-group z-end z-python">)</span></span> <span class="z-keyword z-operator z-arithmetic z-python">*</span> <span class="z-constant z-numeric z-integer z-decimal z-python">2</span><span class="z-keyword z-operator z-arithmetic z-python">*</span><span class="z-keyword z-operator z-arithmetic z-python">*</span><span class="z-keyword z-operator z-arithmetic z-python">-</span><span class="z-constant z-numeric z-integer z-decimal z-python">53</span>
+</span></code></pre>
+<p>これを少し書き換えます。(見やすくするために無駄なスペースを使用しています。)</p>
+<pre data-lang="python" class="language-python z-code"><code class="language-python" data-lang="python"><span class="z-source z-python"><span class="z-constant z-numeric z-integer z-decimal z-python">1</span>  <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">value_raw</span></span>   <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">_urandom</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-constant z-numeric z-integer z-decimal z-python">7</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+<span class="z-constant z-numeric z-integer z-decimal z-python">2</span>  <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">value_int</span></span>   <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">int</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">from_bytes</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">value_raw</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&#39;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python">big<span class="z-punctuation z-definition z-string z-end z-python">&#39;</span></span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+<span class="z-constant z-numeric z-integer z-decimal z-python">3</span>  <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">value_shift</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">value_int</span></span> <span class="z-keyword z-operator z-comparison z-python">&gt;</span><span class="z-keyword z-operator z-comparison z-python">&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-python">3</span>
+<span class="z-constant z-numeric z-integer z-decimal z-python">4</span>  <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">value_rand</span></span>  <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">value_shift</span></span> <span class="z-keyword z-operator z-arithmetic z-python">*</span> <span class="z-constant z-numeric z-integer z-decimal z-python">2</span><span class="z-keyword z-operator z-arithmetic z-python">*</span><span class="z-keyword z-operator z-arithmetic z-python">*</span><span class="z-keyword z-operator z-arithmetic z-python">-</span><span class="z-constant z-numeric z-integer z-decimal z-python">53</span>
+</span></code></pre>
+<ol>
+<li>
+<p><code>_urandom(7)</code>を使って、7byte(=56bit)の値を回収します。</p>
+</li>
+<li>
+<p><code>int.from_bytes</code>を使って、バイト列(<code>value_raw</code>)の整数表現を回収します。</p>
+</li>
+<li>
+<p><code>&gt;&gt;3</code>を使って、3bit分右にシフトします。これで53bitになっています。</p>
+<p>(53bitなので 0~9007199254740991 の整数になるはずです。)</p>
+</li>
+<li>
+<p><code>2**-53</code><a href="https://www.kosh.dev/article/5/#2-53">[*2]</a>を掛ける(2**53で割る)ことで、乱数の範囲を[0,1)にします。</p>
+</li>
+</ol>
+<pre class="z-code"><code><span class="z-text z-plain">value_raw   -&gt;  b&#39;\xdaL@\xf5dM\xff&#39;
+value_int   -&gt;  61445386801532415  -&gt; 11011010010011000100000011110101011001000100110111111111
+value_shift -&gt;  7680673350191551   -&gt; 11011010010011000100000011110101011001000100110111111
+value_rand  -&gt;  0.8527260398007498
+</span></code></pre>
+<p>doubleにおける仮数部の精度は53ビットであるため、53bit全てを乱数で埋め、シフト<code>&gt;&gt;3</code>と掛け算<code>*2**-53</code>をおこなっていると考えられます。<a href="https://www.kosh.dev/article/5/#2-53">[*2]</a></p>
+<br>
+<h2 id="omake">おまけ</h2>
+<h3 id="listportinfonoindetukusu">ListPortInfoのインデックス</h3>
+<p>下位互換性のためにインデックスを使って、3個(<code>port</code>, <code>desc</code>, <code>hwid</code>)だけにアクセスできます。</p>
+<pre data-lang="python" class="language-python z-code"><code class="language-python" data-lang="python"><span class="z-source z-python"><span class="z-comment z-line z-number-sign z-python"><span class="z-punctuation z-definition z-comment z-python">#</span> serial/tools/list_ports_common.py
+</span>
+<span class="z-meta z-function z-python"><span class="z-storage z-type z-function z-python"><span class="z-keyword z-declaration z-function z-python">def</span></span> <span class="z-entity z-name z-function z-python"><span class="z-support z-function z-magic z-python">__getitem__</span></span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-section z-parameters z-begin z-python">(</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-variable z-parameter z-python">self</span><span class="z-punctuation z-separator z-parameters z-python">,</span> <span class="z-variable z-parameter z-python">index</span><span class="z-punctuation z-section z-parameters z-end z-python">)</span></span><span class="z-meta z-function z-python"><span class="z-punctuation z-section z-function z-begin z-python">:</span></span>
+    <span class="z-comment z-block z-documentation z-python"><span class="z-punctuation z-definition z-comment z-begin z-python">&quot;&quot;&quot;</span>Item access: backwards compatible -&gt; (port, desc, hwid)<span class="z-punctuation z-definition z-comment z-end z-python">&quot;&quot;&quot;</span></span>
+    <span class="z-meta z-statement z-conditional z-if z-python"><span class="z-keyword z-control z-conditional z-if z-python">if</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">index</span></span> <span class="z-keyword z-operator z-comparison z-python">==</span> <span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-section z-block z-conditional z-if z-python">:</span></span>
+        <span class="z-keyword z-control z-flow z-return z-python">return</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">device</span></span>
+    <span class="z-meta z-statement z-conditional z-elseif z-python"><span class="z-keyword z-control z-conditional z-elseif z-python">elif</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">index</span></span> <span class="z-keyword z-operator z-comparison z-python">==</span> <span class="z-constant z-numeric z-integer z-decimal z-python">1</span><span class="z-punctuation z-section z-block z-conditional z-elseif z-python">:</span></span>
+        <span class="z-keyword z-control z-flow z-return z-python">return</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">description</span></span>
+    <span class="z-meta z-statement z-conditional z-elseif z-python"><span class="z-keyword z-control z-conditional z-elseif z-python">elif</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">index</span></span> <span class="z-keyword z-operator z-comparison z-python">==</span> <span class="z-constant z-numeric z-integer z-decimal z-python">2</span><span class="z-punctuation z-section z-block z-conditional z-elseif z-python">:</span></span>
+        <span class="z-keyword z-control z-flow z-return z-python">return</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">hwid</span></span>
+    <span class="z-meta z-statement z-conditional z-else z-python"><span class="z-keyword z-control z-conditional z-else z-python">else</span><span class="z-punctuation z-section z-block z-conditional z-else z-python">:</span></span>
+        <span class="z-meta z-statement z-raise z-python"><span class="z-keyword z-control z-flow z-raise z-python">raise</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-type z-exception z-python">IndexError</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&#39;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-single z-python"><span class="z-constant z-other z-placeholder z-python"><span class="z-punctuation z-definition z-placeholder z-begin z-python">{</span><span class="z-punctuation z-definition z-placeholder z-end z-python">}</span></span> &gt; 2<span class="z-punctuation z-definition z-string z-end z-python">&#39;</span></span></span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">format</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">index</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span></span>
+</span></code></pre>
+<h3 id="2-53">2**53</h3>
+<pre class="z-code"><code><span class="z-text z-plain">2**53     -&gt; 100000000000000000000000000000000000000000000000000000
+2**53 - 1 -&gt; 11111111111111111111111111111111111111111111111111111
+</span></code></pre>
+<p><a href="https://ja.wikipedia.org/wiki/%E5%80%8D%E7%B2%BE%E5%BA%A6%E6%B5%AE%E5%8B%95%E5%B0%8F%E6%95%B0%E7%82%B9%E6%95%B0">倍精度浮動小数点数 | wiki</a></p>
+<p><a href="https://docs.python.org/ja/3/tutorial/floatingpoint.html">15. 浮動小数点演算、その問題と制限 | Python ドキュメント</a></p>
+<br>
+<h3 id="os-urandom">os.urandom</h3>
+<p><code>os.urandom</code>はOSによって動作が異なります。</p>
+<p><code>random.SystemRandom.random</code>には以下のような説明があります。</p>
+<blockquote>
+<p>such as /dev/urandom on Unix or CryptGenRandom on Windows</p>
+<p><a href="https://github.com/python/cpython/blob/4ceec495598e78f0776dd46d511dcc612a434dc3/Lib/random.py#L788">cpython/Lib/random.py | GitHub</a></p>
+</blockquote>
+<br>
+<p>この動作については、stackoverflowの回答に分かりやすい説明がありました。</p>
+<p><a href="https://stackoverflow.com/questions/41998399/how-exactly-does-random-random-work-in-python#answer-57190336">How exactly does random.random() work in python? | stackoverflow</a></p>
+<br>
+<p><code>os.urandom</code>と<code>random.random</code>については次の記事に書きます。(多分)</p>
+<br>
+<h3 id="howaitoningu">ホワイトニング</h3>
+<p>TrueRNG v3ではホワイトニングが改善されているそうです。</p>
+<blockquote>
+<p>...解析の手がかりとなるパターンをそのデータから取り除いておきたい。パターンを取り除く処理はホワイトニングと呼ばれる。</p>
+<p>C/C++セキュアプログラミングクックブック VOLUME 2</p>
+</blockquote>
+<br>
+<p>v2ではXORが使用されていたようです。</p>
+<p><a href="https://ubld.it/forums/topic/sticky-faq-answers-questions-asked/">What’s the whitening algorithm? | ubld.it</a></p>
+<br>
+<p>v3で改善されたと書かれていますが、実際に何が使用されているかを発見できませんでした。</p>
+<p>フォーラムにv3のホワイトニングについて質問がありましたが、回答はありませんでした。</p>
+<br>
+<h3 id="supported-modes">Supported Modes</h3>
+<p>TrueRNG pro系はモード変更が可能ですが、TrueRNGは変更できないようです。</p>
+<p>TrueRNGproの商品ページにサポートしているモードが記載されています。</p>
+<p><a href="https://ubld.it/products/truerngpro">TrueRNGpro – USB Random Number Generator | ubld.it</a></p>
+<br>
+<p><code>RAW Binary</code>モードを使用することでホワイトニングされていない値を取得できるようです。</p>
+<hr />
+<h2 id="can-kao-wen-xian">参考文献</h2>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>2016年にPython2系で書かれたコードです。TrueRNGpro用のコードです。 <a href="https://ubld.it/how-to-use-truerngpro-with-python-in-windows-10-and-linux/">How-to use TrueRNGpro with Python in Windows 10 and Linux | ubld.it</a></p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>Python3系で書かれたコードです。公式ページにGitHubへのリンクがありました。<a href="https://github.com/euler357/TrueRNG">TrueRNG Utilities | GitHub</a></p>
+</div>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/5.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

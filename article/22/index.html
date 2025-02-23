@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="Secret-Key Exchange Through Synchronization of Randomized Chaotic Oscillators Aided by Logistic Hash Function"/>
+  <meta name="description" content="IEEE Transactions on Circuits and Systems I に論文が載りました。" />
+  <meta property="description" content="IEEE Transactions on Circuits and Systems I に論文が載りました。" />
+  <meta property="og:type" content="article" />
+<title> Secret-Key Exchange Through Synchronization of Randomized Chaotic Oscillators Aided by Logistic Hash Function| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">Secret-Key Exchange Through Synchronization of Randomized Chaotic Oscillators Aided by Logistic Hash Function</h1>
+    <div class='info'>
+        <div class='date'>2022-11-17</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/paper/">paper</a></div>
+            
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/chaos/">chaos</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p>カオスとは、 周期性、 位相推移性、 および、 長期予測不可能性で特徴つけられる複雑な動的振る舞いです。
+2つのカオス振動子系を結合することにより各々の系はカオス的挙動を示しますが、それらの状態が各時点において等価となることがPecoraらによって発見されました <sup class="footnote-reference"><a href="#2">1</a></sup><sup class="footnote-reference"><a href="#3">2</a></sup>。
+この現象はカオス同期と呼ばれ、暗号技術に応用されてきました <sup class="footnote-reference"><a href="#4">3</a></sup><sup class="footnote-reference"><a href="#5">4</a></sup><sup class="footnote-reference"><a href="#6">5</a></sup><sup class="footnote-reference"><a href="#7">6</a></sup>。</p>
+<h2 id="gai-yao">概要</h2>
+<p>ベースのアイディアは以下の図のように、一部の変数を相互に送信し、自身の変数と置換して利用することで同期させるものです。
+これにより、事前の秘密情報共有なしに、乱数生成機(として利用可能なアトラクター)を共有できます。</p>
+<p><img src="/image/022/alice_bob.png" alt="" /></p>
+<p>　</p>
+<p>ただし、従来のカオス暗号では、信号を直接送信するため、盗聴者が振動子の内部状態を推定可能となる問題がありました。</p>
+<p>今回はLorenz振動子を物理乱数でランダム化し、ランダム化されたカオス時系列を交換することで、Lorenz振動子系が安全に同期することを示しました。
+そして、秘密鍵共有への応用方法を示しました。</p>
+<h2 id="lun-wen">論文</h2>
+<p>以下の論文<sup class="footnote-reference"><a href="#1">7</a></sup>では「ランダム化されたローレンツ方程式の同期現象を利用した秘密鍵交換」と「ロジスティック写像をベースとしたハッシュ関数」を提案しています。　</p>
+<pre data-lang="bibtex" class="language-bibtex z-code"><code class="language-bibtex" data-lang="bibtex"><span class="z-text z-bibtex"><span class="z-meta z-entry z-braces z-bibtex"><span class="z-keyword z-other z-entry-type z-bibtex"><span class="z-punctuation z-definition z-keyword z-bibtex">@</span>ARTICLE</span><span class="z-punctuation z-section z-entry z-begin z-bibtex">{</span><span class="z-entity z-name z-type z-entry-key z-bibtex">9684247</span>,
+  <span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">author</span><span class="z-punctuation z-separator z-key-value z-bibtex">=</span><span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>Onuki, Koshiro and Cho, Kenichiro and Horio, Yoshihiko and Miyano, Takaya<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+  <span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">journal</span><span class="z-punctuation z-separator z-key-value z-bibtex">=</span><span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>IEEE Transactions on Circuits and Systems I: Regular Papers<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>, 
+  <span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">title</span><span class="z-punctuation z-separator z-key-value z-bibtex">=</span><span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>Secret-Key Exchange Through Synchronization of Randomized Chaotic Oscillators Aided by Logistic Hash Function<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>, 
+  <span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">year</span><span class="z-punctuation z-separator z-key-value z-bibtex">=</span><span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>2022<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+  <span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">volume</span><span class="z-punctuation z-separator z-key-value z-bibtex">=</span><span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>69<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+  <span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">number</span><span class="z-punctuation z-separator z-key-value z-bibtex">=</span><span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>4<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+  <span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">pages</span><span class="z-punctuation z-separator z-key-value z-bibtex">=</span><span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>1655-1667<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+  <span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">keywords</span><span class="z-punctuation z-separator z-key-value z-bibtex">=</span><span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>Oscillators;Cryptography;Ciphers;Synchronization;Chaotic communication;Logistics;Hash functions;Cryptography;secret-key exchange;chaotic synchronization;chaos-based stream cipher;hash function<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+  <span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">doi</span><span class="z-punctuation z-separator z-key-value z-bibtex">=</span><span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>10.1109/TCSI.2022.3140762<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span><span class="z-punctuation z-section z-entry z-end z-bibtex">}</span></span>
+</span></code></pre>
+<h2 id="fa-biao">発表</h2>
+<pre data-lang="bibtex" class="language-bibtex z-code"><code class="language-bibtex" data-lang="bibtex"><span class="z-text z-bibtex"><span class="z-meta z-entry z-braces z-bibtex"><span class="z-keyword z-other z-entry-type z-bibtex"><span class="z-punctuation z-definition z-keyword z-bibtex">@</span>inproceedings</span><span class="z-punctuation z-section z-entry z-begin z-bibtex">{</span><span class="z-entity z-name z-type z-entry-key z-bibtex">sita44-731</span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">author</span>    <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>大抜倖司朗 and 堀尾喜彦 and 宮野尚哉<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">title</span>     <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>ランダム化された結合Lorenz振動子系における同期に基づく秘密鍵共有<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">booktitle</span> <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>情報理論とその応用シンポジウム予稿集<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">volume</span>    <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>44<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">number</span>    <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>7.3.1<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">pages</span>     <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>419-424<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">address</span>   <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>広島<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">month</span>     <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>12月<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">year</span>      <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>2021<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">note</span>      <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>2021年12月10日, 西宮市, 関西学院会館<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span>
+</span><span class="z-punctuation z-section z-entry z-end z-bibtex">}</span></span>
+
+<span class="z-meta z-entry z-braces z-bibtex"><span class="z-keyword z-other z-entry-type z-bibtex"><span class="z-punctuation z-definition z-keyword z-bibtex">@</span>inproceedings</span><span class="z-punctuation z-section z-entry z-begin z-bibtex">{</span><span class="z-entity z-name z-type z-entry-key z-bibtex">nlp2021-39</span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">author</span>    <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>大抜倖司朗 and 宮野尚哉<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">title</span>     <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>ランダム化された結合Lorenz振動子系における同期<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">booktitle</span> <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>信学技報<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">volume</span>    <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>121<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">number</span>    <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>258<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">series</span>    <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>NLP2021-39<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">pages</span>     <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>19-22<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">address</span>   <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>広島<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">month</span>     <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>11月<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">year</span>      <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>2021<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">note</span>      <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>2021年11月19日(金) 広島工業大学広島校舎201号室 (NLP)<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span>
+</span><span class="z-punctuation z-section z-entry z-end z-bibtex">}</span></span>
+
+<span class="z-meta z-entry z-braces z-bibtex"><span class="z-keyword z-other z-entry-type z-bibtex"><span class="z-punctuation z-definition z-keyword z-bibtex">@</span>inproceedings</span><span class="z-punctuation z-section z-entry z-begin z-bibtex">{</span><span class="z-entity z-name z-type z-entry-key z-bibtex">nlp2021-106</span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">author</span>    <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>大抜倖司朗 and 長健一郎 and 堀尾喜彦 and 宮野尚哉<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">title</span>     <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>ランダム化されたLorenz振動子系における同期現象を用いた秘密鍵交換<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">booktitle</span> <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>信学技報<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">volume</span>    <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>121<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">number</span>    <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>335<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">series</span>    <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>NLP2021-106, MICT2021-81, MBE2021-67<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">pages</span>     <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>155-158<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">address</span>   <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>ONLINE<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">month</span>     <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>1月<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">year</span>      <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>2022<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span></span>,
+	<span class="z-meta z-key-assignment z-bibtex"><span class="z-string z-unquoted z-key z-bibtex">note</span>      <span class="z-punctuation z-separator z-key-value z-bibtex">=</span> <span class="z-string z-quoted z-other z-braces z-bibtex"><span class="z-punctuation z-definition z-string z-begin z-bibtex">{</span>2022年1月21日(金)-1月23日(日) オンライン開催 (NLP, MICT, MBE, NC)<span class="z-punctuation z-definition z-string z-end z-bibtex">}</span></span>
+</span><span class="z-punctuation z-section z-entry z-end z-bibtex">}</span></span>
+</span></code></pre>
+<h2 id="can-kao">参考</h2>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.64.821">Synchronization in chaotic systems | Phys. Rev. Lett.</a></p>
+</div>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">2</sup>
+<p><a href="https://journals.aps.org/pra/abstract/10.1103/PhysRevA.44.2374">Driving systems with chaotic signals | Phys. Rev. A</a></p>
+</div>
+<div class="footnote-definition" id="4"><sup class="footnote-definition-label">3</sup>
+<p><a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.71.65">Circuit implementation of synchronized chaos with applications to communications | Phys. Rev. Lett.</a></p>
+</div>
+<div class="footnote-definition" id="5"><sup class="footnote-definition-label">4</sup>
+<p><a href="https://ieeexplore.ieee.org/document/246163">Synchronization of Lorenz-based chaotic circuits with applications to communications | IEEE Journals &amp; Magazine | IEEE Xplore</a></p>
+</div>
+<div class="footnote-definition" id="6"><sup class="footnote-definition-label">5</sup>
+<p><a href="https://www.science.org/doi/10.1126/science.279.5354.1198">Communication with Chaotic Lasers | Science</a></p>
+</div>
+<div class="footnote-definition" id="7"><sup class="footnote-definition-label">6</sup>
+<p><a href="https://www.nature.com/articles/nature04275">Chaos-based communications at high bit rates using commercial fibre-optic links | Nature</a></p>
+</div>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">7</sup>
+<p><a href="https://doi.org/10.1109/TCSI.2022.3140762">Secret-Key Exchange Through Synchronization of Randomized Chaotic Oscillators Aided by Logistic Hash Function - doi.org</a></p>
+</div>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/22.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="Random Number Generator (RNG)について"/>
+  <meta name="description" content="RNGについて調べてみました。" />
+  <meta property="description" content="RNGについて調べてみました。" />
+  <meta property="og:type" content="article" />
+<title> Random Number Generator (RNG)について| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">Random Number Generator (RNG)について</h1>
+    <div class='info'>
+        <div class='date'>2021-08-28</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/random/">random</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p>RNGについて調べてみました。</p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/6/#random-number-rn">Random Number (RN)</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/6/#random-number-generator-rng">Random Number Generator (RNG)</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/6/#true-random-number-generator-trng">True Random Number Generator (TRNG)</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/6/#pseudo-random-number-generators-prng">Pseudo Random Number Generators (PRNG)</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/6/#cryptographically-secure-prng-csprng">Cryptographically Secure PRNG (CSPRNG)</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/6/#can-kao-wen-xian">参考文献</a></li> 
+     
+</ol></div></p>
+<h2 id="random-number-rn">Random Number (RN)</h2>
+<p>NISTのCSRCでは以下のように定義されていました。</p>
+<blockquote>
+<p>Definition(s):</p>
+<p>A value in a set of numbers that has an equal probability of being selected from the total population of possibilities and, in that sense, is unpredictable.
+A random number is an instance of an unbiased random variable, that is, the output produced by a uniformly distributed random process.</p>
+<p>NIST SP 800-107 Rev.1 under Random number</p>
+</blockquote>
+<br>
+<p>乱数の性質として<strong>無作為性</strong>と<strong>予測不可能性</strong>が挙げられています。</p>
+<br>
+<p>また、無作為に値を抽出し、連続した値(乱数列)を生成します。</p>
+<p>この時、連続した値を再現することができないため、性質として<strong>再現不可能性</strong>も含まれていると考えられます。</p>
+<h2 id="random-number-generator-rng">Random Number Generator (RNG)</h2>
+<p>RNGは予測不可能な数値のソースです。上記で述べた&quot;乱数&quot;を理想的に生成することが可能です。</p>
+<p>&quot;<strong>純粋な運によって与えられる精度よりも高い精度で、結果を予測することが不可能なソース</strong>&quot;と捉えられます。</p>
+<p>例えば、コイントスです。</p>
+<p>ただし、理論的に正しいとされるRNGを実際に&quot;実装する&quot;ことは不可能であり、結局実装はRNGの近似でしかありません。</p>
+<p>RNGの近似的手法は、True Random Number Generator (<strong>TRNG</strong>)とPseudo Random Number Generators (<strong>PRNG</strong>)の2つに分けられます。</p>
+<p>(コイントスのような理想的なRNGを&quot;perfect RNG&quot;と記述している例もありました。)</p>
+<h2 id="true-random-number-generator-trng">True Random Number Generator (TRNG)</h2>
+<p>TRNGは<strong>ランダムな物理現象(非決定論的な現象)を利用して</strong>ランダムなビットを生成します。</p>
+<p>つまり、無作為性・予測不可能性を限りなく満たす乱数を生成することができます。</p>
+<br>
+<p>TRNGは大きく分けて３つのブロックで構成されます。</p>
+<p><img src="/image/006/3blocks.png" alt="3 blocks" /></p>
+<h3 id="entropy-source-es">Entropy Source (ES)</h3>
+<p>複雑な物理現象等で観測されるデータを回収する部分です。</p>
+<p>生成方法(物理現象)は知られながらも、生成する値が非決定論的である必要があります。</p>
+<p>一般的にはノイズなどが利用されます。(ex. Thermal noise<sup class="footnote-reference"><a href="#1">1</a></sup>)</p>
+<h3 id="entropy-harvester-eh">Entropy Harvester (EH)</h3>
+<p>ESによって生成された値を読み込み、ビット列に変換する部分です。</p>
+<h3 id="post-processor-pp">Post Processor (PP)</h3>
+<p>この部分は必須ではないです。</p>
+<p>ESやEHによって生じた偏りなどを減らしていく部分です。<sup class="footnote-reference"><a href="#2">2</a></sup></p>
+<p>一般的な手法として、von Neumannによる手法<sup class="footnote-reference"><a href="#3">3</a></sup>やXORが挙げられます。</p>
+<p>より堅牢な方法として暗号学的ハッシュ関数(MD5やSHAなど)を用いた方法もあります。</p>
+<p><img src="/image/006/pool-hash.png" alt="pool &amp; hash" /></p>
+<h2 id="pseudo-random-number-generators-prng">Pseudo Random Number Generators (PRNG)</h2>
+<p>初期値(シード)を用いて、ランダムに見える長い乱数列を生成する方法(アルゴリズム)のことです。</p>
+<p>シード値を用いて生成するため、<strong>再現不可能性を満たすことはありません</strong>。</p>
+<p>実際にはTRNGを用いることが望まれますが、生成コストを考慮しPRNGが代用される場合があります。</p>
+<p>シミュレーション等でPRNGを用いる場合は無作為性を満たす<sup class="footnote-reference"><a href="#4">4</a></sup>ことで十分な場合が多いですが、暗号の分野においては予測不可能性を満たす必要があります。</p>
+<p>暗号技術での利用に適した特性を持つPRNGをcryptographically secure PRNG (CSPRNG)と言います。</p>
+<h2 id="cryptographically-secure-prng-csprng">Cryptographically Secure PRNG (CSPRNG)</h2>
+<p>CSPRNGであるためには、まず無作為性を満たすこと(統計検定<sup class="footnote-reference"><a href="#4">4</a></sup>等に合格していること)です。</p>
+<p>次に&quot;next-bit test&quot;<sup class="footnote-reference"><a href="#5">5</a></sup>に合格することと&quot;state compromise extensions&quot;<sup class="footnote-reference"><a href="#6">6</a></sup>に耐えることが求められています。</p>
+<p>ここについてはもう少し調べたいと思います。</p>
+<hr />
+<h2 id="can-kao-wen-xian">参考文献</h2>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://doi.org/10.1109/81.586025">An integrated analog/digital random noise source | paper</a> <a href="https://doi.org/10.1103/PhysRev.32.110">Thermal Agitation of Electric Charge in Conductors | paper</a></p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>Software whitening <a href="https://en.wikipedia.org/wiki/Hardware_random_number_generator#Software_whitening">Hardware random number generator #Software whitening | wiki</a></p>
+</div>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
+<p>John von Neumann / Collected works. volume Ⅴ : Design of computers, theory of automata and numerical analysis / p 768-770. 書籍の情報がわからなかったのですが、偶然同じような人がいたのですぐ判明しました。<a href="https://math.stackexchange.com/questions/186626/finding-a-paper-by-john-von-neumann-written-in-1951">Finding a paper by John von Neumann written in 1951 | stackExchange</a></p>
+</div>
+<div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
+<p>SP 800-22 : <a href="https://csrc.nist.gov/publications/detail/sp/800-22/rev-1a/final">A Statistical Test Suite for Random and Pseudorandom Number Generators for Cryptographic Applications</a> / FIPS 140-2 : <a href="https://csrc.nist.gov/publications/detail/fips/140/2/final">Security Requirements for Cryptographic Modules</a></p>
+</div>
+<div class="footnote-definition" id="5"><sup class="footnote-definition-label">5</sup>
+<p><a href="https://en.wikipedia.org/wiki/Next-bit_test">Next-bit test | wiki</a> / <a href="https://doi.org/10.1109/SFCS.1982.45">Theory and application of trapdoor functions | paper</a></p>
+</div>
+<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
+<p><a href="https://doi.org/10.1007/3-540-69710-1_12">Cryptanalytic Attacks on Pseudorandom Number Generators | paper</a></p>
+</div>
+<br>
+<h3 id="trng">TRNG</h3>
+<p><a href="https://doi.org/10.1109/TCSI.2010.2052515">Implementation and Testing of High-Speed CMOS True Random Number Generators Based on Chaotic Systems | paper</a></p>
+<p><a href="https://doi.org/10.1007/s10470-020-01605-0">A TRNG using chaotic entropy pool as a post-processing technique: analysis, design and FPGA implementation | paper</a></p>
+<p><a href="https://doi.org/10.1109/IBCAST.2018.8312256">Robust entropy harvester for analogue noise sources in TRNG | paper</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Random_number_generation#%22True%22_vs._pseudo-random_numbers">Random number generation #&quot;True&quot; vs. pseudo-random numbers | wiki</a></p>
+<br>
+<h3 id="prng">PRNG</h3>
+<p><a href="https://en.wikipedia.org/wiki/List_of_random_number_generators">List of random number generators | wiki</a></p>
+<br>
+<h3 id="an-hao-li-lun">暗号理論</h3>
+<p>暗号理論入門 原書第3版 (978-4-621-06186-2)</p>
+<p>暗号と乱数―乱数の統計的検定 (978-4-320-11258-2)</p>
+<p>暗号技術の全て (978-4-7981-4881-6)</p>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/6.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="nand2tetris software toolsを使う"/>
+  <meta name="description" content="コンピュータシステムの理論と実装を読むにあたって、 nand2tetris software tools を準備する必要があった時のメモです。" />
+  <meta property="description" content="コンピュータシステムの理論と実装を読むにあたって、 nand2tetris software tools を準備する必要があった時のメモです。" />
+  <meta property="og:type" content="article" />
+<title> nand2tetris software toolsを使う| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">nand2tetris software toolsを使う</h1>
+    <div class='info'>
+        <div class='date'>2022-06-07</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/anyenv/">anyenv</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p>コンピュータシステムの理論と実装を読むにあたって、 nand2tetris software tools <sup class="footnote-reference"><a href="#1">1</a></sup> を準備する必要があった時のメモです。</p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/11/#huan-jing">環境</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/11/#javaworu-reru">javaを入れる。</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/11/#nand2tetris-software-tools">nand2tetris software tools</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/11/#omake">おまけ</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/11/#can-kao-wen-xian">参考文献</a></li> 
+     
+</ol></div></p>
+<h2 id="huan-jing">環境</h2>
+<p>M1 - macOS Montereyでのセットアップになります。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> sw_vers</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">ProductName:</span></span><span class="z-meta z-function-call z-arguments z-shell"> macOS</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">ProductVersion:</span></span><span class="z-meta z-function-call z-arguments z-shell"> 12.4</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">BuildVersion:</span></span><span class="z-meta z-function-call z-arguments z-shell"> 21F79</span>
+</span></code></pre>
+<p>javaが必要ですが、最近使っているMac miniには入っていなかったのでインストールします。</p>
+<p>バージョン管理する予定はないですが、とりあえず<code>anyenv</code>で<code>jenv</code> <sup class="footnote-reference"><a href="#2">2</a></sup> を入れます。</p>
+<p><code>anyenv</code>のバージョンは以下の通りです。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> anyenv<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> --</span>version</span></span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">anyenv</span></span><span class="z-meta z-function-call z-arguments z-shell"> 1.1.4</span>
+</span></code></pre>
+<h2 id="javaworu-reru">javaを入れる。</h2>
+<h3 id="jenvworu-reru">jenvを入れる。</h3>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> anyenv install jenv</span>
+</span></code></pre>
+<h3 id="openjdkworu-reru">openjdkを入れる</h3>
+<p><code>jenv</code>は他の<code>*env</code>系と違って<strong>installコマンドはありません</strong>。</p>
+<p><code>brew</code>等でインストールした上で、<code>jenv add</code>を使用し、登録する形です。</p>
+<p>とりあえず最新を入れます。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> brew install openjdk</span>
+</span></code></pre>
+<h3 id="jenv-add">jenv add</h3>
+<p><code>jenv add PATH_TO_JVM_HOME</code>で登録します。</p>
+<p><code>PATH_TO_JVM_HOME</code>はjenvのREADMEとhomebrewのページを参考にしました。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> jenv add /opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">openjdk64-18.0.1.1</span></span><span class="z-meta z-function-call z-arguments z-shell"> added</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">18.0.1.1</span></span><span class="z-meta z-function-call z-arguments z-shell"> added</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">18.0</span></span><span class="z-meta z-function-call z-arguments z-shell"> added</span>
+ <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">18.0.1.1</span></span><span class="z-meta z-function-call z-arguments z-shell"> already present, skip installation</span>
+</span></code></pre>
+<p><a href="https://github.com/jenv/jenv#12-adding-your-java-environment">#1.2 Adding Your Java Environment | jenv | GitHub</a></p>
+<p><a href="https://formulae.brew.sh/formula/openjdk">openjdk | Homebrew Formulae</a></p>
+<br>
+<h3 id="jenv-versions">jenv versions</h3>
+<p>javaがしっかりと追加されたことを確認します。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> jenv versions</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">*</span></span><span class="z-meta z-function-call z-arguments z-shell"> system (set by /Users/kosh/.anyenv/envs/jenv/version</span><span class="z-meta z-function-call z-shell"></span>)
+  <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">18.0</span></span>
+  <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">18.0.1.1</span></span>
+  <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">openjdk64-18.0.1.1</span></span>
+</span></code></pre>
+<h3 id="jenv-global-local">jenv global/local</h3>
+<p>あとは、他の<code>*env</code>系と同様にlocalまたはglobalで使用するバージョンを指定します。</p>
+<p><code>java -version</code>でしっかり導入できていることを確認します。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> jenv global 18.0</span>
+
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> exec <span class="z-meta z-group z-expansion z-parameter z-shell"><span class="z-punctuation z-definition z-variable z-shell">$</span><span class="z-variable z-other z-readwrite z-shell">SHELL</span></span><span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>l</span></span>
+
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> java<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>version</span></span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">openjdk</span></span><span class="z-meta z-function-call z-arguments z-shell"> version <span class="z-string z-quoted z-double z-shell"><span class="z-punctuation z-definition z-string z-begin z-shell">&quot;</span>18.0.1.1<span class="z-punctuation z-definition z-string z-end z-shell">&quot;</span></span> 2022-04-22</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">OpenJDK</span></span><span class="z-meta z-function-call z-arguments z-shell"> Runtime Environment Homebrew (build 18.0.1.1+0</span><span class="z-meta z-function-call z-shell"></span>)
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">OpenJDK</span></span><span class="z-meta z-function-call z-arguments z-shell"> 64-Bit Server VM Homebrew (build 18.0.1.1+0, mixed mode, sharing</span><span class="z-meta z-function-call z-shell"></span>)
+</span></code></pre>
+<p>local 登録のチェックはおまけに記載します。<a href="https://www.kosh.dev/article/11/#jenv-local">[*1]</a></p>
+<h2 id="nand2tetris-software-tools">nand2tetris software tools</h2>
+<p><a href="https://www.nand2tetris.org/software">Software | From Nand to Tetris</a></p>
+<p>Downloadからソフトウェアをダウンロードします。</p>
+<p>Macユーザー向けのガイドもダウンロードすることができます。</p>
+<p>ダウンロードしたディレクトリ内の<code>*.sh</code>を確認します。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> tree nand2tetris/tools<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>P</span> <span class="z-string z-quoted z-double z-shell"><span class="z-punctuation z-definition z-string z-begin z-shell">&quot;</span>*.sh<span class="z-punctuation z-definition z-string z-end z-shell">&quot;</span></span><span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> --</span>prune</span></span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">nand2tetris/tools</span></span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">├──</span></span><span class="z-meta z-function-call z-arguments z-shell"> Assembler.sh</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">├──</span></span><span class="z-meta z-function-call z-arguments z-shell"> CPUEmulator.sh</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">├──</span></span><span class="z-meta z-function-call z-arguments z-shell"> HardwareSimulator.sh</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">├──</span></span><span class="z-meta z-function-call z-arguments z-shell"> JackCompiler.sh</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">├──</span></span><span class="z-meta z-function-call z-arguments z-shell"> TextComparer.sh</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">└──</span></span><span class="z-meta z-function-call z-arguments z-shell"> VMEmulator.sh</span>
+
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">0</span></span><span class="z-meta z-function-call z-arguments z-shell"> directories, 6 files</span>
+</span></code></pre>
+<p>実行権限がないのでとりあえず与えます。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">[<span class="z-meta z-group z-expansion z-tilde"><span class="z-variable z-language z-tilde z-shell">~</span></span>/nand2tetris/tools]</span></span><span class="z-meta z-function-call z-arguments z-shell"> </span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell">  find ./<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>name</span> <span class="z-string z-quoted z-double z-shell"><span class="z-punctuation z-definition z-string z-begin z-shell">&quot;</span>*.sh<span class="z-punctuation z-definition z-string z-end z-shell">&quot;</span></span></span> <span class="z-keyword z-operator z-logical z-pipe z-shell">|</span> <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">xargs</span></span><span class="z-meta z-function-call z-arguments z-shell"> chmod 755</span>
+</span></code></pre>
+<p>これで<code>HardwareSimulator.sh</code>でシミュレータが起動します。</p>
+<h3 id="shi-iyasuku">使いやすく</h3>
+<p>本の中やガイドではシンボリックリンクの方法が記載されていますが、思いっきり<code>.zshrc</code>にPATHとして登録してしまう方法もあります。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-storage z-modifier z-shell">export</span> <span class="z-variable z-other z-readwrite z-assignment z-shell">PATH</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell"><span class="z-meta z-group z-expansion z-parameter z-shell"><span class="z-punctuation z-definition z-variable z-shell">$</span><span class="z-variable z-other z-readwrite z-shell">PATH</span></span>:</span><span class="z-keyword z-operator z-assignment z-redirection z-shell">&lt;</span>your-path<span class="z-keyword z-operator z-assignment z-redirection z-shell">&gt;</span>/nand2tetris/tools</span>
+</span></code></pre>
+<h2 id="omake">おまけ</h2>
+<h3 id="jenvnoshe-ding-ha">jenvの設定は？</h3>
+<p><code>homebrew</code>とかで直接<code>jenv</code>を入れた場合は<code>.zshrc</code>などにいくつか記載が必要ですが、<code>anyenv</code>で入れた場合は<code>anyenv</code>の設定ですべてカバーされます。</p>
+<h3 id="jenvwoshi-wanaidejavawoshi-u">jenvを使わないでjavaを使う</h3>
+<p><code>jenv</code>を使わないで、普通にjavaを使う場合はシンボリックリンクを作るか、pathを指定してあげる必要があります。</p>
+<h4 id="sinboritukurinku">シンボリックリンク</h4>
+<p>シンボリックリンクの作成はhomebrewのopenjdkのページに記載があります。
+<a href="https://formulae.brew.sh/formula/openjdk">openjdk | Homebrew Formulae</a></p>
+<h4 id="path">PATH</h4>
+<p>PATHに関してはinstallした際の注釈に記載がありました。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">If</span></span><span class="z-meta z-function-call z-arguments z-shell"> you need to have openjdk first in your PATH, run:</span>
+  <span class="z-meta z-function-call z-shell"><span class="z-support z-function z-echo z-shell">echo</span></span><span class="z-meta z-function-call z-arguments z-shell"> <span class="z-string z-quoted z-single z-shell"><span class="z-punctuation z-definition z-string z-begin z-shell">&#39;</span>export PATH=&quot;/opt/homebrew/opt/openjdk/bin:$PATH&quot;<span class="z-punctuation z-definition z-string z-end z-shell">&#39;</span></span> <span class="z-keyword z-operator z-assignment z-redirection z-shell">&gt;&gt;</span> <span class="z-meta z-group z-expansion z-tilde"><span class="z-variable z-language z-tilde z-shell">~</span></span>/.zshrc</span>
+</span></code></pre>
+<h3 id="jenv-local">jenv local</h3>
+<p>適当に17を入れ、<code>jenv add</code>で登録します。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> brew install openjdk@17</span>
+
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> jenv add /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">openjdk64-17.0.3</span></span><span class="z-meta z-function-call z-arguments z-shell"> added</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">17.0.3</span></span><span class="z-meta z-function-call z-arguments z-shell"> added</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">17.0</span></span><span class="z-meta z-function-call z-arguments z-shell"> added</span>
+ <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">17.0.3</span></span><span class="z-meta z-function-call z-arguments z-shell"> already present, skip installation</span>
+
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> jenv versions                                                          </span>
+  <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">system</span></span>
+  <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">17.0</span></span>
+  <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">17.0.3</span></span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">*</span></span><span class="z-meta z-function-call z-arguments z-shell"> 18.0 (set by /Users/kosh/.anyenv/envs/jenv/version</span><span class="z-meta z-function-call z-shell"></span>)
+  <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">18.0.1.1</span></span>
+  <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">openjdk64-17.0.3</span></span>
+  <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">openjdk64-18.0.1.1</span></span>
+</span></code></pre>
+<p>適当なディレクトリで17を指定してみます。</p>
+<p><code>.java-version</code>が作成され、しっかりバージョンが切り替わっていることが確認できます。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> jenv local 17.0</span>
+
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> java<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>version</span>  </span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">openjdk</span></span><span class="z-meta z-function-call z-arguments z-shell"> version <span class="z-string z-quoted z-double z-shell"><span class="z-punctuation z-definition z-string z-begin z-shell">&quot;</span>17.0.3<span class="z-punctuation z-definition z-string z-end z-shell">&quot;</span></span> 2022-04-19</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">OpenJDK</span></span><span class="z-meta z-function-call z-arguments z-shell"> Runtime Environment Homebrew (build 17.0.3+0</span><span class="z-meta z-function-call z-shell"></span>)
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">OpenJDK</span></span><span class="z-meta z-function-call z-arguments z-shell"> 64-Bit Server VM Homebrew (build 17.0.3+0, mixed mode, sharing</span><span class="z-meta z-function-call z-shell"></span>)
+
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell"><span class="z-meta z-group z-expansion z-job z-shell"><span class="z-punctuation z-definition z-variable z-job z-shell">%</span></span></span></span><span class="z-meta z-function-call z-arguments z-shell"> cat .java-version</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">17.0</span></span>
+</span></code></pre>
+<h2 id="can-kao-wen-xian">参考文献</h2>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://www.nand2tetris.org">Home | nand2tetris</a></p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p><a href="https://github.com/jenv/jenv">jenv | GitHub</a></p>
+</div>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/11.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="Raspberry Pi用のカメラ比較"/>
+  <meta name="description" content="実際に撮った時どんな感じなのかといった感じのメモになります。" />
+  <meta property="description" content="実際に撮った時どんな感じなのかといった感じのメモになります。" />
+  <meta property="og:type" content="article" />
+<title> Raspberry Pi用のカメラ比較| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">Raspberry Pi用のカメラ比較</h1>
+    <div class='info'>
+        <div class='date'>2023-06-26</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/raspberrypi/">RaspberryPi</a></div>
+            
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/picamera2/">Picamera2</a></div>
+            
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/python/">Python</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p>実際に撮った時どんな感じなのかといった感じのメモになります。</p>
+<p>以下のカメラです。随順更新していきます。</p>
+<ul>
+<li>Raspberry Pi  Camera Module 3 <sup class="footnote-reference"><a href="#0">1</a></sup></li>
+<li>Arducam 16MP Autofocus Camera Module <sup class="footnote-reference"><a href="#1">2</a></sup></li>
+</ul>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/16/#cuo-tutagan-zi">撮った感じ</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/16/#rgbnofen-bu">RGBの分布</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/16/#supetukubiao">スペック表</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/16/#can-kao-wen-xian">参考文献</a></li> 
+     
+</ol></div></p>
+<h2 id="cuo-tutagan-zi">撮った感じ</h2>
+<p>(⚠️ 同じ日では無いです。)</p>
+<h3 id="raspberry-pi-camera-module-3">Raspberry Pi  Camera Module 3</h3>
+<p><img src="/image/016/20230618113301_EjnWFG8x.png" alt="(4608, 2592)" /></p>
+<h3 id="arducam-16mp-autofocus-camera-module">Arducam 16MP Autofocus Camera Module</h3>
+<p><img src="/image/016/20230624160317_lEUU7xgn.png" alt="(4656, 3496)" /></p>
+<h2 id="rgbnofen-bu">RGBの分布</h2>
+<p><img src="/image/016/color_rgb.png" alt="分布図" /></p>
+<h2 id="supetukubiao">スペック表</h2>
+<p>以下のように<code>picam2.sensor_modes</code>で出力されたものを表にしています。</p>
+<pre data-lang="python" class="language-python z-code"><code class="language-python" data-lang="python"><span class="z-source z-python"><span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-from z-python">from</span></span><span class="z-meta z-statement z-import z-python"><span class="z-meta z-import-source z-python"> <span class="z-meta z-import-path z-python"><span class="z-meta z-import-name z-python">picamera2</span></span> <span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-python">import</span></span></span></span><span class="z-meta z-statement z-import z-python"></span><span class="z-meta z-statement z-import z-python"> <span class="z-meta z-generic-name z-python">Picamera2</span></span>
+
+<span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">picam2</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">Picamera2</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+<span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">print</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">picam2</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">sensor_modes</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span></code></pre>
+<h3 id="raspberry-pi-camera-module-3-1">Raspberry Pi  Camera Module 3</h3>
+<table><thead><tr><th>format</th><th>unpacked</th><th>bit_depth</th><th>size</th><th>fps</th><th>crop_limits</th><th>exposure_limits</th></tr></thead><tbody>
+<tr><td>SRGGB10_CSI2P</td><td>SRGGB10</td><td>10</td><td>(1536, 864)</td><td>120.13</td><td>(768, 432, 3072, 1728)</td><td>(9, 77193582, None)</td></tr>
+<tr><td>SRGGB10_CSI2P</td><td>SRGGB10</td><td>10</td><td>(2304, 1296)</td><td>56.03</td><td>(0, 0, 4608, 2592)</td><td>(13, 112015443, None)</td></tr>
+<tr><td>SRGGB10_CSI2P</td><td>SRGGB10</td><td>10</td><td>(4608, 2592)</td><td>14.35</td><td>(0, 0, 4608, 2592)</td><td>(26, 220417486, None)</td></tr>
+</tbody></table>
+<h3 id="arducam-16mp-autofocus-camera-module-1">Arducam 16MP Autofocus Camera Module</h3>
+<table><thead><tr><th>format</th><th>unpacked</th><th>bit_depth</th><th>size</th><th>fps</th><th>crop_limits</th><th>exposure_limits</th></tr></thead><tbody>
+<tr><td>SRGGB10_CSI2P</td><td>SRGGB10</td><td>10</td><td>(1280, 720)</td><td>80.01</td><td>(1048, 1042, 2560, 1440)</td><td>(287, 120729139, None)</td></tr>
+<tr><td>SRGGB10_CSI2P</td><td>SRGGB10</td><td>10</td><td>(1920, 1080)</td><td>60.05</td><td>(408, 674, 3840, 2160)</td><td>(282, 118430097, None)</td></tr>
+<tr><td>SRGGB10_CSI2P</td><td>SRGGB10</td><td>10</td><td>(2328, 1748)</td><td>30.0</td><td>(0, 0, 4656, 3496)</td><td>(305, 127960311, None)</td></tr>
+<tr><td>SRGGB10_CSI2P</td><td>SRGGB10</td><td>10</td><td>(3840, 2160)</td><td>18.0</td><td>(408, 672, 3840, 2160)</td><td>(491, 206049113, None)</td></tr>
+<tr><td>SRGGB10_CSI2P</td><td>SRGGB10</td><td>10</td><td>(4656, 3496)</td><td>9.0</td><td>(0, 0, 4656, 3496)</td><td>(592, 248567756, None)</td></tr>
+</tbody></table>
+<h2 id="can-kao-wen-xian">参考文献</h2>
+<div class="footnote-definition" id="0"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://www.raspberrypi.com/documentation/accessories/camera.html">Raspberry Pi Documentation - Camera</a></p>
+</div>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">2</sup>
+<p><a href="https://www.arducam.com/product/imx519-autofocus-camera-module-for-raspberry-pi-arducam-b0371/">16MP IMX519 PDAF&amp;CDAF Autofocus Camera for Raspberry Pi and NVIDIA Jetson Nano/Xavier NX and NVIDIA Orin NX - Arducam</a></p>
+</div>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/16.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

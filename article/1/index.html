@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="サイトの再構築"/>
+  <meta name="description" content="サイトをFlaskで作り直しました。" />
+  <meta property="description" content="サイトをFlaskで作り直しました。" />
+  <meta property="og:type" content="article" />
+<title> サイトの再構築| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">サイトの再構築</h1>
+    <div class='info'>
+        <div class='date'>2021-05-03</div>
+        
+    </div>
+<div class="contents">
+
+<p>１年くらい前に何も考えずに<code>kosh.dev</code>を取得しました。</p>
+<p>このドメインのページをうまく使いこなせていなかったので、作り直しました。</p>
+<p><img src="/image/001/old.png" alt="前のサイトについて" /></p>
+<p>前はPythpmでフレームワーク<a href="https://github.com/llbxg/test-tube">test-tube</a>とサーバ<a href="https://github.com/llbxg/saba-server">saba-server</a>を作成して運用していました。</p>
+<p>普通にパッケージを使えばいいだけですが、大枠の理解もかねて作ってみました。が、メンテ等いろいろ大変すぎるので、今回はFlaskとGunicornで立ち上げています。</p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/1/#jin-hui-nosaito">今回のサイト</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/1/#qian-nosaito">前のサイト</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/1/#jin-hou-nosaito">今後のサイト</a></li> 
+     
+</ol></div></p>
+<h2 id="jin-hui-nosaito">今回のサイト</h2>
+<p>基本的に普通のFlaskで立てたサイトです。Blog用の記事は<code>.md</code>で書いた記事を変換する形式を取りました。<code>markdown</code>を使ってHTMLベースに変換して、<code> Beautiful Soup</code>を使って目次とかタグとか修正してます。</p>
+<p><a href="https://python-markdown.github.io/">Python-Markdown</a></p>
+<p><a href="https://www.crummy.com/software/BeautifulSoup/">Beautiful Soup</a></p>
+<h3 id="ogp">OGP</h3>
+<p>OPG用の物を記事ごとに準備するのはめんどくさいです。そういう小さなめんどくさいが積もり積もって更新しなくなるわけです。</p>
+<p>そこで、今回は<code>PIL</code>を使って<strong>動的に画像を作成</strong>して、説明文は最初の<strong>一文を抽出</strong>することにしました。これでだいぶ更新に対する億劫さが軽減されます。</p>
+<p><a href="https://pillow.readthedocs.io/en/stable/">Pillow</a></p>
+<h3 id="nandeflask">なんでFlask</h3>
+<p>普段Pythonを使っていて、マイクロフレームワークという言葉に惹かれてFlaskを使えるようになったのでFlaskを使っています。正直ホームページを作成するのであればFlaskである必要もないですし、Pythonである必要もないと思いますが、とりあえずすぐに作りたかったのです。</p>
+<p><a href="https://flask.palletsprojects.com/en/1.1.x/">Flask</a></p>
+<p>やっぱりPythonでこういうことをするメリットはPythonであることだと思います。API系でバックでPythonを使うのであれば非常に楽だと思います。このサイトの微々たる恩恵はOPG用の画像生成くらいです。今ならFastAPIとかの方が熱い気がします。</p>
+<p><a href="https://fastapi.tiangolo.com/ja/">FastAPI</a></p>
+<h3 id="wen-ti">問題</h3>
+<p>裏と表の処理をしっかり明確に区別できていないのがこのサイトの問題点です。
+実装しようと思った時に楽な方で実装という思想なので、今はいいですがこの後絶対にめんどくさくなります。</p>
+<p>特に記事に対する加工系が両方で処理してしまっているので、そのうち区分しなきゃいけません。</p>
+<p>サイトを作る場合はしっかり役割を明確にすることが大事です、</p>
+<h2 id="qian-nosaito">前のサイト</h2>
+<p>前のサイトは<strong>Pythonの標準ライブラリだけで構築</strong>していました。単に勉強って感じでした。</p>
+<p><img src="/image/001/ie.png" alt="前のサイトの環境" /></p>
+<p>当初はHTML直書きという今思うと恐怖でしたが、流石にしんどかったです。</p>
+<p>そこで更新しやすいように、<code>.md</code>で書いた記事を変換する形式を取りました。ここで今のサイトで使っている<code>markdown</code>と<code> Beautiful Soup</code>を使うようになりました。</p>
+<p>そんなこんなで運営上、標準ライブラリ縛りは消滅しました。</p>
+<h3 id="activitypub">ActivityPub</h3>
+<p>更新が簡単かと思って、ActivityPubに対応する形でMicroBlogを作ってみましたが、そもそもMastdon使ってないし、あまり意味なかったです。</p>
+<p>ActivityPubベースにするにあたってサイト自体も標準ライブラリ縛りは消滅しました。</p>
+<p><a href="https://github.com/ahknight/httpsig">httpsig</a></p>
+<p>ここら辺も自分で書けばいい説はありましたが流石にめんどくさくなってしまいました。</p>
+<h2 id="jin-hou-nosaito">今後のサイト</h2>
+<p>個人サイトであれば、実際にやってみたいことを実践できるのがメリットです。
+Rustベースになるかもだし、そもそもサーバいる？まであります。</p>
+<p><strong>とりあえず更新する</strong>ことを目標として色々やっていきたいです。</p>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/1.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

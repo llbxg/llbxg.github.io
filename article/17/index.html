@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="Raspberry Pi Zero 2のネットワークデーモンに関して"/>
+  <meta name="description" content="Raspberry Pi Zero 2 Wにおけるネットワークデーモンのシステム起動時間への影響について検証しました。" />
+  <meta property="description" content="Raspberry Pi Zero 2 Wにおけるネットワークデーモンのシステム起動時間への影響について検証しました。" />
+  <meta property="og:type" content="article" />
+<title> Raspberry Pi Zero 2のネットワークデーモンに関して| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">Raspberry Pi Zero 2のネットワークデーモンに関して</h1>
+    <div class='info'>
+        <div class='date'>2023-11-07</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/raspberrypi/">RaspberryPi</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p>Raspberry Pi Zero 2 Wにおけるネットワークデーモンのシステム起動時間への影響について検証しました。</p>
+<p>対象は、NetworkManager、systemd-networkd、networking.service (ifup/down)の三つの主要なネットワーク管理システムです。</p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/17/#tesutohuan-jing">テスト環境</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/17/#networkmanagernogai-yao">NetworkManagerの概要</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/17/#networking-service">networking.service</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/17/#systemd-networkd">systemd-networkd</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/17/#matome">まとめ</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/17/#can-kao-wen-xian">参考文献</a></li> 
+     
+</ol></div></p>
+<h2 id="tesutohuan-jing">テスト環境</h2>
+<ul>
+<li>ボード: Raspberry Pi Zero 2 W Rev 1.0</li>
+<li>OS: Raspberry Pi OS Lite (64-bit) – 2023-10-10リリース</li>
+<li>microSD: SanDisk Extreme 32GB (UHS-I U30 V30)</li>
+<li>有線LANアダプター: TP-Link UE300C</li>
+</ul>
+<p>2023年10月10日のRaspberry Pi OSリリースに伴い、デフォルトのネットワークデーモンがdhcpcd<sup class="footnote-reference"><a href="#0">1</a></sup>からNetworkManager<sup class="footnote-reference"><a href="#1">2</a></sup>に変更されました<sup class="footnote-reference"><a href="#2">3</a></sup>。
+デフォルトで、<code>network-online.target</code><sup class="footnote-reference"><a href="#3">4</a></sup>が、<code>networking.service</code>と<code>NetworkManager.service</code>を依存関係として指定しています。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">$</span></span><span class="z-meta z-function-call z-arguments z-shell"> systemctl list-dependencies network-online.target </span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">network-online.target</span></span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">🟢</span></span><span class="z-meta z-function-call z-arguments z-shell"> ├─networking.service</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">🟢</span></span><span class="z-meta z-function-call z-arguments z-shell"> └─NetworkManager-wait-online.service</span>
+</span></code></pre>
+<p>測定結果は、systemd-analyzeコマンドで計測した10回の試行の平均値です。</p>
+<h2 id="networkmanagernogai-yao">NetworkManagerの概要</h2>
+<p>NetworkManagerはユーザーフレンドリーなインターフェースを提供し、複数のネットワークインターフェースを効率的に切り替えることを可能にするデーモンです。
+<code>NetworkManager.service</code>を有効にすることで、OS起動時に自動的にNetworkManagerが起動し、ネットワーク接続を管理します。<code>NetworkManager.service</code>には<code>NetworkManager-wait-online.service</code><sup class="footnote-reference"><a href="#NM-1">5</a></sup>と<code>NetworkManager-dispatcher.service</code>がalsoとして登録されています。</p>
+<p><code>NetworkManager-wait-online.service</code>は、特定のインターフェース（例: eth0）にキャリア（物理的接続）が存在するかを確認するサービスです。これにより、ネットワーク接続が必要な他のサービスやアプリケーションが適切なネットワーク接続完了後に起動することを保証します。</p>
+<h3 id="qi-dong-shun-xu">起動順序</h3>
+<p>NetworkManager.serviceに続き、NetworkManager-wait-online.serviceが起動し、適切なネットワーク接続が確立されるまで他のサービスの起動を待機します。以下はそのプロセスのイメージです。</p>
+<p><img src="/image/017/NetworkManager-service.png" alt="NetworkManager.serviceとNetworkManager-wait-online.service" /></p>
+<h3 id="qi-dong-shi-jian-noji-ce-1">起動時間の計測 1</h3>
+<p>以下の表は、有線LANアダプターとネットワークケーブルの接続状態に応じた、各サービスの起動時間を示しています。</p>
+<table><thead><tr><th style="text-align: center">eth adapter</th><th style="text-align: center">Network Cable</th><th>NetworkManager.service [s]</th><th>NetworkManager-wait-online.service [s]</th><th>Kernel Time [s]</th><th>Userspace Time [s]</th><th>Total Time [s]</th></tr></thead><tbody>
+<tr><td style="text-align: center">○</td><td style="text-align: center">○</td><td>1.1182</td><td>1.6457</td><td>6.4387</td><td>12.0592</td><td>18.4982</td></tr>
+<tr><td style="text-align: center">×</td><td style="text-align: center">×</td><td>1.1508</td><td>1.5773</td><td>6.2877</td><td>11.5893</td><td>17.8774</td></tr>
+<tr><td style="text-align: center">○</td><td style="text-align: center">×</td><td>1.1253</td><td>6.6318</td><td>6.4627</td><td>17.1111</td><td>23.5741</td></tr>
+</tbody></table>
+<p>LANアダプターがない場合、ドライバが不要なためカーネルの起動時間が短縮されます。一方で、アダプターがありながらネットワークケーブルが未接続の場合、<code>NetworkManager-wait-online.service</code>は約5秒間停止します。これは<code>carrier-wait-timeout</code>のデフォルト設定（5000ミリ秒）によるものです。<code>NetworkManager.conf</code><sup class="footnote-reference"><a href="#6">6</a></sup>で変更可能です。</p>
+<h3 id="etc-network-interfacestonogan-she">/etc/network/interfacesとの干渉</h3>
+<p><code>/etc/NetworkManager/NetworkManager.conf</code>に以下の記述があるので、<code>/etc/network/interfaces</code>で定義されたインターフェースはNetworkManagerによって管理されないようです。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">[ifupdown]</span></span><span class="z-meta z-function-call z-arguments z-shell"> </span>
+<span class="z-variable z-other z-readwrite z-assignment z-shell">managed</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell">false</span>
+</span></code></pre>
+<p><code>/etc/network/interfaces</code> ファイルが基本的に空で、そして <code>/etc/network/interfaces.d</code> ディレクトリも空であるため、<code>networking.service</code> が起動時に実際に何も設定するインターフェースがない可能性があります。このため、<code>networking.service</code>は何のエラーも発生せずにすぐに終了します。</p>
+<h2 id="networking-service">networking.service</h2>
+<p><code>networking.service</code>は、伝統的なDebian系ネットワーク管理方法を提供するデーモンで、<code>/etc/network/interfaces</code>ファイルに基づいたネットワーク設定を<code>ifup</code>コマンドを使用し適用します。
+このデーモンは、特に静的IP設定や特定のネットワーク設定スクリプトに依存する環境に適しています。
+Debianの特定の修正により、<code>/etc/default/networking</code>の設定が<code>--read-environment</code>オプションがなくても読み込まれるようになっていますが、これは推奨されている方法ではなさそうです<sup class="footnote-reference"><a href="#7">7</a></sup>。</p>
+<h3 id="intahuesunoshe-ding-li">インターフェースの設定例</h3>
+<p>以下は、eth0インターフェースをDHCPを介して自動的に起動するための設定例です。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">$</span></span><span class="z-meta z-function-call z-arguments z-shell"> cat /etc/network/interfaces</span>
+<span class="z-meta z-function-call z-shell"><span class="z-support z-function z-source z-shell">source</span></span><span class="z-meta z-function-call z-arguments z-shell"> /etc/network/interfaces.d/<span class="z-keyword z-operator z-regexp z-quantifier z-shell">*</span></span>
+
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">auto</span></span><span class="z-meta z-function-call z-arguments z-shell"> eth0</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">iface</span></span><span class="z-meta z-function-call z-arguments z-shell"> eth0 inet dhcp</span>
+</span></code></pre>
+<p>この設定により、ifupが実行されるとdhclient<sup class="footnote-reference"><a href="#8">8</a></sup>プロセスが開始され、eth0インターフェースにIPアドレスが割り当てられます。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">$</span></span><span class="z-meta z-function-call z-arguments z-shell"> ps<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>f</span><span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>p</span> 549</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">UID</span></span><span class="z-meta z-function-call z-arguments z-shell">          PID    PPID  C STIME TTY          TIME CMD</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">root</span></span><span class="z-meta z-function-call z-arguments z-shell">         549       1  0 11:48 <span class="z-keyword z-operator z-regexp z-quantifier z-shell">?</span>        00:00:00 dhclient<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>4</span><span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>v</span><span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>i</span><span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>pf</span> /run/dhclient.eth0.pid<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>lf</span> /var/lib/dhcp/dhclient.eth0.leases<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>I</span><span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>df</span> /var/lib/dhcp/dhclient6.eth0.leases eth0</span>
+</span></code></pre>
+<p>dhclientのデフォルトのタイムアウト設定は60秒ですが、これは<code>dhclient.conf</code>でカスタマイズ可能です。</p>
+<h3 id="qi-dong-shi-jian-noji-ce-2">起動時間の計測 2</h3>
+<p>以下の表は、有線LANアダプターとネットワークケーブルの接続状態に応じた、<code>networking.service</code>の起動時間を示しています。</p>
+<table><thead><tr><th style="text-align: center">eth adapter</th><th style="text-align: center">Network Cable</th><th>networking.service [s]</th><th>Kernel Time [s]</th><th>Userspace Time [s]</th><th>Total Time [s]</th></tr></thead><tbody>
+<tr><td style="text-align: center">○</td><td style="text-align: center">○</td><td>10.7240</td><td>6.4660</td><td>19.6007</td><td>26.0674</td></tr>
+<tr><td style="text-align: center">×</td><td style="text-align: center">×</td><td>1.8900</td><td>6.2849</td><td>10.3421</td><td>16.6274</td></tr>
+<tr><td style="text-align: center">○</td><td style="text-align: center">×</td><td>62.6896</td><td>6.4492</td><td>71.5641</td><td>78.0136</td></tr>
+</tbody></table>
+<p>アダプターが接続されていてもネットワークケーブルが接続されていない場合、dhclientがタイムアウトするまでの長い待機時間が発生します。
+アダプターが存在しない場合、起動時間が著しく短縮されることが確認できます。
+これは、ネットワーク構成の自動探索が行われないためだと思われます。</p>
+<h2 id="systemd-networkd">systemd-networkd</h2>
+<p>systemd-networkdは、システムの起動と密接に統合されたネットワーク設定を提供するデーモンです。これを利用するためには、<code>systemd-networkd.service</code>を起動し、通常このサービスを有効にすると<code>systemd-networkd-wait-online.service</code>も同時に有効になります。
+<code>systemd-networkd-wait-online.service</code>はネットワークが利用可能になるまで起動を待機するサービスで、デフォルトで120秒のタイムアウトが設定されています<sup class="footnote-reference"><a href="#SN_1">9</a></sup>。</p>
+<h3 id="intahuesunoshe-ding-li-1">インターフェースの設定例</h3>
+<p>systemd-networkdを使用するには、以下のような設定ファイルを<code>/etc/systemd/network</code>に配置します。
+ここで<code>Name=eth0</code>は対象のネットワークインターフェースを指定し、<code>DHCP=yes</code>でDHCPを介して自動的にIPアドレスを取得するよう指示します。</p>
+<p>networkctlコマンドでネットワークインターフェースを確認し、以下のように有効にします。
+設定ファイルは<code>/usr/lib/systemd/network</code>ディレクトリまたは<code>/etc/systemd/network</code>ディレクトリに置きます。<code>/etc/systemd/network</code>ディレクトリにある設定ファイルが優先されます。</p>
+<pre data-lang="txt" class="language-txt z-code"><code class="language-txt" data-lang="txt"><span class="z-text z-plain"># /etc/systemd/network/50-wired.network
+[Match]
+Name=eth0
+
+[Network]
+DHCP=yes
+</span></code></pre>
+<h3 id="qi-dong-shi-jian-noji-ce-3">起動時間の計測 3</h3>
+<p>以下の表は、有線LANアダプターとネットワークケーブルの接続状態に応じた、<code>systemd-networkd.service</code>と<code>systemd-networkd-wait-online.service</code>の起動時間を示しています。</p>
+<table><thead><tr><th style="text-align: center">eth adapter</th><th style="text-align: center">Network Cable</th><th>systemd-networkd.service [s]</th><th>systemd-networkd-wait-online.service [s]</th><th>Kernel Time [s]</th><th>Userspace Time [s]</th><th>Total Time [s]</th></tr></thead><tbody>
+<tr><td style="text-align: center">○</td><td style="text-align: center">○</td><td>2.2073</td><td>2.7145</td><td>6.4470</td><td>10.8495</td><td>17.2969</td></tr>
+<tr><td style="text-align: center">×</td><td style="text-align: center">×</td><td>2.0444</td><td>120.3914</td><td>6.3001</td><td>126.4118</td><td>132.7122</td></tr>
+<tr><td style="text-align: center">○</td><td style="text-align: center">×</td><td>2.0385</td><td>120.3782</td><td>6.4466</td><td>126.4923</td><td>132.9396</td></tr>
+</tbody></table>
+<p>アダプターが接続されており、ネットワークケーブルが繋がっている場合には、<code>systemd-networkd</code>及び<code>systemd-networkd-wait-online.service</code>の起動は迅速です。
+しかし、ネットワークケーブルが接続されていない場合、<code>systemd-networkd-wait-online.service</code>は設定されたタイムアウト値まで待機し、その結果として起動時間が大幅に増加します。</p>
+<h2 id="matome">まとめ</h2>
+<p>Raspberry Pi Zero 2 Wでの異なるネットワークデーモンのパフォーマンスと特徴について検証しました。
+NetworkManager、networking.service、systemd-networkdの三つのデーモンを対象に、それぞれの起動時間の影響と使用状況に適した環境を評価しました。</p>
+<p>個人的には、特にLANアダプターなしで、ネットワークケーブルが接続されていない状態での起動速度が速い方が良いので、<code>networking.service</code>がありです。
+(ただ、そもそも、<code>Bookworm</code>になってカーネルの起動時間が長くなったので、とりあえずは<code>Bullseye</code>ベースを使う気がします。最悪、自分でビルドしてどうにかしようと思います。)</p>
+<h2 id="can-kao-wen-xian">参考文献</h2>
+<div class="footnote-definition" id="0"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://manpages.debian.org/testing/manpages-ja/dhcpcd.8.ja.html">dhcpcd(8) — manpages-ja — Debian testing — Debian Manpages</a></p>
+</div>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">2</sup>
+<p><a href="https://networkmanager.dev/docs/api/latest/NetworkManager.html">NetworkManager: NetworkManager Reference Manual</a></p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">3</sup>
+<p><a href="https://downloads.raspberrypi.org/raspios_full_arm64/release_notes.txt">release_notes.txt | raspberrypi.org</a></p>
+</div>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">4</sup>
+<p><a href="https://systemd.io/NETWORK_ONLINE/#network-connectivity-has-been-established-network-onlinetarget">Running Services After the Network Is Up #network-connectivity-has-been-established-network-onlinetarget</a></p>
+</div>
+<div class="footnote-definition" id="NM-1"><sup class="footnote-definition-label">5</sup>
+<p><a href="https://networkmanager.dev/docs/api/latest/NetworkManager-wait-online.service.html">NetworkManager-wait-online.service: NetworkManager Reference Manual</a></p>
+</div>
+<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
+<p><a href="https://developer-old.gnome.org/NetworkManager/stable/NetworkManager.conf.html">NNetworkManager.conf: NetworkManager Reference Manual</a></p>
+</div>
+<div class="footnote-definition" id="7"><sup class="footnote-definition-label">7</sup>
+<p><a href="https://salsa.debian.org/debian/ifupdown/-/commit/c29820f370a4905b836660ee4cf0162cdafdac66#100e8ddfecbe24ffa8c49183af687127fcab416f">Read /etc/default/networking when started from systemd. Closes: #806883 (c29820f3) · Commits · Debian / ifupdown · GitLab</a></p>
+</div>
+<div class="footnote-definition" id="8"><sup class="footnote-definition-label">8</sup>
+<p><a href="https://linux.die.net/man/5/dhclient.conf">dhclient.conf(5): DHCP client config file - Linux man page</a></p>
+</div>
+<div class="footnote-definition" id="SN_1"><sup class="footnote-definition-label">9</sup>
+<p><a href="https://www.freedesktop.org/software/systemd/man/latest/systemd-networkd-wait-online.service.html#--timeout=SECS">--timeout=SECS | systemd-networkd-wait-online.service </a></p>
+</div>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/17.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>kosh.dev - Qiita</title>
+    <link href="https://www.kosh.dev/tags/qiita/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://www.kosh.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2024-12-10T00:00:00+00:00</updated>
+    <id>https://www.kosh.dev/tags/qiita/atom.xml</id>
+    <entry xml:lang="en">
+        <title>SWUpdateを用いたA&#x2F;Bアップデート</title>
+        <published>2024-12-10T00:00:00+00:00</published>
+        <updated>2024-12-10T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://www.kosh.dev/article/24/" type="text/html"/>
+        <id>https://www.kosh.dev/article/24/</id>
+        
+        <content type="html">&lt;p&gt;Qiitaへ投稿しました。&lt;&#x2F;p&gt;
+&lt;p&gt;-&amp;gt; &lt;a href=&quot;https:&#x2F;&#x2F;qiita.com&#x2F;llbxg&#x2F;items&#x2F;68b9f5767aa93c1532bd&quot;&gt;SWUpdateを用いたA&#x2F;Bアップデート #Linux - Qiita&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;p&gt;Linuxベースの組み込み機器におけるA&#x2F;Bアップデートを、SWUpdate&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#swu&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;を使って実現する方法を解説しました。&lt;&#x2F;p&gt;
+&lt;p&gt;個人的にですが、他のSW更新用のセットアップなどと比べると、やっぱりブートローダー(EFI Boot Guard&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#ebg&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;)と&lt;code&gt;swupdate-handler-roundrobin&lt;&#x2F;code&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#rr&quot;&gt;3&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;のようなハンドラーの組み合わせが既にできている点が楽です。&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;swu&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;swupdate.org&#x2F;&quot;&gt;SWUpdate – Your OTA for Embedded Linux and IOT&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;ebg&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;UEFIアプリケーションですが、ブートローダーです。&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;siemens&#x2F;efibootguard&quot;&gt;siemens&#x2F;efibootguard: Simple UEFI boot loader with support for safely switching between current and updated partition sets&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;rr&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;3&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;gitlab.com&#x2F;cip-project&#x2F;cip-sw-updates&#x2F;swupdate-handler-roundrobin&quot;&gt;cip-project &#x2F; cip-sw-updates &#x2F; swupdate-handler-roundrobin · GitLab&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+        
+    </entry>
+</feed>

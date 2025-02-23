@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="LCDディスプレ(ST7735)でのFPSチェック"/>
+  <meta name="description" content="PythonでST7735ディスプレイを制御する際の検証。" />
+  <meta property="description" content="PythonでST7735ディスプレイを制御する際の検証。" />
+  <meta property="og:type" content="article" />
+<title> LCDディスプレ(ST7735)でのFPSチェック| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">LCDディスプレ(ST7735)でのFPSチェック</h1>
+    <div class='info'>
+        <div class='date'>2024-09-29</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/raspberrypi/">RaspberryPi</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p>Raspberry Pi Zero 2 Wを使用してST7735ディスプレイをPythonで制御する際、フレームレート（FPS）はパフォーマンス評価の重要な指標です。
+本記事でPythonのライブラリであるst7735を使用し、ディスプレイにイメージを出力しFPSを計測します。</p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/19/#tesutohuan-jing">テスト環境</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#bei-jing">背景</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#fpswotu-rufang-fa">FPSを図る方法</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#fps">FPS</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#li-lun-zhi-toshi-ce-zhi-nobi-jiao">理論値と実測値の比較</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#omake">おまけ</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#coresize">coresize</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#can-kao-wen-xian">参考文献</a></li> 
+     
+</ol></div></p>
+<h2 id="tesutohuan-jing">テスト環境</h2>
+<ul>
+<li>ボード: Raspberry Pi Zero 2 W Rev 1.0</li>
+<li>OS: Debian(Bookworm)ベース
+<ul>
+<li>カーネル: 6.6.28-v8+</li>
+<li>ファームウェア: 1.20240424</li>
+</ul>
+</li>
+<li>ディスプレイ: TFT LCDディスプレイ
+<ul>
+<li>WINGONEER 128×160 ST7735S</li>
+</ul>
+</li>
+<li>パッケージ
+<ul>
+<li><a href="https://pypi.org/project/st7735/">st7735 · PyPI</a></li>
+<li><a href="https://pypi.org/project/gpiod/">gpiod · PyPI</a></li>
+<li><a href="https://pypi.org/project/rpi-lgpio/">rpi-lgpio · PyPI</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="bei-jing">背景</h2>
+<h3 id="st7735nobaziyon0-0-5to1-0-0">st7735のバージョン<code>0.0.5</code>と<code>1.0.0</code></h3>
+<p>st7735はST7735のTFT LCD ディスプレイを操作するためのライブラリです。
+メンテナーはPimoroni Ltd.であり、主に、Pimoroniのディスプレイ<sup class="footnote-reference"><a href="#pimoroni_display">1</a></sup>をターゲットにしているようです。</p>
+<p>バージョン<code>0.0.5</code>では、BGR/RGBを入れ替えられるようになり、基本的なディスプレイ操作が可能でした。
+しかし、バージョン<code>1.0.0</code>で大きな変更があり、従来のExampleなどがそのままでは動作しなくなりました。
+原因はRPi.GPIOから、lgpiodとgpiodeviceの組み合わせへの変更です。</p>
+<p>今回は、どちらのケースでも動作を確認し、FPSへの影響を検証します。</p>
+<h3 id="rpi-gpiokararpi-lgpiohenobian-geng"><code>rpi-gpio</code>から<code>rpi-lgpio</code>への変更</h3>
+<p>今回のst7735のパッケージとは直接関係ありませんが、RPi.GPIOはカーネルの更新により現在では一部の機能が利用できないとの報告があります<sup class="footnote-reference"><a href="#gpio">2</a></sup>。
+バージョン<code>0.0.5</code>ではRPi.GPIO(<code>rpi-gpio</code>)を利用しています。
+代替品として<code>rpi-lgpio</code>を利用できます。本記事では<code>rpi-lgpio</code>を利用して実験しています。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">sudo</span></span><span class="z-meta z-function-call z-arguments z-shell"> apt remove python3-rpi-lgpio</span>
+<span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">sudo</span></span><span class="z-meta z-function-call z-arguments z-shell"> apt install python3-rpi.gpio</span>
+</span></code></pre>
+<p>2つのライブラリの違いについては、以下のページで解説されています。</p>
+<ul>
+<li><a href="https://rpi-lgpio.readthedocs.io/en/latest/differences.html">Differences — rpi-lgpio 0.6 Documentation</a></li>
+</ul>
+<h2 id="fpswotu-rufang-fa">FPSを図る方法</h2>
+<p>ディスプレイサイズに合わせた画像を作成し、その画像を連続表示することで、FPSを計測します。
+表示にかかった総時間と画像の枚数から、FPSを算出します。
+今回のケースでは148枚の画像を使用しました。
+以下に、今回使用した画像イメージ(GIF)を示します。
+生成用のスクリプトは末尾に掲載しています（<a href="https://www.kosh.dev/article/19/#fpstietukuyong-imezisheng-cheng">fpsチェック用イメージ生成</a>参照）。</p>
+<p><img src="/image/019/sin_wave_balls.gif" alt="sin_wave_balls.gif" /></p>
+<p>このアニメーションの1フレームあたりのデータ量を計算します。</p>
+<ul>
+<li>解像度： 128×160ピクセル</li>
+<li>カラーフォーマット： RGB565（16ビット/ピクセル）</li>
+<li>データ量： 128×160×16 = 327,680ビット = 40,960バイト</li>
+</ul>
+<p>実際には以下のようにイメージを送信します。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">disp</span></span><span class="z-meta z-function-call z-arguments z-shell"> = ST7735(</span>
+    <span class="z-variable z-other z-readwrite z-assignment z-shell">port</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell">0,</span>
+    <span class="z-variable z-other z-readwrite z-assignment z-shell">cs</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell">0,</span>
+    <span class="z-variable z-other z-readwrite z-assignment z-shell">dc</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell">24,</span>
+    <span class="z-variable z-other z-readwrite z-assignment z-shell">backlight</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell">5,</span>
+    <span class="z-variable z-other z-readwrite z-assignment z-shell">rst</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell">25,</span>
+    <span class="z-variable z-other z-readwrite z-assignment z-shell">width</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell">128,</span>
+    <span class="z-variable z-other z-readwrite z-assignment z-shell">height</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell">160,</span>
+    <span class="z-variable z-other z-readwrite z-assignment z-shell">rotation</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell">0,</span>
+    <span class="z-variable z-other z-readwrite z-assignment z-shell">invert</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell">False,</span>
+    <span class="z-variable z-other z-readwrite z-assignment z-shell">spi_speed_hz</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell">10<span class="z-keyword z-operator z-regexp z-quantifier z-shell">*</span><span class="z-keyword z-operator z-regexp z-quantifier z-shell">*</span>6,</span>
+    <span class="z-variable z-other z-readwrite z-assignment z-shell">bgr</span><span class="z-keyword z-operator z-assignment z-shell">=</span><span class="z-string z-unquoted z-shell">False</span>
+<span class="z-meta z-function-call z-shell"></span>)
+
+<span class="z-keyword z-control z-loop z-for z-shell">for</span><span class="z-meta z-group z-for z-shell"> image <span class="z-keyword z-control z-in z-shell">in</span> images:</span>
+    <span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">disp.display</span></span><span class="z-meta z-function-call z-arguments z-shell">(image</span><span class="z-meta z-function-call z-shell"></span>)
+</span></code></pre>
+<p>つまり、約6Mバイトのデータを送信する必要があります。</p>
+<h2 id="fps">FPS</h2>
+<p>FPSはSPIの転送速度によって変化します。
+以下に、SPI速度とFPSの結果をグラフにまとめます。
+各プロットは10回平均の値を使用しています(なお、ディスプレイの物理的な制約により、120FPS以上は表示されません)。</p>
+<p><img src="/image/019/fps.png" alt="FPS/Freq" /></p>
+<p>このグラフから、FPSがステップ的に推移していることがわかります。
+このステップ状の挙動については、既に素晴らしい記事がありました<sup class="footnote-reference"><a href="#spi">3</a></sup>。</p>
+<blockquote>
+<p>実際の周波数は、指定した値に応じて、ハードウェア上の分周比で設定可能な近い周波数が選択されます。</p>
+</blockquote>
+<p>つまり、SPIの周波数は任意の値を指定できるわけではなく、ハードウェアの制約により特定の周波数が選択されます。</p>
+<p>これらを踏まえて、SPI速度とFPSの結果を表にまとめます。</p>
+<table><thead><tr><th style="text-align: center">SPI速度 (MHz)</th><th style="text-align: center"><code>0.0.5</code> (FPS)</th><th style="text-align: center"><code>1.0.0</code> (FPS)</th></tr></thead><tbody>
+<tr><td style="text-align: center">6.00</td><td style="text-align: center">8.725</td><td style="text-align: center">8.763</td></tr>
+<tr><td style="text-align: center">6.10</td><td style="text-align: center">8.833</td><td style="text-align: center">8.872</td></tr>
+<tr><td style="text-align: center">6.50</td><td style="text-align: center">9.267</td><td style="text-align: center">9.309</td></tr>
+<tr><td style="text-align: center">7.00</td><td style="text-align: center">9.809</td><td style="text-align: center">9.855</td></tr>
+<tr><td style="text-align: center">8.00</td><td style="text-align: center">10.703</td><td style="text-align: center">10.755</td></tr>
+<tr><td style="text-align: center">9.00</td><td style="text-align: center">11.597</td><td style="text-align: center">11.655</td></tr>
+<tr><td style="text-align: center">10.00</td><td style="text-align: center">12.402</td><td style="text-align: center">12.476</td></tr>
+<tr><td style="text-align: center">11.00</td><td style="text-align: center">13.206</td><td style="text-align: center">13.297</td></tr>
+<tr><td style="text-align: center">12.00</td><td style="text-align: center">13.974</td><td style="text-align: center">14.066</td></tr>
+<tr><td style="text-align: center">13.00</td><td style="text-align: center">14.742</td><td style="text-align: center">14.835</td></tr>
+<tr><td style="text-align: center">14.00</td><td style="text-align: center">15.349</td><td style="text-align: center">15.466</td></tr>
+<tr><td style="text-align: center">15.00</td><td style="text-align: center">15.955</td><td style="text-align: center">16.097</td></tr>
+<tr><td style="text-align: center">16.00</td><td style="text-align: center">16.696</td><td style="text-align: center">16.852</td></tr>
+<tr><td style="text-align: center">17.00</td><td style="text-align: center">17.438</td><td style="text-align: center">17.606</td></tr>
+<tr><td style="text-align: center">19.00</td><td style="text-align: center">18.254</td><td style="text-align: center">18.436</td></tr>
+<tr><td style="text-align: center">20.00</td><td style="text-align: center">18.697</td><td style="text-align: center">18.908</td></tr>
+<tr><td style="text-align: center">23.00</td><td style="text-align: center">20.146</td><td style="text-align: center">20.413</td></tr>
+<tr><td style="text-align: center">25.00</td><td style="text-align: center">21.269</td><td style="text-align: center">21.509</td></tr>
+<tr><td style="text-align: center">30.00</td><td style="text-align: center">22.524</td><td style="text-align: center">22.869</td></tr>
+<tr><td style="text-align: center">34.00</td><td style="text-align: center">23.254</td><td style="text-align: center">23.538</td></tr>
+<tr><td style="text-align: center">40.00</td><td style="text-align: center">24.826</td><td style="text-align: center">25.097</td></tr>
+<tr><td style="text-align: center">50.00</td><td style="text-align: center">26.508</td><td style="text-align: center">26.870</td></tr>
+<tr><td style="text-align: center">67.00</td><td style="text-align: center">29.469</td><td style="text-align: center">29.995</td></tr>
+<tr><td style="text-align: center">100.00</td><td style="text-align: center">30.869</td><td style="text-align: center">31.305</td></tr>
+</tbody></table>
+<p>注記: 実測値は、取得したデータから線形補間を用いて計算しています。</p>
+<h2 id="li-lun-zhi-toshi-ce-zhi-nobi-jiao">理論値と実測値の比較</h2>
+<h3 id="li-lun-shang-nozui-da-fpsnoji-suan">理論上の最大FPSの計算</h3>
+<p>SPI通信速度を考慮します。
+例えば、50MHzの場合：</p>
+<ul>
+<li>データ転送速度：50,000,000ビット/秒 = 6,250,000バイト/秒</li>
+</ul>
+<p>理論上の最大FPSは以下のように計算できます。</p>
+<p>理論FPS = 6,250,000 / 40,960 ≈ <strong>152.59</strong> (FPS)</p>
+<h3 id="shi-ce-zhi-tonobi-jiao">実測値との比較</h3>
+<p>実際の測定では、SPI速度を上げても理論FPSに近づかないことがわかりました。
+その理由を理解するために、SPI速度と実測フレーム時間、オーバーヘッド時間を比較します。</p>
+<h4 id="obahetudoshi-jian-noding-yi">オーバーヘッド時間の定義</h4>
+<p>オーバーヘッド時間とは、データ転送以外の処理にかかる時間を指します。
+具体的には、以下の要素が含まれます。</p>
+<ul>
+<li>Pythonの処理時間：データ準備、関数の呼び出しなどのスクリプト実行時間。</li>
+<li>GPIO操作の遅延：データ/コマンドの切り替え、チップセレクト（CS）の制御などのGPIOピン操作。</li>
+<li>システムコールの遅延：SPI通信の開始・終了に伴うシステムコール（writeやioctlなど）。</li>
+</ul>
+<p>オーバーヘッド時間は、実測フレーム時間から理論フレーム時間（データ転送時間）を差し引くことで求められます。</p>
+<p>オーバーヘッド時間 = 実測フレーム時間 − 理論フレーム時間</p>
+<h4 id="shi-ce-zhi-toli-lun-zhi-nobi-jiao">実測値と理論値の比較</h4>
+<p>以下の表に、SPI速度ごとの理論フレーム時間、実測フレーム時間、およびオーバーヘッド時間を示します。</p>
+<table><thead><tr><th style="text-align: center">SPI速度 (MHz)</th><th style="text-align: center">理論フレーム時間 (秒)</th><th style="text-align: center">実測フレーム時間 (秒)</th><th style="text-align: center">オーバーヘッド時間 (秒)</th></tr></thead><tbody>
+<tr><td style="text-align: center">6</td><td style="text-align: center">0.05461</td><td style="text-align: center">0.06003</td><td style="text-align: center">0.00542</td></tr>
+<tr><td style="text-align: center">100</td><td style="text-align: center">0.00328</td><td style="text-align: center">0.02796</td><td style="text-align: center">0.02468</td></tr>
+</tbody></table>
+<p>オーバーヘッド時間がSPI速度の増加に伴い増大していることがわかります。
+これは、CPU処理やPythonのスクリプト実行がデータ転送の高速化に追いついていないためと考えられます。
+6MHzの場合、データ転送時間が長いため、CPUやPythonの処理遅延がデータ転送中に吸収されやすく、100MHzの場合、データ転送が高速なため、CPUやPythonの処理がボトルネックとなり、待ち時間が増加していると考えられます。</p>
+<h2 id="omake">おまけ</h2>
+<h3 id="spidev-xfer3guan-shu-niyoruying-xiang"><code>SpiDev_xfer3</code>関数による影響</h3>
+<p>SPI通信は<code>spidev</code>モジュールの<code>xfer3</code>関数を介して行われています。
+この関数は、C言語の実装になっています。</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c">コードをコピーする
+<span class="z-storage z-modifier z-c">static</span> PyObject <span class="z-keyword z-operator z-c">*</span>
+<span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">SpiDev_xfer3</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c">SpiDevObject <span class="z-keyword z-operator z-c">*</span><span class="z-variable z-parameter z-c">self</span><span class="z-punctuation z-separator z-c">,</span> PyObject <span class="z-keyword z-operator z-c">*</span><span class="z-variable z-parameter z-c">args</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c">
+</span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+    <span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> 関数の詳細は省略
+</span></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span>
+</span></code></pre>
+<p>このような低レベルの関数の処理時間を確認することで、オーバーヘッドの原因を特定できる可能性があります。</p>
+<h3 id="botangashi-enaiwen-ti">ボタンが使えない問題</h3>
+<p>RPi.GPIOを使用して、<code>add_event_detect</code>でスイッチに動作を割り当てる簡単なテストプログラムが突然動かなくなりました。</p>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">python3</span></span><span class="z-meta z-function-call z-arguments z-shell"> button.py</span>
+<span class="z-comment z-line z-number-sign z-shell"><span class="z-punctuation z-definition z-comment z-begin z-shell">#</span></span><span class="z-comment z-line z-number-sign z-shell"> RuntimeError: Failed to add edge detection</span><span class="z-comment z-line z-number-sign z-shell">
+</span></span></code></pre>
+<p>rpi.gpioを使い続ける意味はありませんので、とりあえず<code>rpi-lgpio</code>を使います。
+ただ、gpiodを使う、という選択肢もあります。現にPimoroniは移行しています。
+どちらが良いかは今後考えていこうかと思います。</p>
+<p>この問題は、カーネルのバージョンアップに伴い、RPi.GPIOが一部の機能を利用できなくなったためです。
+そのため、rpi-gpioを使い続ける意味は薄れ、代替としてrpi-lgpioやgpiodを利用する選択肢があります。
+実際に、Pimoroniはgpiodへの移行を進めています<sup class="footnote-reference"><a href="#MR33">4</a></sup>。</p>
+<p>どちらを選択するかは、今後の検討課題とします。</p>
+<h3 id="fpstietukuyong-imezisheng-cheng">fpsチェック用イメージ生成</h3>
+<p>以下は、FPS測定用の画像を生成するためのスクリプトです。</p>
+<pre data-lang="py" class="language-py z-code"><code class="language-py" data-lang="py"><span class="z-source z-python"><span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-python">import</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">math</span></span></span>
+<span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-from z-python">from</span></span><span class="z-meta z-statement z-import z-python"><span class="z-meta z-import-source z-python"> <span class="z-meta z-import-path z-python"><span class="z-meta z-import-name z-python">typing</span></span> <span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-python">import</span></span></span></span><span class="z-meta z-statement z-import z-python"></span><span class="z-meta z-statement z-import z-python"> <span class="z-meta z-generic-name z-python">NamedTuple</span></span>
+
+<span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-from z-python">from</span></span><span class="z-meta z-statement z-import z-python"><span class="z-meta z-import-source z-python"> <span class="z-meta z-import-path z-python"><span class="z-meta z-import-name z-python">PIL</span></span> <span class="z-meta z-statement z-import z-python"><span class="z-keyword z-control z-import z-python">import</span></span></span></span><span class="z-meta z-statement z-import z-python"></span><span class="z-meta z-statement z-import z-python"> <span class="z-meta z-generic-name z-python">Image</span><span class="z-punctuation z-separator z-import-list z-python">,</span> <span class="z-meta z-generic-name z-python">ImageDraw</span></span>
+
+
+<span class="z-meta z-class z-python"><span class="z-storage z-type z-class z-python"><span class="z-keyword z-declaration z-class z-python">class</span></span> <span class="z-entity z-name z-class z-python"><span class="z-meta z-generic-name z-python">DisplaySize</span></span><span class="z-meta z-class z-inheritance z-python"><span class="z-punctuation z-section z-inheritance z-begin z-python">(</span></span></span><span class="z-meta z-class z-inheritance z-python"><span class="z-entity z-other z-inherited-class z-python">NamedTuple</span><span class="z-punctuation z-section z-inheritance z-end z-python">)</span></span><span class="z-meta z-class z-python"><span class="z-punctuation z-section z-class z-begin z-python">:</span></span>
+    <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">width</span></span><span class="z-punctuation z-separator z-annotation z-variable z-python">:</span> <span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">int</span></span>
+    <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">height</span></span><span class="z-punctuation z-separator z-annotation z-variable z-python">:</span> <span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">int</span></span>
+
+<span class="z-meta z-class z-python"><span class="z-storage z-type z-class z-python"><span class="z-keyword z-declaration z-class z-python">class</span></span> <span class="z-entity z-name z-class z-python"><span class="z-meta z-generic-name z-python">SinWaveBallAnimation</span></span><span class="z-punctuation z-section z-class z-begin z-python">:</span></span>
+<span class="z-meta z-function z-python">    <span class="z-storage z-type z-function z-python"><span class="z-keyword z-declaration z-function z-python">def</span></span> <span class="z-entity z-name z-function z-python"><span class="z-support z-function z-magic z-python">__init__</span></span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-section z-parameters z-begin z-python">(</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-variable z-parameter z-python">self</span><span class="z-punctuation z-separator z-parameters z-python">,</span> <span class="z-variable z-parameter z-python">display_size</span></span><span class="z-meta z-function z-parameters z-annotation z-python"><span class="z-punctuation z-separator z-annotation z-parameter z-python">:</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">DisplaySize</span></span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-separator z-parameters z-python">,</span> <span class="z-keyword z-operator z-unpacking z-sequence z-python">*</span><span class="z-punctuation z-separator z-parameters z-python">,</span>
+                 <span class="z-variable z-parameter z-python">ball_size</span></span><span class="z-meta z-function z-parameters z-annotation z-python"><span class="z-punctuation z-separator z-annotation z-parameter z-python">:</span> <span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">int</span></span> </span><span class="z-meta z-function z-parameters z-default-value z-python"><span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-constant z-numeric z-integer z-decimal z-python">20</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-separator z-parameters z-python">,</span> <span class="z-variable z-parameter z-python">step_count</span></span><span class="z-meta z-function z-parameters z-annotation z-python"><span class="z-punctuation z-separator z-annotation z-parameter z-python">:</span> <span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">int</span></span> <span class="z-keyword z-operator z-arithmetic z-python">|</span> <span class="z-constant z-language z-python">None</span> </span><span class="z-meta z-function z-parameters z-default-value z-python"><span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-constant z-language z-python">None</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-separator z-parameters z-python">,</span>
+                 <span class="z-variable z-parameter z-python">amplitude</span></span><span class="z-meta z-function z-parameters z-annotation z-python"><span class="z-punctuation z-separator z-annotation z-parameter z-python">:</span> <span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">int</span></span> </span><span class="z-meta z-function z-parameters z-default-value z-python"><span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-constant z-numeric z-integer z-decimal z-python">10</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-separator z-parameters z-python">,</span> <span class="z-variable z-parameter z-python">frequency</span></span><span class="z-meta z-function z-parameters z-annotation z-python"><span class="z-punctuation z-separator z-annotation z-parameter z-python">:</span> <span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">int</span></span> </span><span class="z-meta z-function z-parameters z-default-value z-python"><span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-constant z-numeric z-integer z-decimal z-python">2</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-section z-parameters z-end z-python">)</span></span><span class="z-meta z-function z-python"> </span><span class="z-meta z-function z-annotation z-return z-python"><span class="z-punctuation z-separator z-annotation z-return z-python">-&gt;</span> <span class="z-constant z-language z-python">None</span></span><span class="z-meta z-function z-python"><span class="z-punctuation z-section z-function z-begin z-python">:</span></span>
+        <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">width</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">display_size</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">width</span></span>
+        <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">height</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">display_size</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">height</span></span>
+        <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">ball_size</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ball_size</span></span>
+        <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">step_count</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">step_count</span></span> <span class="z-punctuation z-separator z-continuation z-line z-python">\</span>
+            <span class="z-meta z-statement z-conditional z-if z-python"><span class="z-keyword z-control z-conditional z-if z-python">if</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">step_count</span></span> <span class="z-keyword z-control z-conditional z-else z-python">else</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">display_size</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">width</span></span> <span class="z-keyword z-operator z-arithmetic z-python">+</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ball_size</span></span></span>
+        <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">amplitude</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">amplitude</span></span>
+        <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">frequency</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">frequency</span></span>
+
+        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">base_y</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">height</span></span><span class="z-keyword z-operator z-arithmetic z-python">/</span><span class="z-constant z-numeric z-integer z-decimal z-python">2</span> <span class="z-keyword z-operator z-arithmetic z-python">-</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">ball_size</span></span><span class="z-keyword z-operator z-arithmetic z-python">/</span><span class="z-constant z-numeric z-integer z-decimal z-python">2</span>
+        <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">balls</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-sequence z-list z-python"><span class="z-punctuation z-section z-sequence z-begin z-python">[</span>
+            <span class="z-meta z-mapping z-python"><span class="z-punctuation z-section z-mapping z-begin z-python">{</span></span><span class="z-meta z-mapping z-key z-python"><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">color<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span></span><span class="z-meta z-mapping z-python"><span class="z-punctuation z-separator z-mapping z-key-value z-python">:</span></span><span class="z-meta z-mapping z-python"> </span><span class="z-meta z-mapping z-value z-python"><span class="z-meta z-sequence z-tuple z-python"><span class="z-punctuation z-section z-sequence z-begin z-python">(</span><span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-separator z-sequence z-python">,</span> <span class="z-constant z-numeric z-integer z-decimal z-python">255</span><span class="z-punctuation z-separator z-sequence z-python">,</span> <span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-section z-sequence z-end z-python">)</span></span></span><span class="z-meta z-mapping z-python"><span class="z-punctuation z-separator z-mapping z-python">,</span> </span><span class="z-meta z-mapping z-key z-python"><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">y_position<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span></span><span class="z-meta z-mapping z-python"><span class="z-punctuation z-separator z-mapping z-key-value z-python">:</span></span><span class="z-meta z-mapping z-python"> </span><span class="z-meta z-mapping z-value z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">base_y</span></span> <span class="z-keyword z-operator z-arithmetic z-python">-</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">ball_size</span></span><span class="z-keyword z-operator z-arithmetic z-python">*</span><span class="z-constant z-numeric z-integer z-decimal z-python">2</span></span><span class="z-meta z-mapping z-python"><span class="z-punctuation z-section z-mapping z-end z-python">}</span></span><span class="z-punctuation z-separator z-sequence z-python">,</span>
+            <span class="z-meta z-mapping z-python"><span class="z-punctuation z-section z-mapping z-begin z-python">{</span></span><span class="z-meta z-mapping z-key z-python"><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">color<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span></span><span class="z-meta z-mapping z-python"><span class="z-punctuation z-separator z-mapping z-key-value z-python">:</span></span><span class="z-meta z-mapping z-python"> </span><span class="z-meta z-mapping z-value z-python"><span class="z-meta z-sequence z-tuple z-python"><span class="z-punctuation z-section z-sequence z-begin z-python">(</span><span class="z-constant z-numeric z-integer z-decimal z-python">255</span><span class="z-punctuation z-separator z-sequence z-python">,</span> <span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-separator z-sequence z-python">,</span> <span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-section z-sequence z-end z-python">)</span></span></span><span class="z-meta z-mapping z-python"><span class="z-punctuation z-separator z-mapping z-python">,</span> </span><span class="z-meta z-mapping z-key z-python"><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">y_position<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span></span><span class="z-meta z-mapping z-python"><span class="z-punctuation z-separator z-mapping z-key-value z-python">:</span></span><span class="z-meta z-mapping z-python"> </span><span class="z-meta z-mapping z-value z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">base_y</span></span></span><span class="z-meta z-mapping z-python"><span class="z-punctuation z-section z-mapping z-end z-python">}</span></span><span class="z-punctuation z-separator z-sequence z-python">,</span>
+            <span class="z-meta z-mapping z-python"><span class="z-punctuation z-section z-mapping z-begin z-python">{</span></span><span class="z-meta z-mapping z-key z-python"><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">color<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span></span><span class="z-meta z-mapping z-python"><span class="z-punctuation z-separator z-mapping z-key-value z-python">:</span></span><span class="z-meta z-mapping z-python"> </span><span class="z-meta z-mapping z-value z-python"><span class="z-meta z-sequence z-tuple z-python"><span class="z-punctuation z-section z-sequence z-begin z-python">(</span><span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-separator z-sequence z-python">,</span> <span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-separator z-sequence z-python">,</span> <span class="z-constant z-numeric z-integer z-decimal z-python">255</span><span class="z-punctuation z-section z-sequence z-end z-python">)</span></span></span><span class="z-meta z-mapping z-python"><span class="z-punctuation z-separator z-mapping z-python">,</span> </span><span class="z-meta z-mapping z-key z-python"><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">y_position<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span></span><span class="z-meta z-mapping z-python"><span class="z-punctuation z-separator z-mapping z-key-value z-python">:</span></span><span class="z-meta z-mapping z-python"> </span><span class="z-meta z-mapping z-value z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">base_y</span></span> <span class="z-keyword z-operator z-arithmetic z-python">+</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">ball_size</span></span><span class="z-keyword z-operator z-arithmetic z-python">*</span><span class="z-constant z-numeric z-integer z-decimal z-python">2</span></span><span class="z-meta z-mapping z-python"><span class="z-punctuation z-section z-mapping z-end z-python">}</span></span><span class="z-punctuation z-separator z-sequence z-python">,</span>
+        <span class="z-punctuation z-section z-sequence z-end z-python">]</span></span>
+
+        <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">images</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-sequence z-list z-empty z-python"><span class="z-punctuation z-section z-sequence z-begin z-python">[</span><span class="z-punctuation z-section z-sequence z-end z-python">]</span></span>
+
+<span class="z-meta z-function z-python">    <span class="z-storage z-type z-function z-python"><span class="z-keyword z-declaration z-function z-python">def</span></span> <span class="z-entity z-name z-function z-python"><span class="z-meta z-generic-name z-python">generate_images</span></span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-section z-parameters z-begin z-python">(</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-variable z-parameter z-python">self</span><span class="z-punctuation z-section z-parameters z-end z-python">)</span></span><span class="z-meta z-function z-python"> </span><span class="z-meta z-function z-annotation z-return z-python"><span class="z-punctuation z-separator z-annotation z-return z-python">-&gt;</span> <span class="z-constant z-language z-python">None</span></span><span class="z-meta z-function z-python"><span class="z-punctuation z-section z-function z-begin z-python">:</span></span>
+        <span class="z-meta z-statement z-loop z-for z-python"><span class="z-keyword z-control z-loop z-for z-python">for</span> <span class="z-meta z-generic-name z-python">step</span> <span class="z-keyword z-control z-loop z-for z-in z-python">in</span></span><span class="z-meta z-statement z-loop z-for z-python"> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">range</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">step_count</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span></span><span class="z-meta z-statement z-loop z-for z-python"><span class="z-punctuation z-section z-block z-loop z-for z-python">:</span></span>
+            <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">image</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">Image</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">new</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">RGB<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-meta z-sequence z-tuple z-python"><span class="z-punctuation z-section z-sequence z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">width</span></span><span class="z-punctuation z-separator z-sequence z-python">,</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">height</span></span><span class="z-punctuation z-section z-sequence z-end z-python">)</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-meta z-sequence z-tuple z-python"><span class="z-punctuation z-section z-sequence z-begin z-python">(</span><span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-separator z-sequence z-python">,</span> <span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-separator z-sequence z-python">,</span> <span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-section z-sequence z-end z-python">)</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+            <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">draw</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ImageDraw</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">Draw</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">image</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+
+            <span class="z-meta z-statement z-loop z-for z-python"><span class="z-keyword z-control z-loop z-for z-python">for</span> <span class="z-meta z-generic-name z-python">ball</span> <span class="z-keyword z-control z-loop z-for z-in z-python">in</span></span><span class="z-meta z-statement z-loop z-for z-python"> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">balls</span></span></span><span class="z-meta z-statement z-loop z-for z-python"><span class="z-punctuation z-section z-block z-loop z-for z-python">:</span></span>
+                <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">offset_left</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">step</span></span> <span class="z-keyword z-operator z-arithmetic z-python">-</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">ball_size</span></span>
+                <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">s</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">frequency</span></span> <span class="z-keyword z-operator z-arithmetic z-python">*</span> <span class="z-constant z-numeric z-integer z-decimal z-python">2</span> <span class="z-keyword z-operator z-arithmetic z-python">*</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">math</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">pi</span></span> <span class="z-keyword z-operator z-arithmetic z-python">*</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">step</span></span> <span class="z-keyword z-operator z-arithmetic z-python">/</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">step_count</span></span>
+                <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">y_offset</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-type z-python">int</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">amplitude</span></span> <span class="z-keyword z-operator z-arithmetic z-python">*</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">math</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">sin</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">s</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+                <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">y_position</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ball</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">y_position<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span> <span class="z-keyword z-operator z-arithmetic z-python">+</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">y_offset</span></span>
+                <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">color</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ball</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">color<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span>
+                <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">xy</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-group z-python"><span class="z-punctuation z-section z-group z-begin z-python">(</span>
+                    <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">offset_left</span></span><span class="z-punctuation z-separator z-tuple z-python">,</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">y_position</span></span><span class="z-punctuation z-separator z-tuple z-python">,</span>
+                    <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">offset_left</span></span> <span class="z-keyword z-operator z-arithmetic z-python">+</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">ball_size</span></span><span class="z-punctuation z-separator z-tuple z-python">,</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">y_position</span></span> <span class="z-keyword z-operator z-arithmetic z-python">+</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">ball_size</span></span><span class="z-punctuation z-section z-group z-end z-python">)</span></span>
+                <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">draw</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">ellipse</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">xy</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">color</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+
+            <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">images</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">append</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">image</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+
+<span class="z-meta z-function z-python">    <span class="z-storage z-type z-function z-python"><span class="z-keyword z-declaration z-function z-python">def</span></span> <span class="z-entity z-name z-function z-python"><span class="z-meta z-generic-name z-python">save_gif</span></span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-section z-parameters z-begin z-python">(</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-variable z-parameter z-python">self</span><span class="z-punctuation z-separator z-parameters z-python">,</span> <span class="z-variable z-parameter z-python">filename</span></span><span class="z-meta z-function z-parameters z-annotation z-python"><span class="z-punctuation z-separator z-annotation z-parameter z-python">:</span> <span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">str</span></span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-separator z-parameters z-python">,</span> <span class="z-variable z-parameter z-python">duration</span></span><span class="z-meta z-function z-parameters z-annotation z-python"><span class="z-punctuation z-separator z-annotation z-parameter z-python">:</span> <span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">int</span></span> </span><span class="z-meta z-function z-parameters z-default-value z-python"><span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-constant z-numeric z-integer z-decimal z-python">20</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-separator z-parameters z-python">,</span> <span class="z-variable z-parameter z-python">loop</span></span><span class="z-meta z-function z-parameters z-annotation z-python"><span class="z-punctuation z-separator z-annotation z-parameter z-python">:</span> <span class="z-meta z-qualified-name z-python"><span class="z-support z-type z-python">int</span></span> </span><span class="z-meta z-function z-parameters z-default-value z-python"><span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-constant z-numeric z-integer z-decimal z-python">0</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-separator z-parameters z-python">,</span>
+                 <span class="z-punctuation z-section z-parameters z-end z-python">)</span></span><span class="z-meta z-function z-python"> </span><span class="z-meta z-function z-annotation z-return z-python"><span class="z-punctuation z-separator z-annotation z-return z-python">-&gt;</span> <span class="z-constant z-language z-python">None</span></span><span class="z-meta z-function z-python"><span class="z-punctuation z-section z-function z-begin z-python">:</span></span>
+        <span class="z-meta z-statement z-conditional z-if z-python"><span class="z-keyword z-control z-conditional z-if z-python">if</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">len</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">images</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span> <span class="z-keyword z-operator z-comparison z-python">==</span> <span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-section z-block z-conditional z-if z-python">:</span></span>
+            <span class="z-keyword z-control z-flow z-return z-python">return</span>
+        <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">images</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-constant z-numeric z-integer z-decimal z-python">0</span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">save</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span>
+            <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">filename</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-variable z-parameter z-python">save_all</span><span class="z-keyword z-operator z-assignment z-python">=</span><span class="z-constant z-language z-python">True</span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-variable z-parameter z-python">append_images</span><span class="z-keyword z-operator z-assignment z-python">=</span><span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">images</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-constant z-numeric z-integer z-decimal z-python">1</span><span class="z-punctuation z-separator z-slice z-python">:</span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span>
+            <span class="z-variable z-parameter z-python">optimize</span><span class="z-keyword z-operator z-assignment z-python">=</span><span class="z-constant z-language z-python">False</span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-variable z-parameter z-python">duration</span><span class="z-keyword z-operator z-assignment z-python">=</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">duration</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-variable z-parameter z-python">loop</span><span class="z-keyword z-operator z-assignment z-python">=</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">loop</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+
+<span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">animation</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">SinWaveBallAnimation</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">DisplaySize</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-constant z-numeric z-integer z-decimal z-python">128</span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-constant z-numeric z-integer z-decimal z-python">160</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+<span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">animation</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">generate_images</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+<span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">animation</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">save_gif</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">sin_wave_balls.gif<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span></code></pre>
+<h2 id="coresize">coresize</h2>
+<pre data-lang="bash" class="language-bash z-code"><code class="language-bash" data-lang="bash"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">cat</span></span><span class="z-meta z-function-call z-arguments z-shell"> /sys/module/spidev/coresize </span>
+<span class="z-comment z-line z-number-sign z-shell"><span class="z-punctuation z-definition z-comment z-begin z-shell">#</span></span><span class="z-comment z-line z-number-sign z-shell"> Prints:</span><span class="z-comment z-line z-number-sign z-shell">
+</span><span class="z-comment z-line z-number-sign z-shell"><span class="z-punctuation z-definition z-comment z-begin z-shell">#</span></span><span class="z-comment z-line z-number-sign z-shell"> 16384</span><span class="z-comment z-line z-number-sign z-shell">
+</span></span></code></pre>
+<h2 id="can-kao-wen-xian">参考文献</h2>
+<div class="footnote-definition" id="pimoroni_display"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://shop.pimoroni.com/products/0-96-spi-colour-lcd-160x80-breakout?variant=21414301630547">0.96&quot; SPI Colour LCD (160x80) Breakout</a></p>
+</div>
+<div class="footnote-definition" id="gpio"><sup class="footnote-definition-label">2</sup>
+<p><a href="https://github.com/raspberrypi/linux/issues/6037">GPIO.add_event_detect no longer works with the new kernel 6.60 · Issue #6037 · raspberrypi/linux</a></p>
+</div>
+<div class="footnote-definition" id="spi"><sup class="footnote-definition-label">3</sup>
+<p><a href="https://qiita.com/kan573/items/9b0880dbc90b06c91f4f">RasPi 3B+ で SPI バスの動作周波数と波形を調べてみた #RaspberryPi - Qiita</a></p>
+</div>
+<div class="footnote-definition" id="A14"><sup class="footnote-definition-label">5</sup>
+<p><a href="https://kosh.dev/article/14/">picamera2を用いたカメラ画像の取得とLcdディスプレイへの表示 | kosh.dev</a></p>
+</div>
+<div class="footnote-definition" id="MR33"><sup class="footnote-definition-label">4</sup>
+<p><a href="https://github.com/pimoroni/st7735-python/pull/33">Repackage to pyproject/hatch and port to gpiod by Gadgetoid · Pull Request #33 · pimoroni/st7735-python</a></p>
+</div>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/19.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>
