@@ -1,0 +1,215 @@
+{
+  "name": "neon-lime",
+  "colors": {
+    "editor.foreground": "#ffffff",
+    "editor.background": "#000000"
+  },
+  "tokenColors": [
+    {
+      "scope": ["comment", "punctuation.definition.comment"],
+      "settings": {
+        "foreground": "#7f8b93"
+      }
+    },
+    {
+      "scope": [
+        "punctuation.definition.string",
+        "punctuation.definition.variable",
+        "punctuation.definition.parameters",
+        "punctuation.definition.array",
+        "keyword.operator",
+        "variable.parameter.function"
+      ],
+      "settings": {
+        "foreground": "#ffffff"
+      }
+    },
+    {
+      "scope": "keyword",
+      "settings": {
+        "foreground": "#e1ff36"
+      }
+    },
+    {
+      "scope": "variable",
+      "settings": {
+        "foreground": "#ffffff"
+      }
+    },
+    {
+      "scope": [
+        "entity.name.function",
+        "meta.require",
+        "support.function.any-method",
+        "keyword.other.special-method"
+      ],
+      "settings": {
+        "foreground": "#c7d2da"
+      }
+    },
+    {
+      "scope": ["support.class", "entity.name.class", "entity.name.type.class"],
+      "settings": {
+        "foreground": "#c0ec12"
+      }
+    },
+    {
+      "scope": "meta.class",
+      "settings": {
+        "foreground": "#ddfc16"
+      }
+    },
+    {
+      "scope": "storage",
+      "settings": {
+        "foreground": "#f7fe09"
+      }
+    },
+    {
+      "scope": "support.function",
+      "settings": {
+        "foreground": "#96b5b4"
+      }
+    },
+    {
+      "scope": [
+        "string",
+        "constant.other.symbol",
+        "entity.other.inherited-class"
+      ],
+      "settings": {
+        "foreground": "#96b5b4"
+      }
+    },
+    {
+      "scope": ["constant.numeric", "constant.language", "constant.character"],
+      "settings": {
+        "foreground": "#ddfc16"
+      }
+    },
+    {
+      "scope": "entity.name.tag",
+      "settings": {
+        "foreground": "#a2e813"
+      }
+    },
+    {
+      "scope": "entity.other.attribute-name",
+      "settings": {
+        "foreground": "#c7d2da"
+      }
+    },
+    {
+      "scope": [
+        "entity.other.attribute-name.id",
+        "punctuation.definition.entity"
+      ],
+      "settings": {
+        "foreground": "#a2e813"
+      }
+    },
+    {
+      "scope": "meta.selector",
+      "settings": {
+        "foreground": "#f7fe09"
+      }
+    },
+    {
+      "scope": ["markup.heading", "entity.name.section"],
+      "settings": {
+        "foreground": "#e1ff36"
+      }
+    },
+    {
+      "scope": "keyword.other.unit",
+      "settings": {
+        "foreground": "#ddfc16"
+      }
+    },
+    {
+      "scope": "markup.bold",
+      "settings": {
+        "foreground": "#f7fe09",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "markup.italic",
+      "settings": {
+        "foreground": "#c7d2da",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": "markup.inline.raw",
+      "settings": {
+        "foreground": "#96b5b4"
+      }
+    },
+    {
+      "scope": "string.other.link",
+      "settings": {
+        "foreground": "#96b5b4"
+      }
+    },
+    {
+      "scope": "meta.link",
+      "settings": {
+        "foreground": "#c7d2da"
+      }
+    },
+    {
+      "scope": "markup.list",
+      "settings": {
+        "foreground": "#a2e813"
+      }
+    },
+    {
+      "scope": "markup.quote",
+      "settings": {
+        "foreground": "#c7d2da"
+      }
+    },
+    {
+      "scope": "meta.separator",
+      "settings": {
+        "foreground": "#000000",
+        "background": "#e1ff36"
+      }
+    },
+    {
+      "scope": "markup.inserted",
+      "settings": {
+        "foreground": "#a2e813"
+      }
+    },
+    {
+      "scope": "markup.deleted",
+      "settings": {
+        "foreground": "#6fa400"
+      }
+    },
+    {
+      "scope": "markup.changed",
+      "settings": {
+        "foreground": "#e1ff36"
+      }
+    },
+    {
+      "scope": ["markup.ignored", "markup.untracked"],
+      "settings": {
+        "foreground": "#4f5b66"
+      }
+    },
+    {
+      "scope": [
+        "constant.other.color",
+        "string.regexp",
+        "constant.character.escape"
+      ],
+      "settings": {
+        "foreground": "#96b5b4"
+      }
+    }
+  ]
+}

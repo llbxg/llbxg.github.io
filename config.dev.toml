@@ -6,16 +6,17 @@ description = ""
 
 build_search_index = false
 
-generate_feed = true
-feed_filename = "atom.xml"
+generate_feeds = true
+feed_filenames = ["atom.xml"]
 
 taxonomies = [
   { name = "tags", feed = true},
 ]
 
-[markdown]
-highlight_code = true
-highlight_theme = "css"
+[markdown.highlighting]
+style = "inline"
+theme = "neon-lime"
+extra_themes = ["highlighting/neon-lime.json"]
 
 [extra]
 dev = true
