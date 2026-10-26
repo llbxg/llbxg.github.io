@@ -1,0 +1,8 @@
+{%- set table = body | markdown -%}
+{%- if caption -%}
+  {%- set caption_text = caption | escape -%}
+  {%- set table_open = "<table><caption>" ~ caption_text ~ "</caption>" -%}
+  {{- table | replace(from="<table>", to=table_open) | safe -}}
+{%- else -%}
+  {{- table | safe -}}
+{%- endif -%}
