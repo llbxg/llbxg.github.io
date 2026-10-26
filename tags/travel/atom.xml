@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>kosh.dev - travel</title>
+    <link rel="self" type="application/atom+xml" href="https://www.kosh.dev/tags/travel/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://www.kosh.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2026-10-12T00:00:00+00:00</updated>
+    <id>https://www.kosh.dev/tags/travel/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Pelican Air 1535のタイヤを交換した</title>
+        <published>2026-10-12T00:00:00+00:00</published>
+        <updated>2026-10-12T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://www.kosh.dev/article/27/"/>
+        <id>https://www.kosh.dev/article/27/</id>
+        
+        <content type="html" xml:base="https://www.kosh.dev/article/27/">&lt;p&gt;Pelican Air 1535のホイールを、インラインスケート用のホイールに交換しました。&lt;&#x2F;p&gt;
+&lt;p&gt;今回はホイール、ベアリング、スペーサーなどを個別に購入して組み合わせています。
+使った部品と、交換して使ってみた感じをまとめます。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;027&#x2F;IMG_5539.jpg&quot; alt=&quot;交換後のPelican Air 1535&quot;
+     style=&quot;padding: 10%; box-sizing: border-box;&quot;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;[TOC]&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;hoirunogou-cheng&quot;&gt;ホイールの構成&lt;&#x2F;h2&gt;
+&lt;p&gt;1輪あたりに使う部品は以下の通りです。軸はPelican純正のものをそのまま使います。&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;caption&gt;1輪あたりの部品&lt;&#x2F;caption&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;部品&lt;&#x2F;th&gt;&lt;th style=&quot;text-align: right&quot;&gt;1輪あたり&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;KONIXX TRITON ホイール&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;1個&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;608ZZ ベアリング&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;2個&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;段付きスペーサー&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;1個&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;平ワッシャー&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;3枚 (外側2枚・内側1枚)&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Pelican純正軸&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;1本&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;ホイールの両側にベアリングをはめ込み、軸を通す構成です。
+ただ、&lt;strong&gt;ベアリングの内径と軸の径が違う&lt;&#x2F;strong&gt;ので、そのままでは使えません。&lt;&#x2F;p&gt;
+&lt;p&gt;608ベアリングの内径は8 mmですが、Pelicanの純正軸はそれより細くなっています。&lt;&#x2F;p&gt;
+&lt;p&gt;(径が合って、入手しやすそうなベアリングを探しましたが、ちょうど良いものは見つかりませんでした。)&lt;&#x2F;p&gt;
+&lt;p&gt;そこで、インラインスケート用の&lt;strong&gt;段付きスペーサー&lt;&#x2F;strong&gt;を使います。
+ベアリングと軸の径を合わせつつ、2個のベアリングの間隔を保つための部品です。&lt;&#x2F;p&gt;
+&lt;p&gt;この構成は、Pelican Air 1615のホイール交換動画&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1615&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;を参考にしました。&lt;&#x2F;p&gt;
+&lt;p&gt;組み立てたときのイメージは以下のようになります。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;027&#x2F;wheel.png&quot; alt=&quot;ホイール、ベアリング、スペーサー、ワッシャーの分解図&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;shi-tutabu-pin-togong-ju&quot;&gt;使った部品と工具&lt;&#x2F;h2&gt;
+&lt;p&gt;実際に購入した部品と工具です。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;027&#x2F;IMG_5372.jpg&quot; alt=&quot;交換に使用するホイールやベアリングなどの部品&quot;
+     style=&quot;padding: 14%; box-sizing: border-box;&quot;&gt;&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;ホイール：&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;item.rakuten.co.jp&#x2F;mastersports&#x2F;in-triton&#x2F;&quot;&gt;KONIXX TRITON グリーン (59 mm &#x2F; 82A)&lt;&#x2F;a&gt;
+&lt;ul&gt;
+&lt;li&gt;インラインホッケー向けの屋外用ホイールです。&lt;&#x2F;li&gt;
+&lt;li&gt;直径59 mm、硬度82Aで、608ベアリングに対応しています。&lt;&#x2F;li&gt;
+&lt;li&gt;1個770円で、交換する2輪分と予備を合わせて3個購入しました。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;ベアリング：&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;www.amazon.jp&#x2F;dp&#x2F;B00MUD6MQG&quot;&gt;NSK 608ZZ&lt;&#x2F;a&gt;
+&lt;ul&gt;
+&lt;li&gt;内径8 mm、外径22 mm、幅7 mmです。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;ZZ&lt;&#x2F;code&gt;は両側に金属シールドが付いているタイプです。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;スペーサー：&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;www.amazon.jp&#x2F;dp&#x2F;B06XJFHJ7J&quot;&gt;インラインスケート用アルミスペーサー&lt;&#x2F;a&gt;
+&lt;ul&gt;
+&lt;li&gt;内径約6.3 mm、端部外径約7.9 mm、全長約23.5 mmの段付きスペーサーです。&lt;&#x2F;li&gt;
+&lt;li&gt;端部がベアリングの内側に入り、中央の段がベアリングの間に入ります。&lt;&#x2F;li&gt;
+&lt;li&gt;寸法には公差があるので、実際に組み合わせたときの収まりも確認します。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;ワッシャー：&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;www.amazon.jp&#x2F;dp&#x2F;B0CCT8HDHS&quot;&gt;IMSCREWS 1&#x2F;4インチ平ワッシャー (大外径)&lt;&#x2F;a&gt;
+&lt;ul&gt;
+&lt;li&gt;ホイール単体だと左右の余裕がありガタガタします。&lt;&#x2F;li&gt;
+&lt;li&gt;ホイールの外側に2枚、内側に1枚、1輪あたり合計3枚使いました。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;工具：&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;www.amazon.jp&#x2F;dp&#x2F;B004OCQQ30&quot;&gt;TRUSCO ピンポンチ (5.0 mm × 150 mm)&lt;&#x2F;a&gt;
+&lt;ul&gt;
+&lt;li&gt;純正軸を抜くために購入しました。&lt;&#x2F;li&gt;
+&lt;li&gt;これと頭がゴムのハンマーを使います。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;hoiruwojiao-huan-suru&quot;&gt;ホイールを交換する&lt;&#x2F;h2&gt;
+&lt;p&gt;取り外し方はColorCaseの動画&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#colorcase&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;を参考にしました。&lt;&#x2F;p&gt;
+&lt;p&gt;作業自体は、軸を抜いてホイールを入れ替え、軸を戻す流れです。&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;純正ホイールを外す
+&lt;ul&gt;
+&lt;li&gt;取り外し方はColorCaseの動画&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#colorcase&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;を参考にしました。&lt;&#x2F;li&gt;
+&lt;li&gt;ピンポンチを軸に当て、ハンマーで思いっきり叩いて抜いていきます。&lt;&#x2F;li&gt;
+&lt;li&gt;動画だと簡単に抜けそうなのですが、実際にやるとなかなか抜けませんでした。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;新しいホイールを組み立てる&lt;&#x2F;li&gt;
+&lt;li&gt;ケースに取り付ける
+&lt;ul&gt;
+&lt;li&gt;ホイールの外側にワッシャーを2枚、内側に1枚入れ、純正軸を戻します。&lt;&#x2F;li&gt;
+&lt;li&gt;取り付けた状態でホイールを回し、周囲と干渉しないことを確認します。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h2 id=&quot;kakatutafei-yong&quot;&gt;かかった費用&lt;&#x2F;h2&gt;
+&lt;p&gt;購入した部品の金額は以下の通りです。工具代は含めていません。&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;caption&gt;購入した部品と金額&lt;&#x2F;caption&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;部品&lt;&#x2F;th&gt;&lt;th style=&quot;text-align: right&quot;&gt;購入数量&lt;&#x2F;th&gt;&lt;th style=&quot;text-align: right&quot;&gt;金額 (税込)&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;KONIXX TRITON&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;3個&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;2,310円&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;ホイール送料&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;—&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;385円&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;608ZZ ベアリング&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;4個&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;1,699円&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;アルミスペーサー&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;10個&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;1,069円&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;平ワッシャー&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;50枚&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;1,052円&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;合計&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;&lt;&#x2F;td&gt;&lt;td style=&quot;text-align: right&quot;&gt;&lt;strong&gt;6,515円&lt;&#x2F;strong&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;ただ、ホイールは1個余り、スペーサーとワッシャーもすべて使ったわけではありません。&lt;&#x2F;p&gt;
+&lt;p&gt;購入単価から使った分だけを計算すると、1輪あたり1,789.52円、&lt;strong&gt;2輪分で約3,579円&lt;&#x2F;strong&gt;です。&lt;&#x2F;p&gt;
+&lt;p&gt;(こちらには送料と工具代を含めていません。)&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;shi-tutemitagan-zi&quot;&gt;使ってみた感じ&lt;&#x2F;h2&gt;
+&lt;p&gt;交換後、日本の道路や駅、空港、それからチェコでも使ってみました。&lt;&#x2F;p&gt;
+&lt;p&gt;日本のきれいに舗装された道路では、転がり方もいい感じで、音も小さいです。
+ただ、古めの少し荒れた路面では結構ガタガタします。音も普通にうるさめです。&lt;&#x2F;p&gt;
+&lt;p&gt;駅や空港の中ではほとんど音がせず、スムーズに転がります。
+使っていてタイヤが気になることもありませんでした。&lt;&#x2F;p&gt;
+&lt;p&gt;チェコでは石畳の上も引いて歩きました。
+さすがに音はしますが、使っていて苦になるほどではなかったです。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;正直、めちゃくちゃいいです。&lt;&#x2F;strong&gt; 今のところタイヤに対する不満はありません。
+消耗も、使っている感じではそこまで激しくなさそうです。&lt;&#x2F;p&gt;
+&lt;p&gt;最悪、壊れたり減ったりしても、また自分で交換できます。
+余った部品も使えるので、その点もいい感じです。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;027&#x2F;IMG_5555.jpg&quot; alt=&quot;[bye👋&quot;
+     style=&quot;padding: 15%; box-sizing: border-box;&quot;&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;can-kao&quot;&gt;参考&lt;&#x2F;h2&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;colorcase&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;youtu.be&#x2F;FkZWRVB97V8&quot;&gt;How to Replace Wheels on a Pelican 1535 Air Case | Youtube&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;1615&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;youtu.be&#x2F;yShcbyLjuaI&quot;&gt;Pelican Air Replacement Wheels | Youtube&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+        
+    </entry>
+</feed>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="Flaskでヘッダー情報をafter_requestで設定する"/>
+  <meta name="description" content="after_requestが便利だと気がついてしまいました。" />
+  <meta property="description" content="after_requestが便利だと気がついてしまいました。" />
+  <meta property="og:type" content="article" />
+<title> Flaskでヘッダー情報をafter_requestで設定する| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">Flaskでヘッダー情報をafter_requestで設定する</h1>
+    <div class='info'>
+        <div class='date'>2022-06-02</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/flask/">Flask</a></div>
+            
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/python/">Python</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p><code>after_request</code>が便利だと気がついてしまいました。</p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/10/#chu-qi-zhuang-tai-denohetudaque-ren">初期状態でのヘッダー確認</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/10/#after-request">after_request</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/10/#omake">おまけ</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/10/#can-kao-wen-xian">参考文献</a></li> 
+     
+</ol></div></p>
+<h2 id="chu-qi-zhuang-tai-denohetudaque-ren">初期状態でのヘッダー確認</h2>
+<p>公式に紹介されている最小限のアプリケーション<sup class="footnote-reference"><a href="#1">1</a></sup>は以下のようになります。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">from</span><span> flask</span><span style="color: #E1FF36;"> import</span><span> Flask</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>app = Flask(__name__)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">@app.route</span><span>(&quot;</span><span style="color: #96B5B4;">/</span><span>&quot;)</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">def</span><span style="color: #C7D2DA;"> hello_world</span><span>():</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">    return</span><span> &quot;</span><span style="color: #96B5B4;">&lt;p&gt;Hello, World!&lt;/p&gt;</span><span>&quot;</span></span></code></pre>
+<p>サーバを開始します。デフォルトでは<code>http://127.0.0.1:5000</code>が使用されます。</p>
+<p>この時のサイトのヘッダー情報を<code>requests</code>を使って確認します。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">import</span><span> requests</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>headers = requests.get(&#39;</span><span style="color: #96B5B4;">http://127.0.0.1:5000</span><span>&#39;).headers</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">print</span><span>(headers)</span></span></code></pre><pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #C7D2DA;">%</span><span style="color: #96B5B4;"> {</span><span>&#39;</span><span style="color: #96B5B4;">Server</span><span>&#39;</span><span style="color: #96B5B4;">:</span><span> &#39;</span><span style="color: #96B5B4;">Werkzeug/2.1.2 Python/3.10.0</span><span>&#39;</span><span style="color: #96B5B4;">,</span><span> &#39;</span><span style="color: #96B5B4;">Date</span><span>&#39;</span><span style="color: #96B5B4;">:</span><span> &#39;</span><span style="color: #96B5B4;">Thu, 02 Jun 2022 11:30:54 GMT</span><span>&#39;</span><span style="color: #96B5B4;">,</span><span> &#39;</span><span style="color: #96B5B4;">Content-Type</span><span>&#39;</span><span style="color: #96B5B4;">:</span><span> &#39;</span><span style="color: #96B5B4;">text/html; charset=utf-8</span><span>&#39;</span><span style="color: #96B5B4;">,</span><span> &#39;</span><span style="color: #96B5B4;">Content-Length</span><span>&#39;</span><span style="color: #96B5B4;">:</span><span> &#39;</span><span style="color: #96B5B4;">20</span><span>&#39;</span><span style="color: #96B5B4;">,</span><span> &#39;</span><span style="color: #96B5B4;">Connection</span><span>&#39;</span><span style="color: #96B5B4;">:</span><span> &#39;</span><span style="color: #96B5B4;">close</span><span>&#39;</span><span style="color: #96B5B4;">}</span></span></code></pre>
+<p>必要最低限の情報が登録されています。</p>
+<h2 id="after-request"><code>after_request</code></h2>
+<p>試しに Content Security Policy (CSP) を登録します。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span>...</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">@app.after_request</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">def</span><span style="color: #C7D2DA;"> after_request</span><span>(response):</span></span>
+<span class="giallo-l"><span>    response.headers[&#39;</span><span style="color: #96B5B4;">Content-Security-Policy</span><span>&#39;] = &quot;</span><span style="color: #96B5B4;">default-src &#39;self&#39;</span><span>&quot; </span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">    return</span><span> response</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>...</span></span></code></pre><pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #C7D2DA;">%</span><span style="color: #96B5B4;"> {</span><span>&#39;</span><span style="color: #96B5B4;">Server</span><span>&#39;</span><span style="color: #96B5B4;">:</span><span> &#39;</span><span style="color: #96B5B4;">Werkzeug/2.1.2 Python/3.10.0</span><span>&#39;</span><span style="color: #96B5B4;">,</span><span> &#39;</span><span style="color: #96B5B4;">Date</span><span>&#39;</span><span style="color: #96B5B4;">:</span><span> &#39;</span><span style="color: #96B5B4;">Thu, 02 Jun 2022 11:49:22 GMT</span><span>&#39;</span><span style="color: #96B5B4;">,</span><span> &#39;</span><span style="color: #96B5B4;">Content-Type</span><span>&#39;</span><span style="color: #96B5B4;">:</span><span> &#39;</span><span style="color: #96B5B4;">text/html; charset=utf-8</span><span>&#39;</span><span style="color: #96B5B4;">,</span><span> &#39;</span><span style="color: #96B5B4;">Content-Length</span><span>&#39;</span><span style="color: #96B5B4;">:</span><span> &#39;</span><span style="color: #96B5B4;">20</span><span>&#39;</span><span style="color: #96B5B4;">,</span><span> </span></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">&#39;Content-Security-Policy&#39;</span><span style="color: #96B5B4;">:</span><span> &quot;</span><span style="color: #96B5B4;">default-src &#39;self&#39;</span><span>&quot;</span><span style="color: #96B5B4;">,</span><span> &#39;</span><span style="color: #96B5B4;">Connection</span><span>&#39;</span><span style="color: #96B5B4;">:</span><span> &#39;</span><span style="color: #96B5B4;">close</span><span>&#39;</span><span style="color: #96B5B4;">}</span></span></code></pre>
+<p>しっかりとCSPが登録されていることが確認できます。</p>
+<br>
+<p>Flaskの公式サイトにもあるようにセキュリティに関していくつか設定が必要になるケースがあります。<sup class="footnote-reference"><a href="#2">2</a></sup></p>
+<p>なので、updateを使って<strong>一気に登録</strong>するのが楽です。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span>...</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>security_headers = {</span></span>
+<span class="giallo-l"><span>    &#39;</span><span style="color: #96B5B4;">Strict-Transport-Security</span><span>&#39;:</span></span>
+<span class="giallo-l"><span>        &#39;</span><span style="color: #96B5B4;">max-age=63072000; includeSubDomains; preload</span><span>&#39;,</span></span>
+<span class="giallo-l"><span>    &#39;</span><span style="color: #96B5B4;">Content-Security-Policy</span><span>&#39;:&quot;</span><span style="color: #96B5B4;">default-src &#39;self&#39;</span><span>&quot;,</span></span>
+<span class="giallo-l"><span>    &#39;</span><span style="color: #96B5B4;">X-Content-Type-Options</span><span>&#39;:&#39;</span><span style="color: #96B5B4;">nosniff</span><span>&#39;,</span></span>
+<span class="giallo-l"><span>    &#39;</span><span style="color: #96B5B4;">X-Frame-Options</span><span>&#39;:&#39;</span><span style="color: #96B5B4;">SAMEORIGIN</span><span>&#39;,</span></span>
+<span class="giallo-l"><span>    &#39;</span><span style="color: #96B5B4;">X-XSS-Protection</span><span>&#39;:&#39;</span><span style="color: #96B5B4;">1; mode=block</span><span>&#39;</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">@app.after_request</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">def</span><span style="color: #C7D2DA;"> after_request</span><span>(response):</span></span>
+<span class="giallo-l"><span>    response.headers.update(security_headers)</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">    return</span><span> response</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>...</span></span></code></pre><h2 id="omake">おまけ</h2>
+<h3 id="yokuaruresponse-header">よくある<code>response.header</code></h3>
+<p>個人的には、<code>Response.header</code>の形での登録をよく見る気がします。</p>
+<p>例えば、<code>Flask.make_response</code>を使う形です。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">from</span><span> flask</span><span style="color: #E1FF36;"> import</span><span> Flask, make_response</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>app = Flask(__name__)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">@app.route</span><span>(&quot;</span><span style="color: #96B5B4;">/</span><span>&quot;)</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">def</span><span style="color: #C7D2DA;"> hello_world</span><span>():</span></span>
+<span class="giallo-l"><span>    response = make_response(&quot;</span><span style="color: #96B5B4;">&lt;p&gt;Hello, World!&lt;/p&gt;</span><span>&quot;)</span></span>
+<span class="giallo-l"><span>    response.headers[&#39;</span><span style="color: #96B5B4;">Content-Security-Policy</span><span>&#39;] = &quot;</span><span style="color: #96B5B4;">default-src &#39;self&#39;</span><span>&quot;</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">    return</span><span> response</span></span></code></pre>
+<p>問題はありませんが、<code>after_request</code>の方が楽です。</p>
+<br>
+<h3 id="content-security-policy-setter"><code>@content_security_policy.setter</code></h3>
+<p>継承元の<code>werkzeug.sansio.response.Response</code>で<code>@content_security_policy.setter</code>が設定されているため、<code>Response</code>のプロパティで登録できます。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span>response.content_security_policy = &quot;</span><span style="color: #96B5B4;">default-src &#39;self&#39;</span><span>&quot;</span></span></code></pre><h2 id="can-kao-wen-xian">参考文献</h2>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p><a rel="external" href="https://flask.palletsprojects.com/en/2.1.x/quickstart/#a-minimal-application"># A Minimal Application | Quickstart — Flask Documentation (2.1.x)</a></p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p><a rel="external" href="https://flask.palletsprojects.com/en/2.1.x/security/">Security Considerations — Flask Documentation (2.1.x)</a> / <a rel="external" href="https://flask.palletsprojects.com/en/2.1.x/security/#security-headers"># Security Headers | Security Considerations — Flask Documentation (2.1.x)</a></p>
+</div>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/10.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

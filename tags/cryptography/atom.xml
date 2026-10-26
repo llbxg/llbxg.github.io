@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>kosh.dev - cryptography</title>
+    <link rel="self" type="application/atom+xml" href="https://www.kosh.dev/tags/cryptography/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://www.kosh.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-02-23T00:00:00+00:00</updated>
+    <id>https://www.kosh.dev/tags/cryptography/atom.xml</id>
+    <entry xml:lang="en">
+        <title>PageCryptベースのHTML暗号化を確認する</title>
+        <published>2025-02-23T00:00:00+00:00</published>
+        <updated>2025-02-23T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://www.kosh.dev/article/23/"/>
+        <id>https://www.kosh.dev/article/23/</id>
+        
+        <content type="html" xml:base="https://www.kosh.dev/article/23/">&lt;p&gt;HTMLページをパスワード保護したい場合、Basic認証やDigest認証などサーバー設定が必要な手法を使うのが一般的です。
+しかし、&quot;静的ホスティング上で完結させたい&quot;といったシーンでは、PageCrypt&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#page_crypt&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;のようにクライアント側で復号する仕組みが有用です。&lt;&#x2F;p&gt;
+&lt;p&gt;PageCryptは、HTMLファイルを事前に暗号化し、JavaScriptで復号化することで、サーバーの追加設定を不要にしています。&lt;&#x2F;p&gt;
+&lt;p&gt;本記事では、PythonとJavaScriptでPageCrypt相当の処理を再現しながら、AES-GCM暗号とPBKDF2（あるいはargon2）によるキー導出を解説します。&lt;&#x2F;p&gt;
+&lt;p&gt;Pythonの暗号化ライブラリには &lt;code&gt;pycryptodome&lt;&#x2F;code&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#pd&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; を、JavaScriptの復号には &lt;code&gt;Web Crypto API&lt;&#x2F;code&gt; を使用しています。&lt;&#x2F;p&gt;
+&lt;p&gt;[TOC]&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;quan-ti-noliu-re&quot;&gt;全体の流れ&lt;&#x2F;h2&gt;
+&lt;p&gt;以下のようなフローで、パスワードと平文(HTML)を用いて、AES-GCMで暗号化します。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;image&#x2F;023&#x2F;PBKDF2_AES-GCM.png&quot; alt=&quot;PBKDF2+AES-GCM&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;平文とパスワードを用意する&lt;&#x2F;li&gt;
+&lt;li&gt;PBKDF2を用いてパスワードから鍵(key)を生成&lt;&#x2F;li&gt;
+&lt;li&gt;生成した鍵を利用して、AES-BCMで暗号化を行う&lt;&#x2F;li&gt;
+&lt;li&gt;salt、IV&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#iv&quot;&gt;3&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;、暗号文と認証タグ(tag)を1つにまとめる&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;上記フローからもわかるように、パスワードを直接AESの鍵として使わないです。
+あくまで、パスワードを利用し、PBKDF2を通して鍵を作成し、安全に暗号化する設計になっています。&lt;&#x2F;p&gt;
+&lt;p&gt;実際の運用では「salt」「IV」「暗号文」「認証タグ」の４セットをHTMLに埋め込みます。
+ユーザーがページを開いてパスワードを入力すると、JavaScriptがそれらの情報を使って復号処理を行い、ページを展開する仕組みです。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;aes-gcm-niyoruan-hao-hua-fu-hao-hua&quot;&gt;AES-GCM による暗号化&#x2F;復号化&lt;&#x2F;h2&gt;
+&lt;p&gt;AESにはCBCやCTRなど複数のモードがありますが、ここではAES-GCM(Galois&#x2F;Counter Mode)を利用します。&lt;&#x2F;p&gt;
+&lt;p&gt;AES-GCMは、認証タグ（MAC）が自動的に生成・検証される「認証付き暗号」であり、改ざん検知が標準で行えるのが特徴です。&lt;&#x2F;p&gt;
+&lt;p&gt;まずは「hello」を暗号化・復号する簡単なサンプルコードを示します。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;import&lt;&#x2F;span&gt;&lt;span&gt; base64&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;import&lt;&#x2F;span&gt;&lt;span&gt; os&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt; Crypto.Cipher&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; import&lt;&#x2F;span&gt;&lt;span&gt; AES&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; encrypt&lt;&#x2F;span&gt;&lt;span&gt;(key: bytes, plaintext: bytes) -&amp;gt; bytes:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    iv = os.urandom(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;12&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    cipher = AES.new(key, AES.MODE_GCM, nonce=iv)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ciphertext, tag = cipher.encrypt_and_digest(plaintext)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; iv + ciphertext + tag&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; decrypt&lt;&#x2F;span&gt;&lt;span&gt;(key: bytes, iv: bytes, ciphertext: bytes, tag: bytes) -&amp;gt; bytes:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    cipher = AES.new(key, AES.MODE_GCM, nonce=iv)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; cipher.decrypt_and_verify(ciphertext, tag)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span&gt; __name__ == &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;__main__&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    plaintext =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; b&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;hello&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    key =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; b&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;*&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;16&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    encrypted_data = encrypt(key, plaintext)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    final_encrypted_data = base64.b64encode(encrypted_data)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;    print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Encrypted data:&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, final_encrypted_data)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    iv = encrypted_data[:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;12&lt;&#x2F;span&gt;&lt;span&gt;]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ciphertext = encrypted_data[&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;12&lt;&#x2F;span&gt;&lt;span&gt;:-&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;16&lt;&#x2F;span&gt;&lt;span&gt;]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    tag = encrypted_data[-&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;16&lt;&#x2F;span&gt;&lt;span&gt;:]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;    print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Decrypted data:&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, decrypt(key, iv, ciphertext, tag))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Derived Key: 30303030303030303030303030303030&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Encrypted data: b&amp;#39;7GYaE4mekELCvfQHhONbxe7JSejHy&#x2F;nW&#x2F;LfkQ5Fu9ks8&amp;#39;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Decrypted data: b&amp;#39;hello&amp;#39;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&quot;hello&quot;が暗号化され、復号により元通り&quot;hello&quot;に戻っています。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;gai-zanjian-zhi-noli&quot;&gt;改ざん検知の例&lt;&#x2F;h3&gt;
+&lt;p&gt;暗号文の一部を改ざんした場合、認証タグとの照合が失敗し、&lt;code&gt;.decrypt_and_verify()&lt;&#x2F;code&gt;はエラーを吐きます。&lt;&#x2F;p&gt;
+&lt;p&gt;試しに暗号文の一部を書き換えます。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;key =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; b&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;*&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;16&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;encrypted_data = bytearray(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;7GYaE4mekELCvfQHhONbxe7JSejHy&#x2F;nW&#x2F;LfkQ5Fu9ks8&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Decrypted data:&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, decrypt(key, encrypted_data))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;encrypted_data[&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;12&lt;&#x2F;span&gt;&lt;span&gt;] ^=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; 0x&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;01&lt;&#x2F;span&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;  # 🔥&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;try&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;    print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Decrypted data:&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, decrypt(key, encrypted_data))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;except&lt;&#x2F;span&gt;&lt;span&gt; ValueError&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; as&lt;&#x2F;span&gt;&lt;span&gt; e:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;    print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Error:&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, e)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Decrypted data: b&amp;#39;hello&amp;#39;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Error: MAC check failed&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;このように、改ざんを検知して復号できなくなります。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;javascriptdefu-hao-suru&quot;&gt;JavaScriptで復号する&lt;&#x2F;h3&gt;
+&lt;p&gt;上記Pythonで暗号化したデータを、JavaScriptのWeb Crypto APIで復号する例です。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;async function&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; deriveKey&lt;&#x2F;span&gt;&lt;span&gt;() {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; keyBytes = new&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; Uint8Array&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;16&lt;&#x2F;span&gt;&lt;span&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;((_, i)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; =&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;charCodeAt&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;));&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;  return await&lt;&#x2F;span&gt;&lt;span&gt; crypto.subtle.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;importKey&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;raw&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    keyBytes,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    { name: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;AES-GCM&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, length:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 128&lt;&#x2F;span&gt;&lt;span&gt; },&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;    false&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;decrypt&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  );&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;async function&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; decrypt&lt;&#x2F;span&gt;&lt;span&gt;(key, iv, ciphertextAndTag) {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;  try&lt;&#x2F;span&gt;&lt;span&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    const&lt;&#x2F;span&gt;&lt;span&gt; decryptedArrayBuffer =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; await&lt;&#x2F;span&gt;&lt;span&gt; crypto.subtle.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;decrypt&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      { name: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;AES-GCM&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, iv: iv },&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      key,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      ciphertextAndTag&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    );&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    const&lt;&#x2F;span&gt;&lt;span&gt; decryptedText = new&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; TextDecoder&lt;&#x2F;span&gt;&lt;span&gt;().&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;decode&lt;&#x2F;span&gt;&lt;span&gt;(decryptedArrayBuffer);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    console.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;log&lt;&#x2F;span&gt;&lt;span&gt;(`&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Decrypted data: ${&lt;&#x2F;span&gt;&lt;span&gt;decryptedText&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;`);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  }&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; catch&lt;&#x2F;span&gt;&lt;span&gt; (e) {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    console.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;error&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;復号エラー:&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, e);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;async&lt;&#x2F;span&gt;&lt;span&gt; ()&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; =&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; encryptedData = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;7GYaE4mekELCvfQHhONbxe7JSejHy&#x2F;nW&#x2F;LfkQ5Fu9ks8&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; binaryData = Uint8Array.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;atob&lt;&#x2F;span&gt;&lt;span&gt;(encryptedData), (c)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    c.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;charCodeAt&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  );&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; iv = binaryData.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 12&lt;&#x2F;span&gt;&lt;span&gt;);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; ciphertextAndTag = binaryData.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;12&lt;&#x2F;span&gt;&lt;span&gt;);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; key =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; await&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; deriveKey&lt;&#x2F;span&gt;&lt;span&gt;();&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;  decrypt&lt;&#x2F;span&gt;&lt;span&gt;(key, iv, ciphertextAndTag);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;})();&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;shellsession&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;Decrypted data: hello&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;問題なく復号できています。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;pbkdf2&quot;&gt;PBKDF2&lt;&#x2F;h2&gt;
+&lt;p&gt;AES-GCMで利用する鍵の生成には、PBKDF2を使うのが一般的です。&lt;&#x2F;p&gt;
+&lt;p&gt;PBKDF2はパスワードとsaltを用い、ハッシュ計算を複数回繰り返すことで、攻撃を困難にする仕組みです。&lt;&#x2F;p&gt;
+&lt;p&gt;AES鍵は16バイト(128ビット)や32バイト(256ビット)の長さが必要ですが、ユーザー入力のパスワードは長さや強度がバラバラなので、PBKDF2で安全に鍵を導出します。&lt;&#x2F;p&gt;
+&lt;p&gt;以下の例ではPBKDF2を10万回反復し、AES-256（32バイト）の鍵を導出しています。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt; Crypto.Hash&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; import&lt;&#x2F;span&gt;&lt;span&gt; SHA256&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt; Crypto.Protocol.KDF&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; import&lt;&#x2F;span&gt;&lt;span&gt; PBKDF2&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; derive_key&lt;&#x2F;span&gt;&lt;span&gt;(password: str, salt: bytes) -&amp;gt; bytes:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; PBKDF2(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        password,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        salt,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        dkLen=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;32&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        count=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;100000&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        hmac_hash_module=SHA256,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;暗号化結果には暗号文の先頭にsaltも加えて出力し、復号時はそれを取り出して同じ鍵導出を行います。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;password = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;mypassword&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;plaintext =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; b&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;hello&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;salt = os.urandom(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;16&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;key = derive_key(password, salt)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;encrypted_data = encrypt(key, plaintext)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;final_encrypted_data = base64.b64encode(salt + encrypted_data)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Salt:&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, salt.hex())&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Derived Key:&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, key.hex())&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Base64 Encoded Data:&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, final_encrypted_data)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Salt: 8094f8bc4474837fbe7fd0a6b3777cd1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Derived Key: 93c9bd309716836ce01b954297e4ca99a5c5d30a080fe3b0df09dbe92b1e1963&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Base64 Encoded Data: b&amp;#39;gJT4vER0g3++f9Cms3d80ZX2181OikMw7IADnsZlg11rqY8wqVrOsY2cCnANGWFq1g==&amp;#39;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;JavaScript側で同じくPBKDF2を使えば復号できます。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;async function&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; deriveKey&lt;&#x2F;span&gt;&lt;span&gt;(password, salt) {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; encoder = new&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; TextEncoder&lt;&#x2F;span&gt;&lt;span&gt;();&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; keyMaterial =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; await&lt;&#x2F;span&gt;&lt;span&gt; crypto.subtle.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;importKey&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;raw&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    encoder.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;encode&lt;&#x2F;span&gt;&lt;span&gt;(password),&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;PBKDF2&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;    false&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;deriveKey&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  );&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;  return await&lt;&#x2F;span&gt;&lt;span&gt; crypto.subtle.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;deriveKey&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      name: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;PBKDF2&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      salt: salt,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      iterations:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 100000&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      hash: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;SHA-256&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    },&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    keyMaterial,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    { name: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;AES-GCM&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, length:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 256&lt;&#x2F;span&gt;&lt;span&gt; },&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;    false&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;decrypt&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  );&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;async function&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; decrypt&lt;&#x2F;span&gt;&lt;span&gt;(key, iv, ciphertextAndTag) {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;async&lt;&#x2F;span&gt;&lt;span&gt; ()&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; =&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; encryptedData =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;gJT4vER0g3++f9Cms3d80ZX2181OikMw7IADnsZlg11rqY8wqVrOsY2cCnANGWFq1g==&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; password = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;mypassword&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; binaryData = Uint8Array.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;atob&lt;&#x2F;span&gt;&lt;span&gt;(encryptedData), (c)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    c.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;charCodeAt&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  );&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; salt = binaryData.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 16&lt;&#x2F;span&gt;&lt;span&gt;);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; iv = binaryData.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;16&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 28&lt;&#x2F;span&gt;&lt;span&gt;);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; ciphertextAndTag = binaryData.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;28&lt;&#x2F;span&gt;&lt;span&gt;);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; key =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; await&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; deriveKey&lt;&#x2F;span&gt;&lt;span&gt;(password, salt);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;  decrypt&lt;&#x2F;span&gt;&lt;span&gt;(key, iv, ciphertextAndTag);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;})();&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;shellsession&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;Decrypted data: hello&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;argon2&quot;&gt;argon2&lt;&#x2F;h2&gt;
+&lt;p&gt;オリジナルのPageCryptにはありませんが、argon2を使ったキー導出に差し替えることもできます。&lt;&#x2F;p&gt;
+&lt;p&gt;2015年のパスワードハッシュコンペティション&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#phc&quot;&gt;4&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;の優勝者であるArgon2は、PBKDF2の代替として利用可能です。
+たとえば、BitwardenだとArgon2idを実装しています&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#bit&quot;&gt;5&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;以下の例でも2idを利用しています。&lt;&#x2F;p&gt;
+&lt;p&gt;Pythonでは&lt;code&gt;argon2-cffi&lt;&#x2F;code&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#argon2_cffi&quot;&gt;6&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;、JavaScriptでは&lt;code&gt;argon2-browser&lt;&#x2F;code&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#argon2-browser&quot;&gt;7&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;を利用します。&lt;&#x2F;p&gt;
+&lt;p&gt;基本的な部分はPBKDF2の場合と同じで、以下のように鍵を生成します。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt; argon2.low_level&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; import&lt;&#x2F;span&gt;&lt;span&gt; Type, hash_secret_raw&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; derive_key&lt;&#x2F;span&gt;&lt;span&gt;(password: str, salt: bytes) -&amp;gt; bytes:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; hash_secret_raw(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        secret=password.encode(),&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        salt=salt,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        time_cost=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        memory_cost=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;65536&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        parallelism=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        hash_len=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;32&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        type=Type.ID,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Salt: d10b6d0d2f02808426efaedfc2453896&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Derived Key: 3d7b67a07cb91dce957eda7b2903502de7de8e68e0fa9f616278afcfe3f8d74d&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Base64 Encoded Data: b&amp;#39;0QttDS8CgIQm767fwkU4lvgFvJZ95BYFJPjPa&#x2F;MKXwKh0LwEuZeye2BSzMiCD5r7ZQ==&amp;#39;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;JavaScript側では &lt;code&gt;argon2-browser&lt;&#x2F;code&gt;をCDNで読み込み、同様にキーを生成することで復号可能です。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;async function&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; deriveKey&lt;&#x2F;span&gt;&lt;span&gt;(password, salt) {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;  const&lt;&#x2F;span&gt;&lt;span&gt; hash =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; await&lt;&#x2F;span&gt;&lt;span&gt; argon2.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;hash&lt;&#x2F;span&gt;&lt;span&gt;({&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    pass: password,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    salt: salt,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    time:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 3&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    mem:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 65536&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    hashLen:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 32&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    parallelism:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 1&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    type: argon2.ArgonType.Argon2id,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  });&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;  return await&lt;&#x2F;span&gt;&lt;span&gt; crypto.subtle.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;importKey&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;raw&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    new&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; Uint8Array&lt;&#x2F;span&gt;&lt;span&gt;(hash.hash),&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    { name: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;AES-GCM&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, length:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 256&lt;&#x2F;span&gt;&lt;span&gt; },&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;    false&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;decrypt&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  );&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;shellsession&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;Decrypted data: hello&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;matome&quot;&gt;まとめ&lt;&#x2F;h2&gt;
+&lt;p&gt;PageCryptのように、「AES-GCM + PBKDF2 でHTMLを暗号化し、クライアント側で復号する」という流れを確認しました。&lt;&#x2F;p&gt;
+&lt;p&gt;本家PageCrypt実装はPBKDF2のみですが、argon2にも差し替え可能であり、必要に応じて派生させられます。&lt;&#x2F;p&gt;
+&lt;p&gt;静的ページで手軽にパスワード保護をしたいときに役立ちます。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;omake-zhui-jia-ren-zheng-deta-aad&quot;&gt;(おまけ) 追加認証データ（AAD）&lt;&#x2F;h2&gt;
+&lt;p&gt;AES-GCMでは、「AAD（Additional Authenticated Data）」という領域に、暗号化するデータ本体以外のメタデータを載せることができます。&lt;&#x2F;p&gt;
+&lt;p&gt;AADは、暗号の強さ自体には影響しませんが、通信の安全性には関係します。
+例えば、プロトコルのバージョン番号や受信者のアドレスなどを AAD に含めないと、攻撃者が自由に書き換えることができてしまいます。
+その結果、古い安全性の低いバージョンのプロトコルに変更されるなどのリスクが生じます。&lt;&#x2F;p&gt;
+&lt;p&gt;ただ、GCM の動作を変えるような情報は、認証タグの検証より前にチェックしておく方が安全です&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#aad&quot;&gt;8&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;import&lt;&#x2F;span&gt;&lt;span&gt; os&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt; Crypto.Cipher&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; import&lt;&#x2F;span&gt;&lt;span&gt; AES&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;key =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; b&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;*&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;16&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;plaintext =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; b&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;hello&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;aad =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; b&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;metadata123&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;iv = os.urandom(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;12&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;cipher = AES.new(key, AES.MODE_GCM, nonce=iv)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;cipher.update(aad)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;ciphertext, tag = cipher.encrypt_and_digest(plaintext)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;cipher2 = AES.new(key, AES.MODE_GCM, nonce=iv)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;try&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;    print&lt;&#x2F;span&gt;&lt;span&gt;(cipher2.decrypt_and_verify(ciphertext, tag))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;except&lt;&#x2F;span&gt;&lt;span&gt; ValueError&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; as&lt;&#x2F;span&gt;&lt;span&gt; e:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;    print&lt;&#x2F;span&gt;&lt;span&gt;(e)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;cipher3 = AES.new(key, AES.MODE_GCM, nonce=iv)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;cipher3.update(aad)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;try&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;    print&lt;&#x2F;span&gt;&lt;span&gt;(cipher3.decrypt_and_verify(ciphertext, tag))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;except&lt;&#x2F;span&gt;&lt;span&gt; ValueError&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; as&lt;&#x2F;span&gt;&lt;span&gt; e:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;    print&lt;&#x2F;span&gt;&lt;span&gt;(e)s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;omake-hua-xiang-nodui-ying&quot;&gt;(おまけ) 画像の対応&lt;&#x2F;h2&gt;
+&lt;p&gt;HTML内の画像も暗号化したい場合、画像をbase64で埋め込む方法があります。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;path = Path(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;aiueo.png&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;data = base64.b64encode(path.read_bytes()).decode()&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;element =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; f&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&amp;quot;data:image&#x2F;png;base64,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;data&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;あとは &lt;code&gt;&amp;lt;img src=&quot;data:image&#x2F;png;base64,iVBORw0KGg...&quot; &#x2F;&amp;gt;&lt;&#x2F;code&gt; という形でHTMLに埋め込めば、ひとつのHTMLファイルで完結します。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;can-kao&quot;&gt;参考&lt;&#x2F;h2&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;page_crypt&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;MaxLaumeister&#x2F;PageCrypt&quot;&gt;https:&#x2F;&#x2F;github.com&#x2F;MaxLaumeister&#x2F;PageCrypt&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;pd&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;pypi.org&#x2F;project&#x2F;pycryptodome&#x2F;&quot;&gt;https:&#x2F;&#x2F;pypi.org&#x2F;project&#x2F;pycryptodome&#x2F;&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;iv&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;3&lt;&#x2F;sup&gt;
+&lt;p&gt;12バイトの長さのIV(nonce)が、&quot;NIST SP 800-38D&quot;によって推奨されているようです。&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;phc&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;4&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;www.password-hashing.net&#x2F;&quot;&gt;Password Hashing Competition&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;bit&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;5&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;bitwarden.com&#x2F;ja-jp&#x2F;help&#x2F;kdf-algorithms&#x2F;&quot;&gt;KDFアルゴリズム | Bitwarden&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;argon2_cffi&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;6&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;hynek&#x2F;argon2-cffi?tab=readme-ov-file&quot;&gt;hynek&#x2F;argon2-cffi: Secure Password Hashes for Python&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;argon2-browser&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;7&lt;&#x2F;sup&gt;
+&lt;p&gt;WASM実装のようです。&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;cdnjs.com&#x2F;libraries&#x2F;argon2-browser&quot;&gt;https:&#x2F;&#x2F;cdnjs.com&#x2F;libraries&#x2F;argon2-browser&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;aad&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;8&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;crypto.stackexchange.com&#x2F;questions&#x2F;35727&#x2F;does-aad-make-gcm-encryption-more-secure&quot;&gt;aes - Does AAD make GCM encryption more secure? - Cryptography Stack Exchange&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+        
+    </entry>
+</feed>

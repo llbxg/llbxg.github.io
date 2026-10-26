@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="LCDディスプレ(ST7735)でのFPSチェック"/>
+  <meta name="description" content="PythonでST7735ディスプレイを制御する際の検証。" />
+  <meta property="description" content="PythonでST7735ディスプレイを制御する際の検証。" />
+  <meta property="og:type" content="article" />
+<title> LCDディスプレ(ST7735)でのFPSチェック| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">LCDディスプレ(ST7735)でのFPSチェック</h1>
+    <div class='info'>
+        <div class='date'>2024-09-29</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/raspberrypi/">RaspberryPi</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p>Raspberry Pi Zero 2 Wを使用してST7735ディスプレイをPythonで制御する際、フレームレート（FPS）はパフォーマンス評価の重要な指標です。
+本記事でPythonのライブラリであるst7735を使用し、ディスプレイにイメージを出力しFPSを計測します。</p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/19/#tesutohuan-jing">テスト環境</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#bei-jing">背景</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#fpswotu-rufang-fa">FPSを図る方法</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#fps">FPS</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#li-lun-zhi-toshi-ce-zhi-nobi-jiao">理論値と実測値の比較</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#omake">おまけ</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#coresize">coresize</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/19/#can-kao-wen-xian">参考文献</a></li> 
+     
+</ol></div></p>
+<h2 id="tesutohuan-jing">テスト環境</h2>
+<ul>
+<li>ボード: Raspberry Pi Zero 2 W Rev 1.0</li>
+<li>OS: Debian(Bookworm)ベース
+<ul>
+<li>カーネル: 6.6.28-v8+</li>
+<li>ファームウェア: 1.20240424</li>
+</ul>
+</li>
+<li>ディスプレイ: TFT LCDディスプレイ
+<ul>
+<li>WINGONEER 128×160 ST7735S</li>
+</ul>
+</li>
+<li>パッケージ
+<ul>
+<li><a rel="external" href="https://pypi.org/project/st7735/">st7735 · PyPI</a></li>
+<li><a rel="external" href="https://pypi.org/project/gpiod/">gpiod · PyPI</a></li>
+<li><a rel="external" href="https://pypi.org/project/rpi-lgpio/">rpi-lgpio · PyPI</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="bei-jing">背景</h2>
+<h3 id="st7735nobaziyon0-0-5to1-0-0">st7735のバージョン<code>0.0.5</code>と<code>1.0.0</code></h3>
+<p>st7735はST7735のTFT LCD ディスプレイを操作するためのライブラリです。
+メンテナーはPimoroni Ltd.であり、主に、Pimoroniのディスプレイ<sup class="footnote-reference"><a href="#pimoroni_display">1</a></sup>をターゲットにしているようです。</p>
+<p>バージョン<code>0.0.5</code>では、BGR/RGBを入れ替えられるようになり、基本的なディスプレイ操作が可能でした。
+しかし、バージョン<code>1.0.0</code>で大きな変更があり、従来のExampleなどがそのままでは動作しなくなりました。
+原因はRPi.GPIOから、lgpiodとgpiodeviceの組み合わせへの変更です。</p>
+<p>今回は、どちらのケースでも動作を確認し、FPSへの影響を検証します。</p>
+<h3 id="rpi-gpiokararpi-lgpiohenobian-geng"><code>rpi-gpio</code>から<code>rpi-lgpio</code>への変更</h3>
+<p>今回のst7735のパッケージとは直接関係ありませんが、RPi.GPIOはカーネルの更新により現在では一部の機能が利用できないとの報告があります<sup class="footnote-reference"><a href="#gpio">2</a></sup>。
+バージョン<code>0.0.5</code>ではRPi.GPIO(<code>rpi-gpio</code>)を利用しています。
+代替品として<code>rpi-lgpio</code>を利用できます。本記事では<code>rpi-lgpio</code>を利用して実験しています。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #C7D2DA;">sudo</span><span style="color: #96B5B4;"> apt remove python3-rpi-lgpio</span></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">sudo</span><span style="color: #96B5B4;"> apt install python3-rpi.gpio</span></span></code></pre>
+<p>2つのライブラリの違いについては、以下のページで解説されています。</p>
+<ul>
+<li><a rel="external" href="https://rpi-lgpio.readthedocs.io/en/latest/differences.html">Differences — rpi-lgpio 0.6 Documentation</a></li>
+</ul>
+<h2 id="fpswotu-rufang-fa">FPSを図る方法</h2>
+<p>ディスプレイサイズに合わせた画像を作成し、その画像を連続表示することで、FPSを計測します。
+表示にかかった総時間と画像の枚数から、FPSを算出します。
+今回のケースでは148枚の画像を使用しました。
+以下に、今回使用した画像イメージ(GIF)を示します。
+生成用のスクリプトは末尾に掲載しています（<a href="https://www.kosh.dev/article/19/#fpstietukuyong-imezisheng-cheng">fpsチェック用イメージ生成</a>参照）。</p>
+<p><img src="/image/019/sin_wave_balls.gif" alt="sin_wave_balls.gif" /></p>
+<p>このアニメーションの1フレームあたりのデータ量を計算します。</p>
+<ul>
+<li>解像度： 128×160ピクセル</li>
+<li>カラーフォーマット： RGB565（16ビット/ピクセル）</li>
+<li>データ量： 128×160×16 = 327,680ビット = 40,960バイト</li>
+</ul>
+<p>実際には以下のようにイメージを送信します。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #C7D2DA;">disp</span><span style="color: #96B5B4;"> = ST7735</span><span>(</span></span>
+<span class="giallo-l"><span>    port=</span><span style="color: #96B5B4;">0,</span></span>
+<span class="giallo-l"><span>    cs=</span><span style="color: #96B5B4;">0,</span></span>
+<span class="giallo-l"><span>    dc=</span><span style="color: #96B5B4;">24,</span></span>
+<span class="giallo-l"><span>    backlight=</span><span style="color: #96B5B4;">5,</span></span>
+<span class="giallo-l"><span>    rst=</span><span style="color: #96B5B4;">25,</span></span>
+<span class="giallo-l"><span>    width=</span><span style="color: #96B5B4;">128,</span></span>
+<span class="giallo-l"><span>    height=</span><span style="color: #96B5B4;">160,</span></span>
+<span class="giallo-l"><span>    rotation=</span><span style="color: #96B5B4;">0,</span></span>
+<span class="giallo-l"><span>    invert=</span><span style="color: #96B5B4;">False,</span></span>
+<span class="giallo-l"><span>    spi_speed_hz=</span><span style="color: #96B5B4;">10**6,</span></span>
+<span class="giallo-l"><span>    bgr=</span><span style="color: #96B5B4;">False</span></span>
+<span class="giallo-l"><span>)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">for</span><span> image</span><span style="color: #E1FF36;"> in</span><span style="color: #96B5B4;"> images:</span></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">    disp.display(image</span><span>)</span></span></code></pre>
+<p>つまり、約6Mバイトのデータを送信する必要があります。</p>
+<h2 id="fps">FPS</h2>
+<p>FPSはSPIの転送速度によって変化します。
+以下に、SPI速度とFPSの結果をグラフにまとめます。
+各プロットは10回平均の値を使用しています(なお、ディスプレイの物理的な制約により、120FPS以上は表示されません)。</p>
+<p><img src="/image/019/fps.png" alt="FPS/Freq" /></p>
+<p>このグラフから、FPSがステップ的に推移していることがわかります。
+このステップ状の挙動については、既に素晴らしい記事がありました<sup class="footnote-reference"><a href="#spi">3</a></sup>。</p>
+<blockquote>
+<p>実際の周波数は、指定した値に応じて、ハードウェア上の分周比で設定可能な近い周波数が選択されます。</p>
+</blockquote>
+<p>つまり、SPIの周波数は任意の値を指定できるわけではなく、ハードウェアの制約により特定の周波数が選択されます。</p>
+<p>これらを踏まえて、SPI速度とFPSの結果を表にまとめます。</p>
+<table><thead><tr><th style="text-align: center">SPI速度 (MHz)</th><th style="text-align: center"><code>0.0.5</code> (FPS)</th><th style="text-align: center"><code>1.0.0</code> (FPS)</th></tr></thead><tbody>
+<tr><td style="text-align: center">6.00</td><td style="text-align: center">8.725</td><td style="text-align: center">8.763</td></tr>
+<tr><td style="text-align: center">6.10</td><td style="text-align: center">8.833</td><td style="text-align: center">8.872</td></tr>
+<tr><td style="text-align: center">6.50</td><td style="text-align: center">9.267</td><td style="text-align: center">9.309</td></tr>
+<tr><td style="text-align: center">7.00</td><td style="text-align: center">9.809</td><td style="text-align: center">9.855</td></tr>
+<tr><td style="text-align: center">8.00</td><td style="text-align: center">10.703</td><td style="text-align: center">10.755</td></tr>
+<tr><td style="text-align: center">9.00</td><td style="text-align: center">11.597</td><td style="text-align: center">11.655</td></tr>
+<tr><td style="text-align: center">10.00</td><td style="text-align: center">12.402</td><td style="text-align: center">12.476</td></tr>
+<tr><td style="text-align: center">11.00</td><td style="text-align: center">13.206</td><td style="text-align: center">13.297</td></tr>
+<tr><td style="text-align: center">12.00</td><td style="text-align: center">13.974</td><td style="text-align: center">14.066</td></tr>
+<tr><td style="text-align: center">13.00</td><td style="text-align: center">14.742</td><td style="text-align: center">14.835</td></tr>
+<tr><td style="text-align: center">14.00</td><td style="text-align: center">15.349</td><td style="text-align: center">15.466</td></tr>
+<tr><td style="text-align: center">15.00</td><td style="text-align: center">15.955</td><td style="text-align: center">16.097</td></tr>
+<tr><td style="text-align: center">16.00</td><td style="text-align: center">16.696</td><td style="text-align: center">16.852</td></tr>
+<tr><td style="text-align: center">17.00</td><td style="text-align: center">17.438</td><td style="text-align: center">17.606</td></tr>
+<tr><td style="text-align: center">19.00</td><td style="text-align: center">18.254</td><td style="text-align: center">18.436</td></tr>
+<tr><td style="text-align: center">20.00</td><td style="text-align: center">18.697</td><td style="text-align: center">18.908</td></tr>
+<tr><td style="text-align: center">23.00</td><td style="text-align: center">20.146</td><td style="text-align: center">20.413</td></tr>
+<tr><td style="text-align: center">25.00</td><td style="text-align: center">21.269</td><td style="text-align: center">21.509</td></tr>
+<tr><td style="text-align: center">30.00</td><td style="text-align: center">22.524</td><td style="text-align: center">22.869</td></tr>
+<tr><td style="text-align: center">34.00</td><td style="text-align: center">23.254</td><td style="text-align: center">23.538</td></tr>
+<tr><td style="text-align: center">40.00</td><td style="text-align: center">24.826</td><td style="text-align: center">25.097</td></tr>
+<tr><td style="text-align: center">50.00</td><td style="text-align: center">26.508</td><td style="text-align: center">26.870</td></tr>
+<tr><td style="text-align: center">67.00</td><td style="text-align: center">29.469</td><td style="text-align: center">29.995</td></tr>
+<tr><td style="text-align: center">100.00</td><td style="text-align: center">30.869</td><td style="text-align: center">31.305</td></tr>
+</tbody></table>
+<p>注記: 実測値は、取得したデータから線形補間を用いて計算しています。</p>
+<h2 id="li-lun-zhi-toshi-ce-zhi-nobi-jiao">理論値と実測値の比較</h2>
+<h3 id="li-lun-shang-nozui-da-fpsnoji-suan">理論上の最大FPSの計算</h3>
+<p>SPI通信速度を考慮します。
+例えば、50MHzの場合：</p>
+<ul>
+<li>データ転送速度：50,000,000ビット/秒 = 6,250,000バイト/秒</li>
+</ul>
+<p>理論上の最大FPSは以下のように計算できます。</p>
+<p>理論FPS = 6,250,000 / 40,960 ≈ <strong>152.59</strong> (FPS)</p>
+<h3 id="shi-ce-zhi-tonobi-jiao">実測値との比較</h3>
+<p>実際の測定では、SPI速度を上げても理論FPSに近づかないことがわかりました。
+その理由を理解するために、SPI速度と実測フレーム時間、オーバーヘッド時間を比較します。</p>
+<h4 id="obahetudoshi-jian-noding-yi">オーバーヘッド時間の定義</h4>
+<p>オーバーヘッド時間とは、データ転送以外の処理にかかる時間を指します。
+具体的には、以下の要素が含まれます。</p>
+<ul>
+<li>Pythonの処理時間：データ準備、関数の呼び出しなどのスクリプト実行時間。</li>
+<li>GPIO操作の遅延：データ/コマンドの切り替え、チップセレクト（CS）の制御などのGPIOピン操作。</li>
+<li>システムコールの遅延：SPI通信の開始・終了に伴うシステムコール（writeやioctlなど）。</li>
+</ul>
+<p>オーバーヘッド時間は、実測フレーム時間から理論フレーム時間（データ転送時間）を差し引くことで求められます。</p>
+<p>オーバーヘッド時間 = 実測フレーム時間 − 理論フレーム時間</p>
+<h4 id="shi-ce-zhi-toli-lun-zhi-nobi-jiao">実測値と理論値の比較</h4>
+<p>以下の表に、SPI速度ごとの理論フレーム時間、実測フレーム時間、およびオーバーヘッド時間を示します。</p>
+<table><thead><tr><th style="text-align: center">SPI速度 (MHz)</th><th style="text-align: center">理論フレーム時間 (秒)</th><th style="text-align: center">実測フレーム時間 (秒)</th><th style="text-align: center">オーバーヘッド時間 (秒)</th></tr></thead><tbody>
+<tr><td style="text-align: center">6</td><td style="text-align: center">0.05461</td><td style="text-align: center">0.06003</td><td style="text-align: center">0.00542</td></tr>
+<tr><td style="text-align: center">100</td><td style="text-align: center">0.00328</td><td style="text-align: center">0.02796</td><td style="text-align: center">0.02468</td></tr>
+</tbody></table>
+<p>オーバーヘッド時間がSPI速度の増加に伴い増大していることがわかります。
+これは、CPU処理やPythonのスクリプト実行がデータ転送の高速化に追いついていないためと考えられます。
+6MHzの場合、データ転送時間が長いため、CPUやPythonの処理遅延がデータ転送中に吸収されやすく、100MHzの場合、データ転送が高速なため、CPUやPythonの処理がボトルネックとなり、待ち時間が増加していると考えられます。</p>
+<h2 id="omake">おまけ</h2>
+<h3 id="spidev-xfer3guan-shu-niyoruying-xiang"><code>SpiDev_xfer3</code>関数による影響</h3>
+<p>SPI通信は<code>spidev</code>モジュールの<code>xfer3</code>関数を介して行われています。
+この関数は、C言語の実装になっています。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="c"><span class="giallo-l"><span>コードをコピーする</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">static</span><span> PyObject *</span></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">SpiDev_xfer3</span><span>(SpiDevObject *self, PyObject *args)</span></span>
+<span class="giallo-l"><span>{</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">    // 関数の詳細は省略</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>このような低レベルの関数の処理時間を確認することで、オーバーヘッドの原因を特定できる可能性があります。</p>
+<h3 id="botangashi-enaiwen-ti">ボタンが使えない問題</h3>
+<p>RPi.GPIOを使用して、<code>add_event_detect</code>でスイッチに動作を割り当てる簡単なテストプログラムが突然動かなくなりました。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #C7D2DA;">python3</span><span style="color: #96B5B4;"> button.py</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># RuntimeError: Failed to add edge detection</span></span></code></pre>
+<p>rpi.gpioを使い続ける意味はありませんので、とりあえず<code>rpi-lgpio</code>を使います。
+ただ、gpiodを使う、という選択肢もあります。現にPimoroniは移行しています。
+どちらが良いかは今後考えていこうかと思います。</p>
+<p>この問題は、カーネルのバージョンアップに伴い、RPi.GPIOが一部の機能を利用できなくなったためです。
+そのため、rpi-gpioを使い続ける意味は薄れ、代替としてrpi-lgpioやgpiodを利用する選択肢があります。
+実際に、Pimoroniはgpiodへの移行を進めています<sup class="footnote-reference"><a href="#MR33">4</a></sup>。</p>
+<p>どちらを選択するかは、今後の検討課題とします。</p>
+<h3 id="fpstietukuyong-imezisheng-cheng">fpsチェック用イメージ生成</h3>
+<p>以下は、FPS測定用の画像を生成するためのスクリプトです。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">import</span><span> math</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">from</span><span> typing</span><span style="color: #E1FF36;"> import</span><span> NamedTuple</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">from</span><span> PIL</span><span style="color: #E1FF36;"> import</span><span> Image, ImageDraw</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">class</span><span style="color: #C0EC12;"> DisplaySize</span><span style="color: #DDFC16;">(</span><span style="color: #96B5B4;">NamedTuple</span><span style="color: #DDFC16;">):</span></span>
+<span class="giallo-l"><span>    width: int</span></span>
+<span class="giallo-l"><span>    height: int</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">class</span><span style="color: #C0EC12;"> SinWaveBallAnimation</span><span style="color: #DDFC16;">:</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">    def</span><span style="color: #96B5B4;"> __init__</span><span>(self, display_size: DisplaySize, *,</span></span>
+<span class="giallo-l"><span>                 ball_size: int =</span><span style="color: #DDFC16;"> 20</span><span>, step_count: int |</span><span style="color: #DDFC16;"> None</span><span> =</span><span style="color: #DDFC16;"> None</span><span>,</span></span>
+<span class="giallo-l"><span>                 amplitude: int =</span><span style="color: #DDFC16;"> 10</span><span>, frequency: int =</span><span style="color: #DDFC16;"> 2</span><span>) -&gt;</span><span style="color: #DDFC16;"> None</span><span>:</span></span>
+<span class="giallo-l"><span>        self.width = display_size.width</span></span>
+<span class="giallo-l"><span>        self.height = display_size.height</span></span>
+<span class="giallo-l"><span>        self.ball_size = ball_size</span></span>
+<span class="giallo-l"><span>        self.step_count = step_count \</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">            if</span><span> step_count</span><span style="color: #E1FF36;"> else</span><span> display_size.width + ball_size</span></span>
+<span class="giallo-l"><span>        self.amplitude = amplitude</span></span>
+<span class="giallo-l"><span>        self.frequency = frequency</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>        base_y = self.height/</span><span style="color: #DDFC16;">2</span><span> - self.ball_size/</span><span style="color: #DDFC16;">2</span></span>
+<span class="giallo-l"><span>        self.balls = [</span></span>
+<span class="giallo-l"><span>            {&quot;</span><span style="color: #96B5B4;">color</span><span>&quot;: (</span><span style="color: #DDFC16;">0</span><span>,</span><span style="color: #DDFC16;"> 255</span><span>,</span><span style="color: #DDFC16;"> 0</span><span>), &quot;</span><span style="color: #96B5B4;">y_position</span><span>&quot;: base_y - self.ball_size*</span><span style="color: #DDFC16;">2</span><span>},</span></span>
+<span class="giallo-l"><span>            {&quot;</span><span style="color: #96B5B4;">color</span><span>&quot;: (</span><span style="color: #DDFC16;">255</span><span>,</span><span style="color: #DDFC16;"> 0</span><span>,</span><span style="color: #DDFC16;"> 0</span><span>), &quot;</span><span style="color: #96B5B4;">y_position</span><span>&quot;: base_y},</span></span>
+<span class="giallo-l"><span>            {&quot;</span><span style="color: #96B5B4;">color</span><span>&quot;: (</span><span style="color: #DDFC16;">0</span><span>,</span><span style="color: #DDFC16;"> 0</span><span>,</span><span style="color: #DDFC16;"> 255</span><span>), &quot;</span><span style="color: #96B5B4;">y_position</span><span>&quot;: base_y + self.ball_size*</span><span style="color: #DDFC16;">2</span><span>},</span></span>
+<span class="giallo-l"><span>        ]</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>        self.images = []</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">    def</span><span style="color: #C7D2DA;"> generate_images</span><span>(self) -&gt;</span><span style="color: #DDFC16;"> None</span><span>:</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">        for</span><span> step</span><span style="color: #E1FF36;"> in</span><span style="color: #96B5B4;"> range</span><span>(self.step_count):</span></span>
+<span class="giallo-l"><span>            image = Image.new(&quot;</span><span style="color: #96B5B4;">RGB</span><span>&quot;, (self.width, self.height), (</span><span style="color: #DDFC16;">0</span><span>,</span><span style="color: #DDFC16;"> 0</span><span>,</span><span style="color: #DDFC16;"> 0</span><span>))</span></span>
+<span class="giallo-l"><span>            draw = ImageDraw.Draw(image)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">            for</span><span> ball</span><span style="color: #E1FF36;"> in</span><span> self.balls:</span></span>
+<span class="giallo-l"><span>                offset_left = step - self.ball_size</span></span>
+<span class="giallo-l"><span>                s = self.frequency *</span><span style="color: #DDFC16;"> 2</span><span> * math.pi * step / self.step_count</span></span>
+<span class="giallo-l"><span>                y_offset = int(self.amplitude * math.sin(s))</span></span>
+<span class="giallo-l"><span>                y_position = ball[&quot;</span><span style="color: #96B5B4;">y_position</span><span>&quot;] + y_offset</span></span>
+<span class="giallo-l"><span>                color = ball[&quot;</span><span style="color: #96B5B4;">color</span><span>&quot;]</span></span>
+<span class="giallo-l"><span>                xy = (</span></span>
+<span class="giallo-l"><span>                    offset_left, y_position,</span></span>
+<span class="giallo-l"><span>                    offset_left + self.ball_size, y_position + self.ball_size)</span></span>
+<span class="giallo-l"><span>                draw.ellipse(xy, color)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>            self.images.append(image)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">    def</span><span style="color: #C7D2DA;"> save_gif</span><span>(self, filename: str, duration: int =</span><span style="color: #DDFC16;"> 20</span><span>, loop: int =</span><span style="color: #DDFC16;"> 0</span><span>,</span></span>
+<span class="giallo-l"><span>                 ) -&gt;</span><span style="color: #DDFC16;"> None</span><span>:</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">        if</span><span style="color: #96B5B4;"> len</span><span>(self.images) ==</span><span style="color: #DDFC16;"> 0</span><span>:</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">            return</span></span>
+<span class="giallo-l"><span>        self.images[</span><span style="color: #DDFC16;">0</span><span>].save(</span></span>
+<span class="giallo-l"><span>            filename, save_all=</span><span style="color: #DDFC16;">True</span><span>, append_images=self.images[</span><span style="color: #DDFC16;">1</span><span>:],</span></span>
+<span class="giallo-l"><span>            optimize=</span><span style="color: #DDFC16;">False</span><span>, duration=duration, loop=loop)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>animation = SinWaveBallAnimation(DisplaySize(</span><span style="color: #DDFC16;">128</span><span>,</span><span style="color: #DDFC16;"> 160</span><span>))</span></span>
+<span class="giallo-l"><span>animation.generate_images()</span></span>
+<span class="giallo-l"><span>animation.save_gif(&quot;</span><span style="color: #96B5B4;">sin_wave_balls.gif</span><span>&quot;)</span></span></code></pre><h2 id="coresize">coresize</h2>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #C7D2DA;">cat</span><span style="color: #96B5B4;"> /sys/module/spidev/coresize</span><span> </span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># Prints:</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># 16384</span></span></code></pre><h2 id="can-kao-wen-xian">参考文献</h2>
+<div class="footnote-definition" id="pimoroni_display"><sup class="footnote-definition-label">1</sup>
+<p><a rel="external" href="https://shop.pimoroni.com/products/0-96-spi-colour-lcd-160x80-breakout?variant=21414301630547">0.96" SPI Colour LCD (160x80) Breakout</a></p>
+</div>
+<div class="footnote-definition" id="gpio"><sup class="footnote-definition-label">2</sup>
+<p><a rel="external" href="https://github.com/raspberrypi/linux/issues/6037">GPIO.add_event_detect no longer works with the new kernel 6.60 · Issue #6037 · raspberrypi/linux</a></p>
+</div>
+<div class="footnote-definition" id="spi"><sup class="footnote-definition-label">3</sup>
+<p><a rel="external" href="https://qiita.com/kan573/items/9b0880dbc90b06c91f4f">RasPi 3B+ で SPI バスの動作周波数と波形を調べてみた #RaspberryPi - Qiita</a></p>
+</div>
+<div class="footnote-definition" id="A14"><sup class="footnote-definition-label">5</sup>
+<p><a rel="external" href="https://kosh.dev/article/14/">picamera2を用いたカメラ画像の取得とLcdディスプレイへの表示 | kosh.dev</a></p>
+</div>
+<div class="footnote-definition" id="MR33"><sup class="footnote-definition-label">4</sup>
+<p><a rel="external" href="https://github.com/pimoroni/st7735-python/pull/33">Repackage to pyproject/hatch and port to gpiod by Gadgetoid · Pull Request #33 · pimoroni/st7735-python</a></p>
+</div>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/19.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>kosh.dev - werkzeug</title>
+    <link rel="self" type="application/atom+xml" href="https://www.kosh.dev/tags/werkzeug/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://www.kosh.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-01-07T00:00:00+00:00</updated>
+    <id>https://www.kosh.dev/tags/werkzeug/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Flaskで動的にrouteを追加する</title>
+        <published>2023-01-07T00:00:00+00:00</published>
+        <updated>2023-01-07T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://www.kosh.dev/article/12/"/>
+        <id>https://www.kosh.dev/article/12/</id>
+        
+        <content type="html" xml:base="https://www.kosh.dev/article/12/">&lt;p&gt;forループを使ってrouteを追加する際のめもです。&lt;&#x2F;p&gt;
+&lt;p&gt;(ついでに The Hitchhiker’s Guide to Python の Common Gotchas &lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#6&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;のメモも追記しています。)&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;p&gt;最小限の最小限のアプリケーション&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;を準備します。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt; flask&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; import&lt;&#x2F;span&gt;&lt;span&gt; Flask&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;app = Flask(__name__)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;@app.route&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; hello_world&lt;&#x2F;span&gt;&lt;span&gt;():&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&amp;lt;p&amp;gt;Hello, World!&amp;lt;&#x2F;p&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;strong&gt;新しく&#x2F;popcornと&#x2F;creamsoadの２つのルートを追加することを考えます。&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;[TOC]&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;yi-ban-de-nafang-fa&quot;&gt;一般的な方法&lt;&#x2F;h2&gt;
+&lt;p&gt;それぞれ個別で定義する方法です。 &lt;code&gt;route()&lt;&#x2F;code&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#2&quot;&gt;3&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; デコレーターを使うと以下のように追加することになります。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;@app.route&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&#x2F;popcorn&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; popcorn&lt;&#x2F;span&gt;&lt;span&gt;():&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;🍿 popcorn&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;@app.route&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&#x2F;creamsoad&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; creamsoad&lt;&#x2F;span&gt;&lt;span&gt;():&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;🥤 cream soad&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;この方法でも特に問題はありませんが、単純だったり、重複的な場合は一気に作成したくなる場合があります。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;loopwoshi-tutezhui-jia-suru&quot;&gt;loopを使って追加する&lt;&#x2F;h2&gt;
+&lt;p&gt;forのloop内でview関数を定義し、&lt;code&gt;add_url_rule()&lt;&#x2F;code&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#3&quot;&gt;4&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; を使って追加していきます。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt; functools&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; import&lt;&#x2F;span&gt;&lt;span&gt; partial&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;s = {&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;popcorn&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;🍿 popcorn&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;creamsoad&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;🥤 cream soad&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; key, value&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; in&lt;&#x2F;span&gt;&lt;span&gt; s.items():&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; temp_func&lt;&#x2F;span&gt;&lt;span&gt;(v):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        return&lt;&#x2F;span&gt;&lt;span&gt; v&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    view_func = partial(temp_func, v=value)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    app.add_url_rule(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&amp;#39;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;key&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, endpoint=key, view_func=view_func)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;実際にapp.run()で起動させ、httpコマンド &lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#4&quot;&gt;5&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; を使用してアクセスできるか確認します。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; http http:&#x2F;&#x2F;127.0.0.1:5000&#x2F;popcorn&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;HTTP&#x2F;1.1&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 200&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; OK&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;Connection:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; close&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;Content-Length:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 12&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;Content-Type:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; text&#x2F;html&lt;&#x2F;span&gt;&lt;span&gt;; charset=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;utf-8&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;Date:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; Xxx, xx Xxx&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 2022&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; xx:xx:xx GMT&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;Server:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; Werkzeug&#x2F;2.2.2 Python&#x2F;3.9.9&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;🍿&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; popcorn&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;&#x2F;popcorn&lt;&#x2F;code&gt;へアクセスできることが確認できました。&lt;&#x2F;p&gt;
+&lt;p&gt;以下ではおまけとしてクロージャの遅延評対策とエンドポイントについて記載しています。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;late-binding-closures&quot;&gt;Late Binding Closures&lt;&#x2F;h2&gt;
+&lt;p&gt;上記例では、&lt;code&gt;add_url_rule&lt;&#x2F;code&gt;でview関数を登録する際に&lt;code&gt;functools.partial&lt;&#x2F;code&gt; &lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#5&quot;&gt;6&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; を使用しています。&lt;&#x2F;p&gt;
+&lt;p&gt;これは &lt;strong&gt;Late Binding Closures&lt;&#x2F;strong&gt; (クロージャの遅延評価)を掻い潜る(?)ために必要です。&lt;&#x2F;p&gt;
+&lt;p&gt;もし&lt;code&gt;partial&lt;&#x2F;code&gt;を使用しない場合は以下のようになります。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;s = {&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;popcorn&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;🍿 popcorn&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;creamsoad&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;🥤 cream soad&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; key, value&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; in&lt;&#x2F;span&gt;&lt;span&gt; s.items():&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; temp_func&lt;&#x2F;span&gt;&lt;span&gt;():&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        return&lt;&#x2F;span&gt;&lt;span&gt; value&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    app.add_url_rule(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&amp;#39;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;key&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, endpoint=key, view_func=temp_func)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;s.items()&lt;&#x2F;code&gt;で与えられたvalueを&lt;code&gt;temp_func&lt;&#x2F;code&gt;の引数ではなくそのまま使用しています。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;&#x2F;popcorn&lt;&#x2F;code&gt;にアクセスしてみます。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; http http:&#x2F;&#x2F;127.0.0.1:5000&#x2F;popcorn&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;HTTP&#x2F;1.1&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 200&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; OK&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;Connection:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; close&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;Content-Length:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 15&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;Content-Type:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; text&#x2F;html&lt;&#x2F;span&gt;&lt;span&gt;; charset=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;utf-8&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;Date:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; Xxx, xx Xxx&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 2022&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; xx:xx:xx GMT&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;Server:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; Werkzeug&#x2F;2.2.2 Python&#x2F;3.9.9&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;🥤&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; cream soad&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;期待される 🍿 popcorn ではなく 🥤 cream soad が返ってきました。&lt;&#x2F;p&gt;
+&lt;p&gt;これはクロージャで変数をバインドすることで発生しています。&lt;&#x2F;p&gt;
+&lt;p&gt;(今回であればクロージャ&lt;code&gt;temp_func&lt;&#x2F;code&gt;内で&lt;code&gt;value&lt;&#x2F;code&gt;を使用しています。&lt;code&gt;&#x2F;popcorn&lt;&#x2F;code&gt;にアクセスし、&lt;code&gt;view_func(=temp_func)&lt;&#x2F;code&gt;が&lt;code&gt;value&lt;&#x2F;code&gt;を返す時にバインドされている&quot;cream soda&quot;が返されてしまいます。)&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;jian-dan-nali&quot;&gt;簡単な例&lt;&#x2F;h3&gt;
+&lt;p&gt;より簡単な例は以下のようになります。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;fs = [&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;lambda&lt;&#x2F;span&gt;&lt;span&gt; : n**&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; for&lt;&#x2F;span&gt;&lt;span&gt; n&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; in&lt;&#x2F;span&gt;&lt;span&gt; [&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 3&lt;&#x2F;span&gt;&lt;span&gt;]]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;([f()&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; for&lt;&#x2F;span&gt;&lt;span&gt; f&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; in&lt;&#x2F;span&gt;&lt;span&gt; fs])&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;1, 2, 3の2乗が返されるように見えるため&lt;code&gt;[1, 4, 9]&lt;&#x2F;code&gt;を考えますが、実際には&lt;code&gt;[9, 9, 9]&lt;&#x2F;code&gt;が返ってきます。&lt;&#x2F;p&gt;
+&lt;p&gt;Pythonのクロージャにおける遅延バインディングは &quot;The Hitchhiker’s Guide to Python&quot; などで詳しく確認できます&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#7&quot;&gt;7&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;functools.partial&lt;&#x2F;code&gt;を使用することで引数が評価され期待通りに動作します。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;import&lt;&#x2F;span&gt;&lt;span&gt; functools&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;import&lt;&#x2F;span&gt;&lt;span&gt; math&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;fs = [functools.partial(math.pow, n)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; for&lt;&#x2F;span&gt;&lt;span&gt; n&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; in&lt;&#x2F;span&gt;&lt;span&gt; [&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 3&lt;&#x2F;span&gt;&lt;span&gt;]]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;([f(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; for&lt;&#x2F;span&gt;&lt;span&gt; f&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; in&lt;&#x2F;span&gt;&lt;span&gt; fs])&lt;&#x2F;span&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;  # [1.0, 4.0, 9.0]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;関数のデフォルト引数が関数が定義されるタイミングで評価されることを利用することもできます&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#8&quot;&gt;8&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;キャッシング機能を追加したりする際にも利用できますし、今回のようなケースで先に評価してもらうことで期待通り動作します。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;fs = [&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;lambda&lt;&#x2F;span&gt;&lt;span&gt; i=n: i**&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; for&lt;&#x2F;span&gt;&lt;span&gt; n&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; in&lt;&#x2F;span&gt;&lt;span&gt; [&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 3&lt;&#x2F;span&gt;&lt;span&gt;]]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;([f()&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; for&lt;&#x2F;span&gt;&lt;span&gt; f&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; in&lt;&#x2F;span&gt;&lt;span&gt; fs])&lt;&#x2F;span&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;  # [1, 4, 9]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;ただ、個人的には&lt;code&gt;functools.partial&lt;&#x2F;code&gt;の方が意図を汲みやすい気がするので使っています。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;endpoint&quot;&gt;endpoint&lt;&#x2F;h2&gt;
+&lt;p&gt;上記例では&lt;code&gt;add_url_rule&lt;&#x2F;code&gt;をする際に&lt;code&gt;endpoint=key&lt;&#x2F;code&gt;のようにエンドポイントを指定しています。&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;p&gt;&lt;code&gt;add_url_rule&lt;&#x2F;code&gt;において、&lt;code&gt;view_function&lt;&#x2F;code&gt;が登録される場所を簡略的に表すと以下のようになります。
+(詳しくは&lt;code&gt;flask&#x2F;app.py&lt;&#x2F;code&gt;を確認してください。)&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; add_url_rule&lt;&#x2F;span&gt;&lt;span&gt;(self,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            rule, endpoint=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;None&lt;&#x2F;span&gt;&lt;span&gt;, view_func=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;None&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            provide_automatic_options=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;None&lt;&#x2F;span&gt;&lt;span&gt;, **options):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        if&lt;&#x2F;span&gt;&lt;span&gt; endpoint is&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            endpoint = view_func.__name__&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        self.view_functions[endpoint] = view_func&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;endpoint&lt;&#x2F;code&gt;が存在しない場合は&lt;code&gt;.__name__&lt;&#x2F;code&gt;を使用して関数の名前を設定するようにしています。&lt;&#x2F;p&gt;
+&lt;p&gt;しかし、&lt;code&gt;partial&lt;&#x2F;code&gt;を使用した場合は&lt;code&gt;.__name__&lt;&#x2F;code&gt;を使用することができずエラーを吐きます。&lt;&#x2F;p&gt;
+&lt;p&gt;そのため、&lt;code&gt;endpoint=key&lt;&#x2F;code&gt;のように指定する必要があります。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;AttributeError: &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;functools.partial&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; object has no attribute &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;__name__&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;同じ&lt;code&gt;endpoint&lt;&#x2F;code&gt;に対して複数の登録が確認されると、エラーが発生します。(&lt;code&gt;flask&#x2F;scaffold.py&lt;&#x2F;code&gt;の&lt;code&gt;_endpoint_from_view_func&lt;&#x2F;code&gt;にて)&lt;&#x2F;p&gt;
+&lt;p&gt;例えば&lt;code&gt;partial&lt;&#x2F;code&gt;を使用せずview_functionに&lt;code&gt;temp_func&lt;&#x2F;code&gt;を使用し、&lt;code&gt;endpoint&lt;&#x2F;code&gt;を指定しなかった場合などです。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;AssertionError: View function mapping is overwriting an existing endpoint function: temp_func&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;最終的にResponseとして&lt;code&gt;view_functions&lt;&#x2F;code&gt;内の関数がendpointを&lt;strong&gt;key&lt;&#x2F;strong&gt;として返されます。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;ruteingu&quot;&gt;ルーティング&lt;&#x2F;h3&gt;
+&lt;p&gt;実際に&lt;code&gt;app&lt;&#x2F;code&gt;に登録されているルーティング等を確認したい場合は&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;直接&lt;code&gt;view_functions&lt;&#x2F;code&gt;を確認する&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;url_map&lt;&#x2F;code&gt;でMap&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#9&quot;&gt;9&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;を確認する&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;などがあります。&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;p&gt;&lt;code&gt;app.view_functions&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;{&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;static&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &amp;lt;function Flask.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;__init__&lt;&#x2F;span&gt;&lt;span&gt;.&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;locals&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;.&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;lambda&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; at 0x1045d2820&amp;gt;, &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;popcorn&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: functools.partial(&amp;lt;function temp_func at&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; 0x&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;1045e5310&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;, v=&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;🍿 popcorn&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;), &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;creamsoad&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: functools.partial(&amp;lt;function temp_func at&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; 0x&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;1045e53a0&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;, v=&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;🥤 cream soad&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;app.url_map&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;Map([&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &amp;lt;Rule &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&#x2F;static&#x2F;&amp;lt;filename&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; (OPTIONS, HEAD, GET) -&amp;gt; static&amp;gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &amp;lt;Rule &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&#x2F;popcorn&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; (OPTIONS, HEAD, GET) -&amp;gt; popcorn&amp;gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &amp;lt;Rule &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&#x2F;creamsoad&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; (OPTIONS, HEAD, GET) -&amp;gt; creamsoad&amp;gt;])&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;can-kao-wen-xian&quot;&gt;参考文献&lt;&#x2F;h2&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;6&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.python-guide.org&#x2F;writing&#x2F;gotchas&#x2F;&quot;&gt;Common Gotchas - The Hitchhiker’s Guide to Python&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;1&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;flask.palletsprojects.com&#x2F;en&#x2F;2.2.x&#x2F;quickstart&#x2F;#a-minimal-application&quot;&gt;A Minimal Application - flask.palletsprojects.com&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;2&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;3&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;flask.palletsprojects.com&#x2F;en&#x2F;2.2.x&#x2F;api&#x2F;#flask.Flask.route&quot;&gt;route - flask.palletsprojects.com&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;3&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;4&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;flask.palletsprojects.com&#x2F;en&#x2F;2.2.x&#x2F;api&#x2F;#flask.Flask.add_url_rule&quot;&gt;add_url_rule - flask.palletsprojects.com&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;4&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;5&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;httpie.io&quot;&gt;httpie.io&lt;&#x2F;a&gt; &#x2F; &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;httpie&#x2F;httpie&quot;&gt;httpie - GitHub&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;5&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;6&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.python.org&#x2F;ja&#x2F;3&#x2F;library&#x2F;functools.html#functools.partial&quot;&gt;functools.partial - docs.python.org&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;7&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;7&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.python-guide.org&#x2F;writing&#x2F;gotchas&#x2F;#late-binding-closures&quot;&gt;Late Binding Closures - The Hitchhiker’s Guide to Python&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;8&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;8&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.python-guide.org&#x2F;writing&#x2F;gotchas&#x2F;#mutable-default-arguments&quot;&gt;Mutable Default Arguments - The Hitchhiker’s Guide to Python&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;9&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;9&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;werkzeug.palletsprojects.com&#x2F;en&#x2F;2.2.x&#x2F;routing&#x2F;#maps-rules-and-adapters&quot;&gt;werkzeug-map&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Flaskで毎回キャッシュを使わずに読み込ませる</title>
+        <published>2021-06-25T00:00:00+00:00</published>
+        <updated>2021-06-25T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://www.kosh.dev/article/2/"/>
+        <id>https://www.kosh.dev/article/2/</id>
+        
+        <content type="html" xml:base="https://www.kosh.dev/article/2/">&lt;p&gt;Flask&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;では静的なコンテンツは指定したディレクトリからしか引き出せないようになっています。デフォルトは&lt;code&gt;static&lt;&#x2F;code&gt;です。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;&#x2F;static&#x2F;css&#x2F;main.css&lt;&#x2F;code&gt;のようにアクセスすることでディレクトリ内のファイルが使えます。&lt;&#x2F;p&gt;
+&lt;p&gt;この時、ヘッダーに自動的に&lt;code&gt;last_modified&lt;&#x2F;code&gt;を設定しています。そのため、ユーザーの２回目以降のアクセス時に&lt;code&gt;if_modified&lt;&#x2F;code&gt;つきでアクセスされ304になり、キャッシュ(Cache)が利用されます。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;last_modified&lt;&#x2F;code&gt;を自分で設定することで、キャッシュを使わずに毎回読み込ませることが可能になります。&lt;&#x2F;p&gt;
+&lt;p&gt;[TOC]&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;jie-jue-ce&quot;&gt;解決策&lt;&#x2F;h2&gt;
+&lt;p&gt;WSGIアプリケーションのクラス&lt;code&gt;Flask&lt;&#x2F;code&gt;のインスタンスを作る際に、&lt;code&gt;static_folder&lt;&#x2F;code&gt;を無効にします。&lt;&#x2F;p&gt;
+&lt;p&gt;これで、&lt;code&gt;&#x2F;static&lt;&#x2F;code&gt;のURLにview関数を登録する部分がスキップされます。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;app = Flask(__name__, static_folder=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;None&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;&#x2F;static&lt;&#x2F;code&gt;のURLにview関数を登録します。&lt;&#x2F;p&gt;
+&lt;p&gt;この時、任意の条件にマッチした場合に&lt;code&gt;last_modified&lt;&#x2F;code&gt;を指定します。今回はアクセスされるたびに現在の時刻を指定しています。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;@app.route&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&#x2F;static&#x2F;&amp;lt;path:filename&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; static&lt;&#x2F;span&gt;&lt;span&gt;(filename):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    directory_path = os.path.join(app.root_path, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;static&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    last_modified =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    if&lt;&#x2F;span&gt;&lt;span&gt; &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;.css&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; in filename:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        last_modified = datetime.datetime.now(datetime.timezone.utc)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    max_age = app.get_send_file_max_age(filename)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; send_from_directory(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        directory_path, filename, last_modified=last_modified, max_age=max_age&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;これで、キャッシュを利用せず毎回読み込ませることが可能になりました。&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;h3 id=&quot;viewguan-shu-static-nobu-zu&quot;&gt;view関数(static)の補足&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;endpoint&lt;&#x2F;code&gt;を設定してあげることで、view関数の名前(static)を変えても&lt;code&gt;url_for&lt;&#x2F;code&gt;が使えるようになります。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;@app.route&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&#x2F;static&#x2F;&amp;lt;path:filename&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;, endpoint=&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;static&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; my_static&lt;&#x2F;span&gt;&lt;span&gt;(filename):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;html&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #A2E813;&quot;&gt;link&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; rel&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;stylesheet&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; href&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;{{url_for(&amp;#39;static&amp;#39;, filename=&amp;#39;main.css&amp;#39;)}}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&#x2F;&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;shi-zhuang-wozhui-u&quot;&gt;実装を追う&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;&#x2F;static&lt;&#x2F;code&gt;にアクセスした際のview関数をどこで設定しているのかを確認します。&lt;&#x2F;p&gt;
+&lt;p&gt;(コード上で重要でなさそうなところは...で省略しています。)&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;p&gt;Flaskの&lt;code&gt;app.py&lt;&#x2F;code&gt;の&lt;code&gt;__init__&lt;&#x2F;code&gt;の中で設定されていることがわかります。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Flask&#x2F;app.py&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;class&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C0EC12;&quot;&gt; Flask&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Scaffold&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;        def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; __init__&lt;&#x2F;span&gt;&lt;span&gt;(self, ...):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;            if&lt;&#x2F;span&gt;&lt;span&gt; self.has_static_folder:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                self.add_url_rule(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;                    f&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;self.static_url_path&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&#x2F;&amp;lt;path:filename&amp;gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                    endpoint=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;static&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                    host=static_host,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                    view_func=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;lambda&lt;&#x2F;span&gt;&lt;span&gt; **kw: self_ref().send_static_file(**kw),&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;lambda式で&lt;code&gt;send_static_file&lt;&#x2F;code&gt;を使用していますが、この関数は
+結局のところ&lt;code&gt;flask.send_from_directory&lt;&#x2F;code&gt;です。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Flask&#x2F;scaffold.py&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; send_static_file&lt;&#x2F;span&gt;&lt;span&gt;(self, filename: str) -&amp;gt; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Response&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; send_from_directory(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        t.cast(str, self.static_folder), filename, max_age=max_age&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;そして結局のところ&lt;code&gt;werkzeug.utils.send_from_directory&lt;&#x2F;code&gt;です。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Flask&#x2F;helpers.py&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; send_from_directory&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    directory: t.Union[os.PathLike, str],&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    path: t.Union[os.PathLike, str],&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    filename: t.Optional[str] =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    **kwargs: t.Any,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;) -&amp;gt; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Response&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; werkzeug.utils.send_from_directory(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        directory, path, **_prepare_send_file_kwargs(**kwargs)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;そして結局のところ&lt;code&gt;werkzeug.utils.send_file&lt;&#x2F;code&gt;です。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# werkzeug&#x2F;utils.py&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; send_from_directory&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    directory: t.Union[os.PathLike, str],&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    path: t.Union[os.PathLike, str],&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    environ: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;WSGIEnvironment&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    **kwargs: t.Any,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;) -&amp;gt; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Response&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    path = safe_join(os.fspath(directory), os.fspath(path))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; send_file(path, environ, **kwargs)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;werkzeug.utils.send_file&lt;&#x2F;code&gt;はDocstringとコメントを除いて150行くらいの関数です。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;**kwargs&lt;&#x2F;code&gt;を使って上から値を渡し続けているので、
+&lt;code&gt;flask.send_from_directory&lt;&#x2F;code&gt;に&lt;code&gt;last_modified=&lt;&#x2F;code&gt;を設定することで解決できることがわかりました。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# werkzeug&#x2F;utils.py&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; send_file&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    last_modified: t.Optional[t.Union[datetime, int, float]] =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;) -&amp;gt; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Response&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    if&lt;&#x2F;span&gt;&lt;span&gt; response_class is&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        from&lt;&#x2F;span&gt;&lt;span&gt; .wrappers&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; import&lt;&#x2F;span&gt;&lt;span&gt; Response&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        response_class = Response&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    rv = response_class(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        data, mimetype=mimetype, headers=headers, direct_passthrough=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;True&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    if&lt;&#x2F;span&gt;&lt;span&gt; last_modified is not&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        rv.last_modified = last_modified&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    elif&lt;&#x2F;span&gt;&lt;span&gt; mtime is not&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        rv.last_modified = mtime&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; rv&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;bu-zu&quot;&gt;補足&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;last_modified&lt;&#x2F;code&gt;が設定されていない場合は&lt;code&gt;os.stat()&lt;&#x2F;code&gt;を使用し、ファイルの&lt;strong&gt;最終内容更新日時を採用&lt;&#x2F;strong&gt;しているようです。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# werkzeug&#x2F;utils.py&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; send_file&lt;&#x2F;span&gt;&lt;span&gt;(...) -&amp;gt; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Response&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    if&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; isinstance&lt;&#x2F;span&gt;&lt;span&gt;(path_or_file, (os.PathLike, str)) or&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; hasattr&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            path_or_file, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;__fspath__&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            path_or_file = t.cast(t.Union[os.PathLike, str], path_or_file)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;            if&lt;&#x2F;span&gt;&lt;span&gt; _root_path is not&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                path = os.path.join(_root_path, path_or_file)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;            else&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                path = os.path.abspath(path_or_file)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            stat = os.stat(path)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            size = stat.st_size&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            mtime = stat.st_mtime&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        else&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            file = path_or_file&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;omake1-cache-busting&quot;&gt;おまけ1 - Cache Busting&lt;&#x2F;h2&gt;
+&lt;p&gt;更新したファイルがある場合、ファイル名にクエリ文字を追加することでキャッシュは利用されなくなります。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;html&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #A2E813;&quot;&gt;link&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; rel&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;stylesheet&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; href&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;main.css?v=1.0.2&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&#x2F;&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;omake2-static&quot;&gt;おまけ2 - &#x2F;static&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;self.static_url_path&lt;&#x2F;code&gt;は本当にデフォルトで&lt;code&gt;static&lt;&#x2F;code&gt;なのかを確認します。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Flask&#x2F;app.py&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;class&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C0EC12;&quot;&gt; Flask&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;Scaffold&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;        def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; __init__&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        self,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        static_url_path: t.Optional[str] =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        static_folder: t.Optional[str] = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;static&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        super().&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;__init__&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            static_folder=static_folder,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            static_url_path=static_url_path,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;この時&lt;code&gt;Scaffold&lt;&#x2F;code&gt;に渡されて&lt;code&gt;self.static_url_path&lt;&#x2F;code&gt;は&lt;code&gt;static&lt;&#x2F;code&gt;だとわかりました。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# Flask&#x2F;scaffold.py&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;class&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C0EC12;&quot;&gt; Scaffold&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;    @&lt;&#x2F;span&gt;&lt;span&gt;property&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; static_url_path&lt;&#x2F;span&gt;&lt;span&gt;(self) -&amp;gt; t.Optional[str]:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        if&lt;&#x2F;span&gt;&lt;span&gt; self._static_url_path is not&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;            return&lt;&#x2F;span&gt;&lt;span&gt; self._static_url_path&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        if&lt;&#x2F;span&gt;&lt;span&gt; self.static_folder is not&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            basename = os.path.basename(self.static_folder)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;            return&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; f&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&amp;quot;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;basename&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;.rstrip(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        return&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;    @static_url_path.setter&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; static_url_path&lt;&#x2F;span&gt;&lt;span&gt;(self, value: t.Optional[str]) -&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        if&lt;&#x2F;span&gt;&lt;span&gt; value is not&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            value = value.rstrip(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        self._static_url_path = value&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;can-kao-wen-xian&quot;&gt;参考文献&lt;&#x2F;h2&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;1&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;flask.palletsprojects.com&#x2F;en&#x2F;2.0.x&#x2F;&quot;&gt;Flask&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;2&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;www.palletsprojects.com&#x2F;p&#x2F;werkzeug&#x2F;&quot;&gt;Werkzeug&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+        
+    </entry>
+</feed>

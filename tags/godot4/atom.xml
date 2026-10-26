@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>kosh.dev - Godot4</title>
+    <link rel="self" type="application/atom+xml" href="https://www.kosh.dev/tags/godot4/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://www.kosh.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-06-03T00:00:00+00:00</updated>
+    <id>https://www.kosh.dev/tags/godot4/atom.xml</id>
+    <entry xml:lang="en">
+        <title>OpenSeeFaceとGodot4を繋ぐ</title>
+        <published>2023-06-03T00:00:00+00:00</published>
+        <updated>2023-06-03T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://www.kosh.dev/article/15/"/>
+        <id>https://www.kosh.dev/article/15/</id>
+        
+        <content type="html" xml:base="https://www.kosh.dev/article/15/">&lt;p&gt;OpenSeeFace&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;で顔のランドマークを検出して、結果をソケット通信(UDP)で受け取ったときのメモです。&lt;&#x2F;p&gt;
+&lt;p&gt;c#で受け取る例を示します。ついでに、pythonをGodotから実行する方法も載せておきます。&lt;&#x2F;p&gt;
+&lt;p&gt;[TOC]&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;huan-jing&quot;&gt;環境&lt;&#x2F;h2&gt;
+&lt;p&gt;Godot: &lt;code&gt;v4.0.2.stable.official&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Python: &lt;code&gt;3.9.9&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;OpenSeeFace: &lt;code&gt;9e07f6e1993022e7679f2e5ee3daec0ff617fac1&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;openseefacetoha&quot;&gt;OpenSeeFaceとは&lt;&#x2F;h2&gt;
+&lt;p&gt;OpenSeeFaceは、MobileNetV3に基づいた顔のランドマーク検出モデルを実装したトラッキングライブラリです。
+顔の特徴点(ランドマーク)を検出し、それを基に顔の動きを追跡することができます。&lt;&#x2F;p&gt;
+&lt;p&gt;Webカメラ入力またはビデオファイルからの顔のトラッキングを行い、そのトラッキングデータを&lt;strong&gt;UDP経由で送信&lt;&#x2F;strong&gt;します。&lt;&#x2F;p&gt;
+&lt;p&gt;この送信されたデータは3Dモデル、またはLive2Dモデルのアニメーションで利用できます。&lt;&#x2F;p&gt;
+&lt;p&gt;このライブラリでは、複数のモデルを提供しており、ユーザーの環境に合わせて変更できます。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;detanosong-xin-ce&quot;&gt;データの送信側&lt;&#x2F;h2&gt;
+&lt;p&gt;OpenSeeFaceでは&lt;code&gt;facetracker.py&lt;&#x2F;code&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#2&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;を実行して起動します。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; python facetracker.py -P&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 1&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; --log-data output.log&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;facetracker.py&lt;&#x2F;code&gt;にてsendtoによりトラッキングデータが送信されています。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;sock.sendto(packet,  (target_ip,  target_port))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;デフォルトではipがlocalhost(127.0.0.1)、portは11573です。実行時の引数として与えることもできます。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;packet&lt;&#x2F;code&gt;は&lt;code&gt;bytearray()&lt;&#x2F;code&gt;によって作成され、&lt;code&gt;packet.extend(bytearray(struct.pack(&quot;d&quot;,  now)))&lt;&#x2F;code&gt;のようにデータを追加しています。&lt;&#x2F;p&gt;
+&lt;p&gt;何のデータが出力されているかはlogファイルを確認するのが良いでしょう。少し多すぎるのでここでの記載は省略しますが、各フィードのメモをおまけとして追加しておきます。&lt;&#x2F;p&gt;
+&lt;!-- [特徴データのメモ](#_4) --&gt;
+&lt;h2 id=&quot;godotdeshou-kequ-ru&quot;&gt;Godotで受け取る&lt;&#x2F;h2&gt;
+&lt;p&gt;c#では、UDPのサーバーとして&lt;code&gt;UDPServer&lt;&#x2F;code&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#3&quot;&gt;3&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;を使用できます。&lt;&#x2F;p&gt;
+&lt;p&gt;公式ドキュメントを参考に、以下のようにOpenSeeFaceからデータを取得することができます。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;csharp&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;extends Node&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;var server := UDPServer.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;new&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;func&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; _ready&lt;&#x2F;span&gt;&lt;span&gt;():&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	server.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;listen&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;11573&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;func&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; _process&lt;&#x2F;span&gt;&lt;span&gt;(delta):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	server.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;poll&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	if server.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;is_connection_available&lt;&#x2F;span&gt;&lt;span&gt;():&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		var peer = server.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;take_connection&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		var packet = peer.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;get_packet&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;取得したデータ(&lt;code&gt;packet&lt;&#x2F;code&gt;)はbyte形式ですので、こちらを変換する必要があります。&lt;&#x2F;p&gt;
+&lt;p&gt;そこで一旦、変換用の関数を定義しておきます。(もしかするともう少しいい変換方法があるかもです。)&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;csharp&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;func&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; bytes_to_double&lt;&#x2F;span&gt;&lt;span&gt;(bytes):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var double: float = 0.0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	if bytes.size() == 8:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		var f64 = bytes.decode_double(0)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		double = float(f64)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	return double&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;func bytes_to_int(bytes):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var integer: int = 0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	if bytes.size() == 4:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		var i32 = bytes.decode_u32(0)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		integer = int(i32)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	return integer&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;func bytes_to_float(bytes):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var float_number: float = 0.0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	if bytes.size() == 4:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		var f32 = bytes.decode_float(0)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		float_number = float(f32)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	return float_number&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;あとはいい感じに受け取ったデータを区切って、辞書型に保存する関数を定義します。&lt;&#x2F;p&gt;
+&lt;p&gt;これで&lt;code&gt;data&lt;&#x2F;code&gt;を取得することで特徴データを使用できます。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;csharp&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;func&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; parse_packet&lt;&#x2F;span&gt;&lt;span&gt;(packet):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var data = {}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;	var&lt;&#x2F;span&gt;&lt;span&gt; index =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var timestamp_bytes = packet.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(index, index +&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 8&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var timestamp =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; bytes_to_double&lt;&#x2F;span&gt;&lt;span&gt;(timestamp_bytes)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;timestamp&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;] = timestamp&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 8&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var face_id_bytes = packet.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(index, index +&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var face_id =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; bytes_to_int&lt;&#x2F;span&gt;&lt;span&gt;(face_id_bytes)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;face_id&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;] = face_id&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var width_bytes = packet.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(index, index +&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var width =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; bytes_to_float&lt;&#x2F;span&gt;&lt;span&gt;(width_bytes)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;width&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;] = width&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var height_bytes = packet.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(index, index +&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var height =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; bytes_to_float&lt;&#x2F;span&gt;&lt;span&gt;(height_bytes)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;height&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;] = height&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;eye_blink&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;] = []&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;eye_blink&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;].&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;append&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;bytes_to_float&lt;&#x2F;span&gt;&lt;span&gt;(packet.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(index, index +&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;eye_blink&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;].&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;append&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;bytes_to_float&lt;&#x2F;span&gt;&lt;span&gt;(packet.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(index, index +&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var success_bytes = packet.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(index, index +&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 1&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var success =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; bytes_to_int&lt;&#x2F;span&gt;&lt;span&gt;(success_bytes)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;success&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;] = success&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var pnp_error_bytes = packet.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(index, index +&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var pnp_error =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; bytes_to_float&lt;&#x2F;span&gt;&lt;span&gt;(pnp_error_bytes)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;pnp_error&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;] = pnp_error&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var quaternions = []&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	for i in&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; range&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		quaternions.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;append&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;bytes_to_float&lt;&#x2F;span&gt;&lt;span&gt;(packet.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(index + i *&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;, index + (i +&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 1&lt;&#x2F;span&gt;&lt;span&gt;) *&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;quaternion&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;] = quaternions&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var eulers = []&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	for i in&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; range&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		eulers.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;append&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;bytes_to_float&lt;&#x2F;span&gt;&lt;span&gt;(packet.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(index + i *&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;, index + (i +&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 1&lt;&#x2F;span&gt;&lt;span&gt;) *&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;euler&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;] = eulers&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 12&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var translations = []&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	for i in&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; range&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		translations.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;append&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;bytes_to_float&lt;&#x2F;span&gt;&lt;span&gt;(packet.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(index + i *&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;, index + (i +&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 1&lt;&#x2F;span&gt;&lt;span&gt;) *&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;translation&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;] = translations&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 12&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 66&lt;&#x2F;span&gt;&lt;span&gt; *&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 3&lt;&#x2F;span&gt;&lt;span&gt; *&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;  # Landmark&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 66&lt;&#x2F;span&gt;&lt;span&gt; *&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 3&lt;&#x2F;span&gt;&lt;span&gt; *&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;  # Point3D&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 18&lt;&#x2F;span&gt;&lt;span&gt; *&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;  # ???&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	# Feature list&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var features = [&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;eye_l&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;eye_r&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;eyebrow_steepness_l&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;eyebrow_quirk_l&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;eyebrow_steepness_r&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;eyebrow_quirk_r&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;eyebrow_updown_l&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;eyebrow_updown_r&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;mouth_corner_updown_l&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;mouth_corner_inout_l&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;mouth_corner_updown_r&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;mouth_corner_inout_r&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;mouth_open&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;mouth_wide&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;features&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;] = {}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	for i in&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; range&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;14&lt;&#x2F;span&gt;&lt;span&gt;):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		data[&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;features&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;][features[i]] =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; bytes_to_float&lt;&#x2F;span&gt;&lt;span&gt;(packet.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;slice&lt;&#x2F;span&gt;&lt;span&gt;(index, index +&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span&gt;))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		index +=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 4&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	return data&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;pythonwogodotkarahu-bu&quot;&gt;pythonをGodotから呼ぶ&lt;&#x2F;h2&gt;
+&lt;p&gt;いちいち、&lt;code&gt;facetracker.py&lt;&#x2F;code&gt;を起動して、Godotでパペットを起動してとするのは非常に手間がかかります。&lt;&#x2F;p&gt;
+&lt;p&gt;そこでmainのスクリプトなどで最初に実行してしまうことにします。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;OS.execute&lt;&#x2F;code&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#4&quot;&gt;4&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;を使うと、OpenSeeFaceが停止するまで、それ以降の処理が実行されません。&lt;&#x2F;p&gt;
+&lt;p&gt;そのため、&lt;code&gt;OS.create_process&lt;&#x2F;code&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#5&quot;&gt;5&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;を使用して、新しいプロセスを作成し、実行します。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;csharp&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span&gt; python_cmd = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;&amp;lt;path to python&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;func&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; run_py&lt;&#x2F;span&gt;&lt;span&gt;():&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var output = []&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var args = [&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;OpenSeeFace&#x2F;facetracker.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;--visualize&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;--pnp-points&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;--max-threads&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;-c&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;-P&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;-F&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;60&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	var pid = OS.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt;create_process&lt;&#x2F;span&gt;&lt;span&gt;(python_cmd, args)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	return pid&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;これで実行はされます。しかし、これだとGodotが終了してもプロセスが実行され続けてしまいます。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;_notification&lt;&#x2F;code&gt;関数内で&lt;code&gt;NOTIFICATION_WM_CLOSE_REQUEST&lt;&#x2F;code&gt;を使用してウィンドウが閉じられたことを検出します。。&lt;&#x2F;p&gt;
+&lt;p&gt;あとは、実行時に取得したpidを使って&lt;code&gt;OS.kill&lt;&#x2F;code&gt;によってkillします。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;csharp&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;func&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; _notification&lt;&#x2F;span&gt;&lt;span&gt;(what):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	if what == NOTIFICATION_WM_CLOSE_REQUEST:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		get_tree().set_auto_accept_quit(false)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		OS.kill(pid)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;		get_tree().quit()&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;omake-papetutofeng-nochu-li-li&quot;&gt;おまけ: パペット風の出力例&lt;&#x2F;h2&gt;
+&lt;p&gt;上記スクリプトを使って、ためしにパペットを作ってみました。&lt;&#x2F;p&gt;
+&lt;p&gt;取得した特徴データのうち目の開閉と口の開閉、加えて顔の傾きを使用して出力しています。&lt;&#x2F;p&gt;
+&lt;blockquote class=&quot;twitter-tweet&quot;&gt;&lt;p lang=&quot;ja&quot; dir=&quot;ltr&quot;&gt;顔トラッキング60fpsで動作確認した👀👄&lt;a href=&quot;https:&#x2F;&#x2F;twitter.com&#x2F;hashtag&#x2F;GODOT4?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#GODOT4&lt;&#x2F;a&gt; &lt;a href=&quot;https:&#x2F;&#x2F;twitter.com&#x2F;hashtag&#x2F;OpenSeeFace?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#OpenSeeFace&lt;&#x2F;a&gt; &lt;a href=&quot;https:&#x2F;&#x2F;t.co&#x2F;C7iFZoYZJH&quot;&gt;pic.twitter.com&#x2F;C7iFZoYZJH&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;&amp;mdash; kosh (@llbxg) &lt;a href=&quot;https:&#x2F;&#x2F;twitter.com&#x2F;llbxg&#x2F;status&#x2F;1655534078911991808?ref_src=twsrc%5Etfw&quot;&gt;May 8, 2023&lt;&#x2F;a&gt;&lt;&#x2F;blockquote&gt; &lt;script async src=&quot;https:&#x2F;&#x2F;platform.twitter.com&#x2F;widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;&#x2F;script&gt;
+&lt;h2 id=&quot;omake-te-zheng-detanomemo&quot;&gt;おまけ: 特徴データのメモ&lt;&#x2F;h2&gt;
+&lt;p&gt;各フィードのメモです。&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Frame, Time: 映像フレームのIDとそのタイムスタンプ。&lt;&#x2F;li&gt;
+&lt;li&gt;Width, Height: 映像の幅と高さ。&lt;&#x2F;li&gt;
+&lt;li&gt;FPS: 映像のフレームレート（フレーム・パー・セカンド）。&lt;&#x2F;li&gt;
+&lt;li&gt;Face, FaceID: 顔の検出とその識別子。&lt;&#x2F;li&gt;
+&lt;li&gt;RightOpen, LeftOpen: 右目と左目が開いているかどうかの指標。&lt;&#x2F;li&gt;
+&lt;li&gt;AverageConfidence: 検出された顔の信頼度の平均。&lt;&#x2F;li&gt;
+&lt;li&gt;Success3D, PnPError: 3D顔再構成の成功とそのエラー。&lt;&#x2F;li&gt;
+&lt;li&gt;RotationQuat.X, Y, Z, W: 顔の回転を表すクォータニオン。&lt;&#x2F;li&gt;
+&lt;li&gt;Euler.X, Y, Z: オイラー角による顔の回転。&lt;&#x2F;li&gt;
+&lt;li&gt;RVec.X, Y, Z, TVec.X, Y, Z: 顔の位置と姿勢を表すロドリゲスベクトルと平行移動ベクトル。&lt;&#x2F;li&gt;
+&lt;li&gt;Landmark[i].X, Y, Confidence: i番目の顔のランドマーク（特徴点）の位置とその信頼度。&lt;&#x2F;li&gt;
+&lt;li&gt;Point3D[i].X, Y, Z: i番目の3Dランドマークの位置。&lt;&#x2F;li&gt;
+&lt;li&gt;eye_l, eye_r: 左目と右目の開き具合。&lt;&#x2F;li&gt;
+&lt;li&gt;eyebrow_steepness_l, eyebrow_updown_l, eyebrow_quirk_l, eyebrow_steepness_r, eyebrow_updown_r, eyebrow_quirk_r: 左右の眉の特性（傾き、上下動、特異な動き）。&lt;&#x2F;li&gt;
+&lt;li&gt;mouth_corner_updown_l, mouth_corner_inout_l, mouth_corner_updown_r, mouth_corner_inout_r: 口角の上下動と内外動。&lt;&#x2F;li&gt;
+&lt;li&gt;mouth_open, mouth_wide: 口の開き具合と幅。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;can-kao-wen-xian&quot;&gt;参考文献&lt;&#x2F;h2&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;1&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;emilianavt&#x2F;OpenSeeFace&quot;&gt;emilianavt&#x2F;OpenSeeFace - GitHub&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;2&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;emilianavt&#x2F;OpenSeeFace&#x2F;blob&#x2F;master&#x2F;facetracker.py&quot;&gt;OpenSeeFace - GitHub - facetracker.py&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;3&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;3&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.godotengine.org&#x2F;en&#x2F;stable&#x2F;classes&#x2F;class_udpserver.html#udpserver&quot;&gt;class_udpserver #udpserver - docs.godotengine.org&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;4&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;4&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.godotengine.org&#x2F;en&#x2F;stable&#x2F;classes&#x2F;class_os.html#class-os-method-execute&quot;&gt;class_os.html #class-os-method-execute - docs.godotengine.org&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;5&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;5&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.godotengine.org&#x2F;en&#x2F;stable&#x2F;classes&#x2F;class_os.html#class-os-method-create-process&quot;&gt;class_os.html #class-os-method-create-process - docs.godotengine.org&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;6&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;6&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.godotengine.org&#x2F;en&#x2F;stable&#x2F;classes&#x2F;class_os.html#class-os-method-kill&quot;&gt;class_os.html #class-os-method-kill - docs.godotengine.org&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+        
+    </entry>
+</feed>

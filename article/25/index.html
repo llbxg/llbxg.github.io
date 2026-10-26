@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="Xteink X3向け縦書きXTCをつくる"/>
+  <meta name="description" content="青空文庫形式のテキストを縦書きでレンダリングし、Xteink X3向けのXTCへ変換するPythonツールを作成しました。" />
+  <meta property="description" content="青空文庫形式のテキストを縦書きでレンダリングし、Xteink X3向けのXTCへ変換するPythonツールを作成しました。" />
+  <meta property="og:type" content="article" />
+<title> Xteink X3向け縦書きXTCをつくる| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">Xteink X3向け縦書きXTCをつくる</h1>
+    <div class='info'>
+        <div class='date'>2026-08-02</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/xteink/">Xteink</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p>Xteink X3 <sup class="footnote-reference"><a href="#x3">1</a></sup> で日本語の本を縦書きで読むため、青空文庫形式のテキストをXTCへ変換するPythonツールを作成しました。</p>
+<p>CrossPoint Reader<sup class="footnote-reference"><a href="#CPR">2</a></sup> 1.5では、日本語の表示とルビには対応しています。一方、現時点では縦書き表示には対応していません。</p>
+<p>Reader本体へ縦書きを実装する方法もありますが、今回は活発に開発されているupstreamをできるだけそのまま利用するため、テキストをあらかじめ縦書きのページ画像へレンダリングし、それをXTCファイルとして格納する方法を選びました。</p>
+<p><img src="/image/025/book-passport-x3.png" alt="Xteink X3で表示した縦書きページ" /></p>
+<p>本記事では、XTCフォーマットをCrossPoint Readerの実装から簡単に確認し、青空文庫形式のテキストを縦書きXTCへ変換するツールについて説明します。</p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/25/#bian-huan-turuwoshi-u">変換ツールを使う</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/25/#bian-huan-noliu-re">変換の流れ</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/25/#xtchuomatuto">XTCフォーマット</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/25/#shi-zhuang">実装</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/25/#xian-zai-nodui-ying-fan-wei-tozhi-yue">現在の対応範囲と制約</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/25/#matome">まとめ</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/25/#can-kao">参考</a></li> 
+     
+</ol></div></p>
+<h2 id="bian-huan-turuwoshi-u">変換ツールを使う</h2>
+<p>作成したツールは、次のリポジトリで公開しています。</p>
+<ul>
+<li><a rel="external" href="https://github.com/llbxg/toxtc">llbxg/toxtc | GitHub</a></li>
+</ul>
+<p>Python 3.10以降と、縦書きの描画に使用する日本語フォントが必要です。</p>
+<p>リポジトリを取得し、<code>uv</code>を使用して依存パッケージをインストールします。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #C7D2DA;">git</span><span style="color: #96B5B4;"> clone https://github.com/llbxg/toxtc.git</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">cd toxtc</span></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">uv</span><span style="color: #96B5B4;"> sync</span></span></code></pre>
+<p>青空文庫形式のテキストは、<code>aozora2xtc</code>コマンドで変換できます。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #C7D2DA;">uv</span><span style="color: #96B5B4;"> run aozora2xtc input.txt output.xtc \</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">    --font NotoSansJP-VF.ttf \</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">    --device x3</span></span></code></pre>
+<p>生成された<code>output.xtc</code>をXteink X3へコピーし、CrossPoint Readerから開きます。</p>
+<p>生成したXTCファイルは、現在のところXteink X3上のCrossPoint Readerでのみ動作を確認しています。</p>
+<p>ルビ、傍点、改ページ、見出しなど、基本的な青空文庫記法に対応しています。詳しい対応範囲については後述します。</p>
+<p><img src="/image/025/page-0075.png" alt="生成した縦書きページ" /></p>
+<h2 id="bian-huan-noliu-re">変換の流れ</h2>
+<p><code>aozora2xtc</code>では、青空文庫形式のテキストをそのままXTCへ格納しているわけではありません。</p>
+<p>まず、入力されたテキストから本文、ルビ、傍点、見出し、改ページなどの記法を解析します。解析した内容をXteink X3の画面サイズに合わせて縦書きで配置し、各ページを1-bitの画像として描画します。</p>
+<p>最後に、それぞれのページ画像をXTG形式へ変換し、書籍情報やページテーブルとともにXTCファイルへ格納します。</p>
+<ol>
+<li>青空文庫形式のテキストを読み込む</li>
+<li>ルビ、傍点、見出しなどを解析する</li>
+<li>縦書きでレイアウトする</li>
+<li>各ページを1-bit画像として描画する</li>
+<li>ページ画像をXTGへ変換する</li>
+<li>複数のXTGをXTCへ格納する</li>
+</ol>
+<p>この方式では、縦書きの処理はCrossPoint Readerではなく、変換ツール側で行います。</p>
+<p>XTC内に文章や縦書きのレイアウト情報が保存されているわけではありません。あらかじめ縦書きで描画されたページ画像が保存されています。</p>
+<p>そのため、Reader側に縦書きのレイアウト処理を追加しなくても、生成時の見た目のままページを表示できます。</p>
+<p>一方、ページは固定された画像になるため、Reader上で文字サイズを変更したり、画面サイズに合わせて文章を再配置したりすることはできません。</p>
+<h2 id="xtchuomatuto">XTCフォーマット</h2>
+<p>XTCは、ページごとにレンダリングされた画像を格納する電子書籍フォーマットです。</p>
+<p>CrossPoint Readerでは、XTCフォーマットの型が<code>XtcTypes.h</code>に定義されています。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="cpp"><span class="giallo-l"><span style="color: #7F8B93;">// lib/Xtc/Xtc/XtcTypes.h</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">constexpr uint32_t</span><span> XTC_MAGIC =</span><span style="color: #DDFC16;"> 0x00435458</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">constexpr uint32_t</span><span> XTCH_MAGIC =</span><span style="color: #DDFC16;"> 0x48435458</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">constexpr uint32_t</span><span> XTG_MAGIC =</span><span style="color: #DDFC16;"> 0x00475458</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">constexpr uint32_t</span><span> XTH_MAGIC =</span><span style="color: #DDFC16;"> 0x00485458</span><span>;</span></span></code></pre>
+<p><code>XTC</code>と<code>XTCH</code>は、書籍全体を格納するコンテナ形式です。</p>
+<p><code>XTG</code>と<code>XTH</code>は、コンテナ内に格納される1ページ分の画像形式です。</p>
+<table><thead><tr><th>形式</th><th>用途</th><th>階調</th></tr></thead><tbody>
+<tr><td>XTC</td><td>複数ページを格納する書籍</td><td>1-bit</td></tr>
+<tr><td>XTCH</td><td>複数ページを格納する書籍</td><td>2-bit</td></tr>
+<tr><td>XTG</td><td>1ページ分の画像</td><td>1-bit</td></tr>
+<tr><td>XTH</td><td>1ページ分の画像</td><td>2-bit</td></tr>
+</tbody></table>
+<p>今回は白黒表示を目的としているため、XTCとXTGを使用します。</p>
+<h3 id="xtc-header">XTC Header</h3>
+<p>XTCの先頭には、56バイトの<code>XtcHeader</code>が配置されます。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="cpp"><span class="giallo-l"><span style="color: #7F8B93;">// lib/Xtc/Xtc/XtcTypes.h</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">#pragma</span><span style="color: #C7D2DA;"> pack</span><span>(</span><span style="color: #C7D2DA;">push</span><span>, 1)</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">struct</span><span> XtcHeader {</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint32_t</span><span> magic;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint8_t</span><span> versionMajor;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint8_t</span><span> versionMinor;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint16_t</span><span> pageCount;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint8_t</span><span> readDirection;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint8_t</span><span> hasMetadata;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint8_t</span><span> hasThumbnails;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint8_t</span><span> hasChapters;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint32_t</span><span> currentPage;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint64_t</span><span> metadataOffset;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint64_t</span><span> pageTableOffset;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint64_t</span><span> dataOffset;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint64_t</span><span> thumbOffset;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint32_t</span><span> chapterOffset;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint32_t</span><span> padding;</span></span>
+<span class="giallo-l"><span>};</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">#pragma</span><span style="color: #C7D2DA;"> pack</span><span>(</span><span style="color: #C7D2DA;">pop</span><span>)</span></span></code></pre>
+<p><code>#pragma pack(push, 1)</code>が指定されているため、各メンバーの間にアライメント用のパディングは入りません。</p>
+<p>主に使用する値は次のとおりです。</p>
+<ul>
+<li><code>magic</code>: XTCまたはXTCHの識別子</li>
+<li><code>pageCount</code>: ページ数</li>
+<li><code>readDirection</code>: 読書方向</li>
+<li><code>metadataOffset</code>: メタデータの位置</li>
+<li><code>pageTableOffset</code>: ページテーブルの位置</li>
+<li><code>dataOffset</code>: 最初のページデータの位置</li>
+<li><code>chapterOffset</code>: 章情報の位置</li>
+</ul>
+<p>CrossPoint Readerでは、最初にヘッダーを読み込み、<code>magic</code>とバージョンを確認しています。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="cpp"><span class="giallo-l"><span style="color: #7F8B93;">// lib/Xtc/Xtc/XtcParser.cpp</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">size_t</span><span> bytesRead =</span></span>
+<span class="giallo-l"><span>    m_file.</span><span style="color: #C7D2DA;">read</span><span>(reinterpret_cast&lt;</span><span style="color: #F7FE09;">uint8_t</span><span>*&gt;(&amp;m_header),</span></span>
+<span class="giallo-l"><span>                sizeof(XtcHeader));</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">if</span><span> (bytesRead != sizeof(XtcHeader)) {</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">  return</span><span> XtcError::READ_ERROR;</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">if</span><span> (m_header.magic != XTC_MAGIC &amp;&amp;</span></span>
+<span class="giallo-l"><span>    m_header.magic != XTCH_MAGIC) {</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">  return</span><span> XtcError::INVALID_MAGIC;</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>XTCかXTCHかは、<code>magic</code>の値から判定されます。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="cpp"><span class="giallo-l"><span>m_bitDepth =</span></span>
+<span class="giallo-l"><span>    (m_header.magic == XTCH_MAGIC) ?</span><span style="color: #DDFC16;"> 2</span><span> :</span><span style="color: #DDFC16;"> 1</span><span>;</span></span></code></pre>
+<p>今回生成するファイルでは<code>XTC_MAGIC</code>を設定するため、ページは1-bit画像として扱われます。</p>
+<h3 id="page-table">Page table</h3>
+<p>XTCでは、各ページの位置をページテーブルで管理しています。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="cpp"><span class="giallo-l"><span style="color: #7F8B93;">// lib/Xtc/Xtc/XtcTypes.h</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">#pragma</span><span style="color: #C7D2DA;"> pack</span><span>(</span><span style="color: #C7D2DA;">push</span><span>, 1)</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">struct</span><span> PageTableEntry {</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint64_t</span><span> dataOffset;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint32_t</span><span> dataSize;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint16_t</span><span> width;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint16_t</span><span> height;</span></span>
+<span class="giallo-l"><span>};</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">#pragma</span><span style="color: #C7D2DA;"> pack</span><span>(</span><span style="color: #C7D2DA;">pop</span><span>)</span></span></code></pre>
+<p>1ページにつき16バイトのエントリーを持ちます。</p>
+<ul>
+<li><code>dataOffset</code>: XTCファイル内のページ位置</li>
+<li><code>dataSize</code>: ページデータ全体のサイズ</li>
+<li><code>width</code>: ページ画像の幅</li>
+<li><code>height</code>: ページ画像の高さ</li>
+</ul>
+<p>CrossPoint Readerは、表示するページに対応するエントリーだけを読み込みます。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="cpp"><span class="giallo-l"><span style="color: #F7FE09;">const uint64_t</span><span> entryOffset =</span></span>
+<span class="giallo-l"><span>    m_header.pageTableOffset +</span></span>
+<span class="giallo-l"><span>    static_cast&lt;</span><span style="color: #F7FE09;">uint64_t</span><span>&gt;(pageIndex) *</span></span>
+<span class="giallo-l"><span>        sizeof(PageTableEntry);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>m_file.</span><span style="color: #C7D2DA;">seek64</span><span>(entryOffset);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>PageTableEntry entry;</span></span>
+<span class="giallo-l"><span>m_file.</span><span style="color: #C7D2DA;">read</span><span>(</span></span>
+<span class="giallo-l"><span>    reinterpret_cast&lt;</span><span style="color: #F7FE09;">uint8_t</span><span>*&gt;(&amp;entry),</span></span>
+<span class="giallo-l"><span>    sizeof(PageTableEntry)</span></span>
+<span class="giallo-l"><span>);</span></span></code></pre>
+<p>読み込んだ<code>dataOffset</code>を使い、対象ページのXTGデータへ移動します。</p>
+<p>XTC内の構造は、概ね次のようになります。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="plain"><span class="giallo-l"><span>XTC</span></span>
+<span class="giallo-l"><span>├── Header</span></span>
+<span class="giallo-l"><span>├── Metadata</span></span>
+<span class="giallo-l"><span>├── Chapter data</span></span>
+<span class="giallo-l"><span>├── Page table</span></span>
+<span class="giallo-l"><span>├── XTG page 1</span></span>
+<span class="giallo-l"><span>├── XTG page 2</span></span>
+<span class="giallo-l"><span>└── ...</span></span></code></pre><h3 id="xtg">XTG</h3>
+<p>XTGは、1ページ分の白黒画像を格納する形式です。</p>
+<p>CrossPoint Readerでは、XTGとXTHに共通する22バイトのヘッダーが定義されています。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="cpp"><span class="giallo-l"><span style="color: #7F8B93;">// lib/Xtc/Xtc/XtcTypes.h</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">#pragma</span><span style="color: #C7D2DA;"> pack</span><span>(</span><span style="color: #C7D2DA;">push</span><span>, 1)</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">struct</span><span> XtgPageHeader {</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint32_t</span><span> magic;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint16_t</span><span> width;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint16_t</span><span> height;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint8_t</span><span> colorMode;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint8_t</span><span> compression;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint32_t</span><span> dataSize;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  uint64_t</span><span> md5;</span></span>
+<span class="giallo-l"><span>};</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">#pragma</span><span style="color: #C7D2DA;"> pack</span><span>(</span><span style="color: #C7D2DA;">pop</span><span>)</span></span></code></pre>
+<p>XTGは、概ね次のような構造です。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="plain"><span class="giallo-l"><span>XTG</span></span>
+<span class="giallo-l"><span>├── Page header</span></span>
+<span class="giallo-l"><span>│   ├── Magic number</span></span>
+<span class="giallo-l"><span>│   ├── Width</span></span>
+<span class="giallo-l"><span>│   ├── Height</span></span>
+<span class="giallo-l"><span>│   ├── Color mode</span></span>
+<span class="giallo-l"><span>│   ├── Compression</span></span>
+<span class="giallo-l"><span>│   ├── Data size</span></span>
+<span class="giallo-l"><span>│   └── MD5</span></span>
+<span class="giallo-l"><span>└── Bitmap data</span></span>
+<span class="giallo-l"><span>    └── 1ページ分の白黒画像</span></span></code></pre>
+<p>ヘッダーの直後に、実際のビットマップデータが続きます。</p>
+<p>本文やルビが文字データとして保存されているわけではなく、描画後のページ全体が画像として保存されています。</p>
+<p>XTGの画像データは、次の形式で格納されます。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="cpp"><span class="giallo-l"><span style="color: #7F8B93;">// XTG (1-bit): Row-major, 8 pixels/byte, MSB first</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">// dataSize = ((width + 7) / 8) * height</span></span></code></pre>
+<p><code>Row-major</code>なので、画像は上の行から順番に保存されます。</p>
+<p>各ピクセルは白または黒であり、8ピクセル分が1バイトにまとめられます。</p>
+<p>CrossPoint Readerは、ページテーブルの<code>dataOffset</code>へ移動したあと、ページ先頭の<code>XtgPageHeader</code>を読み込みます。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="cpp"><span class="giallo-l"><span>XtgPageHeader pageHeader;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">size_t</span><span> headerRead =</span></span>
+<span class="giallo-l"><span>    m_file.</span><span style="color: #C7D2DA;">read</span><span>(</span></span>
+<span class="giallo-l"><span>        reinterpret_cast&lt;</span><span style="color: #F7FE09;">uint8_t</span><span>*&gt;(&amp;pageHeader),</span></span>
+<span class="giallo-l"><span>        sizeof(XtgPageHeader)</span></span>
+<span class="giallo-l"><span>    );</span></span></code></pre>
+<p>その後、ページのMagic Numberを確認します。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="cpp"><span class="giallo-l"><span style="color: #F7FE09;">const uint32_t</span><span> expectedMagic =</span></span>
+<span class="giallo-l"><span>    (m_bitDepth ==</span><span style="color: #DDFC16;"> 2</span><span>) ? XTH_MAGIC : XTG_MAGIC;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">if</span><span> (pageHeader.magic != expectedMagic) {</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">  return</span><span> XtcError::INVALID_MAGIC;</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p><code>md5</code>には、画像データから計算したMD5の先頭8バイトを格納できます。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="cpp"><span class="giallo-l"><span style="color: #F7FE09;">uint64_t</span><span> md5;</span><span style="color: #7F8B93;"> // MD5 checksum (first 8 bytes, optional)</span></span></code></pre>
+<p>ただし、現在のCrossPoint Readerの実装では、<code>md5</code>の値は検証されていません。ヘッダーの一部として読み込まれますが、ページ表示時には使用されていません。</p>
+<h3 id="pythondextgwosheng-cheng-suru">PythonでXTGを生成する</h3>
+<p><code>toxtc</code>では、Pillowの画像を1-bitへ変換し、白黒のピクセルをXTGのBitmap dataへ格納します。</p>
+<p>その後、CrossPoint Readerの<code>XtgPageHeader</code>に対応する22バイトのヘッダーを<code>struct.pack</code>で生成します。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span>digest = hashlib.md5(data).digest()[:</span><span style="color: #DDFC16;">8</span><span>]</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>header = struct.pack(</span></span>
+<span class="giallo-l"><span>    &quot;</span><span style="color: #96B5B4;">&lt;IHHBBI8s</span><span>&quot;,</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">    0x</span><span style="color: #DDFC16;">00475458</span><span>,</span></span>
+<span class="giallo-l"><span>    width,</span></span>
+<span class="giallo-l"><span>    height,</span></span>
+<span class="giallo-l"><span style="color: #DDFC16;">    0</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #DDFC16;">    0</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">    len</span><span>(data),</span></span>
+<span class="giallo-l"><span>    digest,</span></span>
+<span class="giallo-l"><span>)</span></span></code></pre>
+<p>フォーマット文字列の先頭にある<code>&lt;</code>は、各値をリトルエンディアンで格納することを表します。</p>
+<p>残りの値は、<code>XtgPageHeader</code>の各メンバーに順番に対応しています。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="plain"><span class="giallo-l"><span>I   magic</span></span>
+<span class="giallo-l"><span>H   width</span></span>
+<span class="giallo-l"><span>H   height</span></span>
+<span class="giallo-l"><span>B   colorMode</span></span>
+<span class="giallo-l"><span>B   compression</span></span>
+<span class="giallo-l"><span>I   dataSize</span></span>
+<span class="giallo-l"><span>8s  md5</span></span></code></pre>
+<p>生成したヘッダーに画像データを連結することで、1ページ分のXTGデータになります。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">return</span><span> header + data</span></span></code></pre><h2 id="shi-zhuang">実装</h2>
+<p><code>toxtc</code>では、XTCを書き出す処理と、青空文庫を解析・描画する処理を分離しています。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="plain"><span class="giallo-l"><span>toxtc</span></span>
+<span class="giallo-l"><span>├── XTC writer</span></span>
+<span class="giallo-l"><span>└── Aozora Bunko converter</span></span>
+<span class="giallo-l"><span>    ├── Parser</span></span>
+<span class="giallo-l"><span>    └── Vertical renderer</span></span></code></pre>
+<p>青空文庫に依存する処理は、主に次の2つです。</p>
+<ul>
+<li>青空文庫記法の解析</li>
+<li>縦書きページの描画</li>
+</ul>
+<p>一方、XTCを生成する処理は入力形式に依存しません。</p>
+<p>Pillowの画像を受け取り、それぞれをXTGへ変換してXTCへ格納します。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">from</span><span> pathlib</span><span style="color: #E1FF36;"> import</span><span> Path</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">from</span><span> PIL</span><span style="color: #E1FF36;"> import</span><span> Image</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">from</span><span> toxtc</span><span style="color: #E1FF36;"> import</span><span> BookMetadata, write_xtc</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>pages = [</span></span>
+<span class="giallo-l"><span>    Image.open(&quot;</span><span style="color: #96B5B4;">page-0001.bmp</span><span>&quot;),</span></span>
+<span class="giallo-l"><span>    Image.open(&quot;</span><span style="color: #96B5B4;">page-0002.bmp</span><span>&quot;),</span></span>
+<span class="giallo-l"><span>]</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>write_xtc(</span></span>
+<span class="giallo-l"><span>    Path(&quot;</span><span style="color: #96B5B4;">book.xtc</span><span>&quot;),</span></span>
+<span class="giallo-l"><span>    pages,</span></span>
+<span class="giallo-l"><span>    BookMetadata(title=&quot;</span><span style="color: #96B5B4;">Example</span><span>&quot;),</span></span>
+<span class="giallo-l"><span>)</span></span></code></pre>
+<p>XTC writerを独立させたことで、青空文庫以外の入力にも利用できます。</p>
+<p>例えば、HTMLやEPUBを別の方法でページ画像へ変換した場合や、カレンダーなどの画像をXTCとしてまとめる場合にも、同じXTC生成処理を再利用できます。</p>
+<h3 id="qing-kong-wen-ku-ji-fa-nojie-xi">青空文庫記法の解析</h3>
+<p>入力されたテキストは、描画前に内部の文書モデルへ変換します。</p>
+<p>例えば、次の青空文庫形式のルビは、</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="plain"><span class="giallo-l"><span>｜親文字《おやもじ》</span></span></code></pre>
+<p>親文字の<code>親文字</code>と、読みの<code>おやもじ</code>に分けて保持します。</p>
+<p>これにより、解析処理ではルビの構造だけを取り出し、描画処理で本文と読みの位置や文字サイズを決定できます。</p>
+<p>傍点、見出し、改ページについても同様に、それぞれの要素として扱います。</p>
+<p>青空文庫記法の解析と縦書きの描画処理を分離することで、レンダリング処理側では入力テキストの記法を直接意識せずに描画できます。</p>
+<h3 id="zong-shu-kirendaringu">縦書きレンダリング</h3>
+<p>解析した要素は、Pillowを使用して1ページずつ画像へ描画します。</p>
+<p>本文は上から下へ配置し、列が埋まると左側の次の列へ移動します。ルビは本文の右側へ、小さい文字で配置します。</p>
+<p>縦書きでは、単純に文字を90度回転させるだけでは正しく表示できません。</p>
+<p>句読点や括弧には縦書き用の配置が必要です。また、行頭や行末では禁則処理が必要になります。</p>
+<p>ルビや傍点についても、本文との位置関係を保ちながら描画する必要があります。</p>
+<p>現時点では、実際に本を読むために必要な範囲から順に対応しています。</p>
+<h2 id="xian-zai-nodui-ying-fan-wei-tozhi-yue">現在の対応範囲と制約</h2>
+<p>現在、青空文庫形式の次の要素に対応しています。</p>
+<ul>
+<li>明示的なルビ</li>
+<li>暗黙的なルビ</li>
+<li>傍点</li>
+<li>改ページ</li>
+<li>大見出し</li>
+<li>中見出し</li>
+<li>小見出し</li>
+</ul>
+<p>一方、青空文庫で使用されるすべての注記には対応していません。</p>
+<p>未対応の注記は、基本的に本文へ描画せず読み飛ばします。</p>
+<p>また、ページを画像として生成する方式には、次の制約があります。</p>
+<ul>
+<li>Reader上で文字サイズを変更できない</li>
+<li>画面サイズごとにページを再生成する必要がある</li>
+<li>フォントを変更する場合はXTCを再生成する必要がある</li>
+<li>縦書きの禁則処理や約物配置は完全ではない</li>
+</ul>
+<p>その代わり、Reader側のレイアウト機能に依存せず、日本語の縦書き、ルビ、傍点などを変換ツール側で制御できます。</p>
+<p>CrossPoint Readerのupstreamを大きく変更せず、現時点で縦書きの本を読むという目的に対しては、扱いやすい方法だと考えています。</p>
+<h2 id="matome">まとめ</h2>
+<p>青空文庫形式のテキストを縦書きのページ画像へレンダリングし、XTGとしてXTCへ格納するPythonツールを作成しました。</p>
+<p>ページを画像として事前に生成することで、CrossPoint Reader本体へ縦書きレイアウトを実装せず、日本語の縦書き、ルビ、傍点を表示できます。</p>
+<p>一方、生成後のページは固定画像となるため、Reader上での文字サイズ変更などには対応できません。</p>
+<p>現在はXteink X3上のCrossPoint Readerでのみ動作を確認しています。未対応の青空文庫記法や縦書きレイアウトについては、必要に応じて対応していきます。</p>
+<h2 id="can-kao">参考</h2>
+<div class="footnote-definition" id="CPR"><sup class="footnote-definition-label">2</sup>
+<p><a rel="external" href="https://github.com/crosspoint-reader/crosspoint-reader">crosspoint-reader/crosspoint-reader | GitHub</a></p>
+</div>
+<div class="footnote-definition" id="x3"><sup class="footnote-definition-label">1</sup>
+<p><a rel="external" href="https://www.xteink.com/products/xteink-x3">Xteink X3 Pocket eReader</a></p>
+</div>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/25.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

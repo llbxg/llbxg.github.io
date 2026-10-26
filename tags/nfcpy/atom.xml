@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>kosh.dev - nfcpy</title>
+    <link rel="self" type="application/atom+xml" href="https://www.kosh.dev/tags/nfcpy/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://www.kosh.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2021-07-25T00:00:00+00:00</updated>
+    <id>https://www.kosh.dev/tags/nfcpy/atom.xml</id>
+    <entry xml:lang="en">
+        <title>nfcpyにおけるタイムアウト処理</title>
+        <published>2021-07-25T00:00:00+00:00</published>
+        <updated>2021-07-25T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://www.kosh.dev/article/3/"/>
+        <id>https://www.kosh.dev/article/3/</id>
+        
+        <content type="html" xml:base="https://www.kosh.dev/article/3/">&lt;p&gt;nfcpyを利用してカード情報を読み取る際のタイムアウト処理について考えます。&lt;&#x2F;p&gt;
+&lt;p&gt;[TOC]&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;nfcpy&quot;&gt;nfcpy&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;nfcpy&lt;&#x2F;code&gt;と非接触型のデバイスを使って、NFC対応のカードから情報を読み取ることができます。&lt;&#x2F;p&gt;
+&lt;p&gt;今回はPaSoRiのRC-S380を利用しています。対応デバイスは公式を確認してください。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;nfcpy.readthedocs.io&#x2F;en&#x2F;latest&#x2F;overview.html#supported-devices&quot;&gt;nfcpy : Supported Devices&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;カード情報を読み取る簡単なコードは以下のようになります。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;import&lt;&#x2F;span&gt;&lt;span&gt; nfc&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;with&lt;&#x2F;span&gt;&lt;span&gt; nfc.ContactlessFrontend(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;usb&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; as&lt;&#x2F;span&gt;&lt;span&gt; clf:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    clf.connect(rdwr={})&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;これだとカードの読み取りが行われるまで(カードが置かれ、離されるまで)待ち続けてしまいます。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;nfcpy&lt;&#x2F;code&gt;において、以下のように実装されていることで&lt;strong&gt;読み込み待機が発生&lt;&#x2F;strong&gt;しています。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;# nfc&#x2F;clf&#x2F;__init__.py&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;class&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C0EC12;&quot;&gt; ContactlessFrontend&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;(object):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; connect&lt;&#x2F;span&gt;&lt;span&gt;(self, **options):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        terminate = options.get(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;terminate&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt; lambda&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; False&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;  # (1)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        try&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;            while&lt;&#x2F;span&gt;&lt;span&gt; not terminate():&lt;&#x2F;span&gt;&lt;span style=&quot;color: #7F8B93;&quot;&gt;  # (2)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;                if&lt;&#x2F;span&gt;&lt;span&gt; rdwr_options:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;(1) デフォルトの&lt;code&gt;terminate&lt;&#x2F;code&gt;は&lt;code&gt;lambda: False&lt;&#x2F;code&gt;と設定されています。&lt;&#x2F;p&gt;
+&lt;p&gt;(2) これにより、&lt;code&gt;terminate()&lt;&#x2F;code&gt;がFalseを返し続け、永遠に読み取りを行おうとします。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;timeout&quot;&gt;timeout&lt;&#x2F;h2&gt;
+&lt;p&gt;つまり、&lt;code&gt;connect&lt;&#x2F;code&gt;の引数に&lt;code&gt;terminate=&lt;&#x2F;code&gt;を与えることで、タイムアウト処理を実装できます。&lt;&#x2F;p&gt;
+&lt;p&gt;公式のサンプルを参考に、&lt;strong&gt;5秒後に待機をやめる&lt;&#x2F;strong&gt;ようにするには以下のようになります。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;nfcpy.readthedocs.io&#x2F;en&#x2F;latest&#x2F;modules&#x2F;clf.html#nfc.clf.ContactlessFrontend.connect&quot;&gt;nfcpy : nfc.clf.ContactlessFrontend.connect&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt; functools&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; import&lt;&#x2F;span&gt;&lt;span&gt; partial&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;import&lt;&#x2F;span&gt;&lt;span&gt; time&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;import&lt;&#x2F;span&gt;&lt;span&gt; nfc&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; afrer&lt;&#x2F;span&gt;&lt;span&gt;(n, started):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;    return&lt;&#x2F;span&gt;&lt;span&gt; time.time() - started &amp;gt; n&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;with&lt;&#x2F;span&gt;&lt;span&gt; nfc.ContactlessFrontend(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;usb&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; as&lt;&#x2F;span&gt;&lt;span&gt; clf:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    started = time.time()&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    wait_s =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 5&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    clf.connect(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        rdwr={}, &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        terminate=partial(afrer, wait_s, started)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;”読み取りを開始した時間(&lt;code&gt;started&lt;&#x2F;code&gt;)から、5秒後(&lt;code&gt;wait_s&lt;&#x2F;code&gt;)にTureが返るような関数”をterminateに渡すことでタイムアウト処理を実装することができました。&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;p&gt;これだとカードを置いている状態でも、タイムアウトが実行されてしまいます。&lt;&#x2F;p&gt;
+&lt;p&gt;そこで、カードが置かれている場合はタイムアウト処理を停止させます。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;class&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C0EC12;&quot;&gt; Card&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;(object):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; __init__&lt;&#x2F;span&gt;&lt;span&gt;(self):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        self.on_card =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; False&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; on_connect&lt;&#x2F;span&gt;&lt;span&gt;(self, tag):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        self.on_card =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; True&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        return&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; True&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; on_release&lt;&#x2F;span&gt;&lt;span&gt;(self, tag):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        self.on_card =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; False&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        return&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; True&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C7D2DA;&quot;&gt; after&lt;&#x2F;span&gt;&lt;span&gt;(self, started, n):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        return&lt;&#x2F;span&gt;&lt;span&gt; time.time() - started &amp;gt; n and not self.on_card&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; __call__&lt;&#x2F;span&gt;&lt;span&gt;(self, started, n):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        with&lt;&#x2F;span&gt;&lt;span&gt; nfc.ContactlessFrontend(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;usb&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; as&lt;&#x2F;span&gt;&lt;span&gt; clf:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            rdwr_options = {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;on-connect&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: self.on_connect,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;on-release&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: self.on_release&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            clf.connect(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                rdwr=rdwr_options,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                terminate=partial(self.after, started, n)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;card=Card()&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;card(time.time(),&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; 5&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;&#x27;on-connect&#x27;&lt;&#x2F;code&gt;と&lt;code&gt;&#x27;on-release&#x27;&lt;&#x2F;code&gt;のオプションを追加してあげることで、カードの読み込み開始と終了を確認できます。&lt;&#x2F;p&gt;
+&lt;p&gt;これで&lt;code&gt;on_card&lt;&#x2F;code&gt;がTrueの際(カードが置かれたままの状態)には、タイムアウト処理が停止します。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;wai-bu-zhi-yu&quot;&gt;外部制御&lt;&#x2F;h2&gt;
+&lt;p&gt;この&lt;code&gt;terminate&lt;&#x2F;code&gt;を利用することで、別の場所から読み込み待機を解除することが可能になります。&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #FFFFFF; background-color: #000000;&quot;&gt;&lt;code data-lang=&quot;python&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;import&lt;&#x2F;span&gt;&lt;span&gt; threading&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;import&lt;&#x2F;span&gt;&lt;span&gt; time&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;import&lt;&#x2F;span&gt;&lt;span&gt; nfc&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;class&lt;&#x2F;span&gt;&lt;span style=&quot;color: #C0EC12;&quot;&gt; Card&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;(object):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; __init__&lt;&#x2F;span&gt;&lt;span&gt;(self):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        self.flag =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt; False&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;    def&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt; __call__&lt;&#x2F;span&gt;&lt;span&gt;(self):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt;        with&lt;&#x2F;span&gt;&lt;span&gt; nfc.ContactlessFrontend(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #96B5B4;&quot;&gt;usb&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #E1FF36;&quot;&gt; as&lt;&#x2F;span&gt;&lt;span&gt; clf:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            clf.connect(rdwr={}, terminate=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #F7FE09;&quot;&gt;lambda&lt;&#x2F;span&gt;&lt;span&gt;: self.flag)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;threading.Thread(target=(card:=Card())).start()&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;time.sleep(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;card.flag=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #DDFC16;&quot;&gt;True&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;外から&lt;code&gt;flag&lt;&#x2F;code&gt;をTrueにすることで、読み込み待機を解除できました。&lt;&#x2F;p&gt;
+&lt;p&gt;この実装により、カード読み込みとカード登録などを一台の非接触形のデバイスでカバーできるようになります。&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

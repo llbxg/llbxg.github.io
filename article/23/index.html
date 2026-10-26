@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="PageCryptベースのHTML暗号化を確認する"/>
+  <meta name="description" content="PageCrypt の動作原理を解説し、Python と JavaScript でパスワード保護されたHTMLを暗号化・復号化する。" />
+  <meta property="description" content="PageCrypt の動作原理を解説し、Python と JavaScript でパスワード保護されたHTMLを暗号化・復号化する。" />
+  <meta property="og:type" content="article" />
+<title> PageCryptベースのHTML暗号化を確認する| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">PageCryptベースのHTML暗号化を確認する</h1>
+    <div class='info'>
+        <div class='date'>2025-02-23</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/cryptography/">cryptography</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p>HTMLページをパスワード保護したい場合、Basic認証やDigest認証などサーバー設定が必要な手法を使うのが一般的です。
+しかし、"静的ホスティング上で完結させたい"といったシーンでは、PageCrypt<sup class="footnote-reference"><a href="#page_crypt">1</a></sup>のようにクライアント側で復号する仕組みが有用です。</p>
+<p>PageCryptは、HTMLファイルを事前に暗号化し、JavaScriptで復号化することで、サーバーの追加設定を不要にしています。</p>
+<p>本記事では、PythonとJavaScriptでPageCrypt相当の処理を再現しながら、AES-GCM暗号とPBKDF2（あるいはargon2）によるキー導出を解説します。</p>
+<p>Pythonの暗号化ライブラリには <code>pycryptodome</code><sup class="footnote-reference"><a href="#pd">2</a></sup> を、JavaScriptの復号には <code>Web Crypto API</code> を使用しています。</p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/23/#quan-ti-noliu-re">全体の流れ</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/23/#aes-gcm-niyoruan-hao-hua-fu-hao-hua">AES-GCM による暗号化/復号化</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/23/#pbkdf2">PBKDF2</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/23/#argon2">argon2</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/23/#matome">まとめ</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/23/#omake-zhui-jia-ren-zheng-deta-aad">(おまけ) 追加認証データ（AAD）</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/23/#omake-hua-xiang-nodui-ying">(おまけ) 画像の対応</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/23/#can-kao">参考</a></li> 
+     
+</ol></div></p>
+<h2 id="quan-ti-noliu-re">全体の流れ</h2>
+<p>以下のようなフローで、パスワードと平文(HTML)を用いて、AES-GCMで暗号化します。</p>
+<p><img src="/image/023/PBKDF2_AES-GCM.png" alt="PBKDF2+AES-GCM" /></p>
+<ol>
+<li>平文とパスワードを用意する</li>
+<li>PBKDF2を用いてパスワードから鍵(key)を生成</li>
+<li>生成した鍵を利用して、AES-BCMで暗号化を行う</li>
+<li>salt、IV<sup class="footnote-reference"><a href="#iv">3</a></sup>、暗号文と認証タグ(tag)を1つにまとめる</li>
+</ol>
+<p>上記フローからもわかるように、パスワードを直接AESの鍵として使わないです。
+あくまで、パスワードを利用し、PBKDF2を通して鍵を作成し、安全に暗号化する設計になっています。</p>
+<p>実際の運用では「salt」「IV」「暗号文」「認証タグ」の４セットをHTMLに埋め込みます。
+ユーザーがページを開いてパスワードを入力すると、JavaScriptがそれらの情報を使って復号処理を行い、ページを展開する仕組みです。</p>
+<h2 id="aes-gcm-niyoruan-hao-hua-fu-hao-hua">AES-GCM による暗号化/復号化</h2>
+<p>AESにはCBCやCTRなど複数のモードがありますが、ここではAES-GCM(Galois/Counter Mode)を利用します。</p>
+<p>AES-GCMは、認証タグ（MAC）が自動的に生成・検証される「認証付き暗号」であり、改ざん検知が標準で行えるのが特徴です。</p>
+<p>まずは「hello」を暗号化・復号する簡単なサンプルコードを示します。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">import</span><span> base64</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">import</span><span> os</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">from</span><span> Crypto.Cipher</span><span style="color: #E1FF36;"> import</span><span> AES</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">def</span><span style="color: #C7D2DA;"> encrypt</span><span>(key: bytes, plaintext: bytes) -&gt; bytes:</span></span>
+<span class="giallo-l"><span>    iv = os.urandom(</span><span style="color: #DDFC16;">12</span><span>)</span></span>
+<span class="giallo-l"><span>    cipher = AES.new(key, AES.MODE_GCM, nonce=iv)</span></span>
+<span class="giallo-l"><span>    ciphertext, tag = cipher.encrypt_and_digest(plaintext)</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">    return</span><span> iv + ciphertext + tag</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">def</span><span style="color: #C7D2DA;"> decrypt</span><span>(key: bytes, iv: bytes, ciphertext: bytes, tag: bytes) -&gt; bytes:</span></span>
+<span class="giallo-l"><span>    cipher = AES.new(key, AES.MODE_GCM, nonce=iv)</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">    return</span><span> cipher.decrypt_and_verify(ciphertext, tag)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">if</span><span> __name__ == &quot;</span><span style="color: #96B5B4;">__main__</span><span>&quot;:</span></span>
+<span class="giallo-l"><span>    plaintext =</span><span style="color: #F7FE09;"> b</span><span>&quot;</span><span style="color: #96B5B4;">hello</span><span>&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>    key =</span><span style="color: #F7FE09;"> b</span><span>&quot;</span><span style="color: #96B5B4;">0</span><span>&quot;*</span><span style="color: #DDFC16;">16</span></span>
+<span class="giallo-l"><span>    encrypted_data = encrypt(key, plaintext)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>    final_encrypted_data = base64.b64encode(encrypted_data)</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">    print</span><span>(&quot;</span><span style="color: #96B5B4;">Encrypted data:</span><span>&quot;, final_encrypted_data)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>    iv = encrypted_data[:</span><span style="color: #DDFC16;">12</span><span>]</span></span>
+<span class="giallo-l"><span>    ciphertext = encrypted_data[</span><span style="color: #DDFC16;">12</span><span>:-</span><span style="color: #DDFC16;">16</span><span>]</span></span>
+<span class="giallo-l"><span>    tag = encrypted_data[-</span><span style="color: #DDFC16;">16</span><span>:]</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">    print</span><span>(&quot;</span><span style="color: #96B5B4;">Decrypted data:</span><span>&quot;, decrypt(key, iv, ciphertext, tag))</span></span></code></pre><pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #7F8B93;"># Derived Key: 30303030303030303030303030303030</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># Encrypted data: b&#39;7GYaE4mekELCvfQHhONbxe7JSejHy/nW/LfkQ5Fu9ks8&#39;</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># Decrypted data: b&#39;hello&#39;</span></span></code></pre>
+<p>"hello"が暗号化され、復号により元通り"hello"に戻っています。</p>
+<h3 id="gai-zanjian-zhi-noli">改ざん検知の例</h3>
+<p>暗号文の一部を改ざんした場合、認証タグとの照合が失敗し、<code>.decrypt_and_verify()</code>はエラーを吐きます。</p>
+<p>試しに暗号文の一部を書き換えます。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span>key =</span><span style="color: #F7FE09;"> b</span><span>&quot;</span><span style="color: #96B5B4;">0</span><span>&quot;*</span><span style="color: #DDFC16;">16</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>encrypted_data = bytearray(</span><span style="color: #F7FE09;">b</span><span>&quot;</span><span style="color: #96B5B4;">7GYaE4mekELCvfQHhONbxe7JSejHy/nW/LfkQ5Fu9ks8</span><span>&quot;)</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">print</span><span>(&quot;</span><span style="color: #96B5B4;">Decrypted data:</span><span>&quot;, decrypt(key, encrypted_data))</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>encrypted_data[</span><span style="color: #DDFC16;">12</span><span>] ^=</span><span style="color: #F7FE09;"> 0x</span><span style="color: #DDFC16;">01</span><span style="color: #7F8B93;">  # 🔥</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">try</span><span>:</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">    print</span><span>(&quot;</span><span style="color: #96B5B4;">Decrypted data:</span><span>&quot;, decrypt(key, encrypted_data))</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">except</span><span> ValueError</span><span style="color: #E1FF36;"> as</span><span> e:</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">    print</span><span>(&quot;</span><span style="color: #96B5B4;">Error:</span><span>&quot;, e)</span></span></code></pre><pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #7F8B93;"># Decrypted data: b&#39;hello&#39;</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># Error: MAC check failed</span></span></code></pre>
+<p>このように、改ざんを検知して復号できなくなります。</p>
+<h3 id="javascriptdefu-hao-suru">JavaScriptで復号する</h3>
+<p>上記Pythonで暗号化したデータを、JavaScriptのWeb Crypto APIで復号する例です。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="javascript"><span class="giallo-l"><span style="color: #F7FE09;">async function</span><span style="color: #C7D2DA;"> deriveKey</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> keyBytes = new</span><span style="color: #C7D2DA;"> Uint8Array</span><span>(</span><span style="color: #DDFC16;">16</span><span>).</span><span style="color: #C7D2DA;">map</span><span>((_, i)</span><span style="color: #F7FE09;"> =&gt;</span><span> &quot;</span><span style="color: #96B5B4;">0</span><span>&quot;.</span><span style="color: #C7D2DA;">charCodeAt</span><span>(</span><span style="color: #DDFC16;">0</span><span>));</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">  return await</span><span> crypto.subtle.</span><span style="color: #C7D2DA;">importKey</span><span>(</span></span>
+<span class="giallo-l"><span>    &quot;</span><span style="color: #96B5B4;">raw</span><span>&quot;,</span></span>
+<span class="giallo-l"><span>    keyBytes,</span></span>
+<span class="giallo-l"><span>    { name: &quot;</span><span style="color: #96B5B4;">AES-GCM</span><span>&quot;, length:</span><span style="color: #DDFC16;"> 128</span><span> },</span></span>
+<span class="giallo-l"><span style="color: #DDFC16;">    false</span><span>,</span></span>
+<span class="giallo-l"><span>    [&quot;</span><span style="color: #96B5B4;">decrypt</span><span>&quot;]</span></span>
+<span class="giallo-l"><span>  );</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">async function</span><span style="color: #C7D2DA;"> decrypt</span><span>(key, iv, ciphertextAndTag) {</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">  try</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">    const</span><span> decryptedArrayBuffer =</span><span style="color: #E1FF36;"> await</span><span> crypto.subtle.</span><span style="color: #C7D2DA;">decrypt</span><span>(</span></span>
+<span class="giallo-l"><span>      { name: &quot;</span><span style="color: #96B5B4;">AES-GCM</span><span>&quot;, iv: iv },</span></span>
+<span class="giallo-l"><span>      key,</span></span>
+<span class="giallo-l"><span>      ciphertextAndTag</span></span>
+<span class="giallo-l"><span>    );</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">    const</span><span> decryptedText = new</span><span style="color: #C7D2DA;"> TextDecoder</span><span>().</span><span style="color: #C7D2DA;">decode</span><span>(decryptedArrayBuffer);</span></span>
+<span class="giallo-l"><span>    console.</span><span style="color: #C7D2DA;">log</span><span>(`</span><span style="color: #96B5B4;">Decrypted data: ${</span><span>decryptedText</span><span style="color: #96B5B4;">}</span><span>`);</span></span>
+<span class="giallo-l"><span>  }</span><span style="color: #E1FF36;"> catch</span><span> (e) {</span></span>
+<span class="giallo-l"><span>    console.</span><span style="color: #C7D2DA;">error</span><span>(&quot;</span><span style="color: #96B5B4;">復号エラー:</span><span>&quot;, e);</span></span>
+<span class="giallo-l"><span>  }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>(</span><span style="color: #F7FE09;">async</span><span> ()</span><span style="color: #F7FE09;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> encryptedData = &quot;</span><span style="color: #96B5B4;">7GYaE4mekELCvfQHhONbxe7JSejHy/nW/LfkQ5Fu9ks8</span><span>&quot;;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> binaryData = Uint8Array.</span><span style="color: #C7D2DA;">from</span><span>(</span><span style="color: #C7D2DA;">atob</span><span>(encryptedData), (c)</span><span style="color: #F7FE09;"> =&gt;</span></span>
+<span class="giallo-l"><span>    c.</span><span style="color: #C7D2DA;">charCodeAt</span><span>(</span><span style="color: #DDFC16;">0</span><span>)</span></span>
+<span class="giallo-l"><span>  );</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> iv = binaryData.</span><span style="color: #C7D2DA;">slice</span><span>(</span><span style="color: #DDFC16;">0</span><span>,</span><span style="color: #DDFC16;"> 12</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> ciphertextAndTag = binaryData.</span><span style="color: #C7D2DA;">slice</span><span>(</span><span style="color: #DDFC16;">12</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> key =</span><span style="color: #E1FF36;"> await</span><span style="color: #C7D2DA;"> deriveKey</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">  decrypt</span><span>(key, iv, ciphertextAndTag);</span></span>
+<span class="giallo-l"><span>})();</span></span></code></pre><pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellsession"><span class="giallo-l"><span>Decrypted data: hello</span></span></code></pre>
+<p>問題なく復号できています。</p>
+<h2 id="pbkdf2">PBKDF2</h2>
+<p>AES-GCMで利用する鍵の生成には、PBKDF2を使うのが一般的です。</p>
+<p>PBKDF2はパスワードとsaltを用い、ハッシュ計算を複数回繰り返すことで、攻撃を困難にする仕組みです。</p>
+<p>AES鍵は16バイト(128ビット)や32バイト(256ビット)の長さが必要ですが、ユーザー入力のパスワードは長さや強度がバラバラなので、PBKDF2で安全に鍵を導出します。</p>
+<p>以下の例ではPBKDF2を10万回反復し、AES-256（32バイト）の鍵を導出しています。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">from</span><span> Crypto.Hash</span><span style="color: #E1FF36;"> import</span><span> SHA256</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">from</span><span> Crypto.Protocol.KDF</span><span style="color: #E1FF36;"> import</span><span> PBKDF2</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">def</span><span style="color: #C7D2DA;"> derive_key</span><span>(password: str, salt: bytes) -&gt; bytes:</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">    return</span><span> PBKDF2(</span></span>
+<span class="giallo-l"><span>        password,</span></span>
+<span class="giallo-l"><span>        salt,</span></span>
+<span class="giallo-l"><span>        dkLen=</span><span style="color: #DDFC16;">32</span><span>,</span></span>
+<span class="giallo-l"><span>        count=</span><span style="color: #DDFC16;">100000</span><span>,</span></span>
+<span class="giallo-l"><span>        hmac_hash_module=SHA256,</span></span>
+<span class="giallo-l"><span>        )</span></span></code></pre>
+<p>暗号化結果には暗号文の先頭にsaltも加えて出力し、復号時はそれを取り出して同じ鍵導出を行います。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span>password = &quot;</span><span style="color: #96B5B4;">mypassword</span><span>&quot;</span></span>
+<span class="giallo-l"><span>plaintext =</span><span style="color: #F7FE09;"> b</span><span>&quot;</span><span style="color: #96B5B4;">hello</span><span>&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>salt = os.urandom(</span><span style="color: #DDFC16;">16</span><span>)</span></span>
+<span class="giallo-l"><span>key = derive_key(password, salt)</span></span>
+<span class="giallo-l"><span>encrypted_data = encrypt(key, plaintext)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>final_encrypted_data = base64.b64encode(salt + encrypted_data)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #96B5B4;">print</span><span>(&quot;</span><span style="color: #96B5B4;">Salt:</span><span>&quot;, salt.hex())</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">print</span><span>(&quot;</span><span style="color: #96B5B4;">Derived Key:</span><span>&quot;, key.hex())</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">print</span><span>(&quot;</span><span style="color: #96B5B4;">Base64 Encoded Data:</span><span>&quot;, final_encrypted_data)</span></span></code></pre><pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #7F8B93;"># Salt: 8094f8bc4474837fbe7fd0a6b3777cd1</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># Derived Key: 93c9bd309716836ce01b954297e4ca99a5c5d30a080fe3b0df09dbe92b1e1963</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># Base64 Encoded Data: b&#39;gJT4vER0g3++f9Cms3d80ZX2181OikMw7IADnsZlg11rqY8wqVrOsY2cCnANGWFq1g==&#39;</span></span></code></pre>
+<p>JavaScript側で同じくPBKDF2を使えば復号できます。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="javascript"><span class="giallo-l"><span style="color: #F7FE09;">async function</span><span style="color: #C7D2DA;"> deriveKey</span><span>(password, salt) {</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> encoder = new</span><span style="color: #C7D2DA;"> TextEncoder</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> keyMaterial =</span><span style="color: #E1FF36;"> await</span><span> crypto.subtle.</span><span style="color: #C7D2DA;">importKey</span><span>(</span></span>
+<span class="giallo-l"><span>    &quot;</span><span style="color: #96B5B4;">raw</span><span>&quot;,</span></span>
+<span class="giallo-l"><span>    encoder.</span><span style="color: #C7D2DA;">encode</span><span>(password),</span></span>
+<span class="giallo-l"><span>    &quot;</span><span style="color: #96B5B4;">PBKDF2</span><span>&quot;,</span></span>
+<span class="giallo-l"><span style="color: #DDFC16;">    false</span><span>,</span></span>
+<span class="giallo-l"><span>    [&quot;</span><span style="color: #96B5B4;">deriveKey</span><span>&quot;]</span></span>
+<span class="giallo-l"><span>  );</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">  return await</span><span> crypto.subtle.</span><span style="color: #C7D2DA;">deriveKey</span><span>(</span></span>
+<span class="giallo-l"><span>    {</span></span>
+<span class="giallo-l"><span>      name: &quot;</span><span style="color: #96B5B4;">PBKDF2</span><span>&quot;,</span></span>
+<span class="giallo-l"><span>      salt: salt,</span></span>
+<span class="giallo-l"><span>      iterations:</span><span style="color: #DDFC16;"> 100000</span><span>,</span></span>
+<span class="giallo-l"><span>      hash: &quot;</span><span style="color: #96B5B4;">SHA-256</span><span>&quot;,</span></span>
+<span class="giallo-l"><span>    },</span></span>
+<span class="giallo-l"><span>    keyMaterial,</span></span>
+<span class="giallo-l"><span>    { name: &quot;</span><span style="color: #96B5B4;">AES-GCM</span><span>&quot;, length:</span><span style="color: #DDFC16;"> 256</span><span> },</span></span>
+<span class="giallo-l"><span style="color: #DDFC16;">    false</span><span>,</span></span>
+<span class="giallo-l"><span>    [&quot;</span><span style="color: #96B5B4;">decrypt</span><span>&quot;]</span></span>
+<span class="giallo-l"><span>  );</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">async function</span><span style="color: #C7D2DA;"> decrypt</span><span>(key, iv, ciphertextAndTag) {</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>(</span><span style="color: #F7FE09;">async</span><span> ()</span><span style="color: #F7FE09;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> encryptedData =</span></span>
+<span class="giallo-l"><span>    &quot;</span><span style="color: #96B5B4;">gJT4vER0g3++f9Cms3d80ZX2181OikMw7IADnsZlg11rqY8wqVrOsY2cCnANGWFq1g==</span><span>&quot;;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> password = &quot;</span><span style="color: #96B5B4;">mypassword</span><span>&quot;;</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> binaryData = Uint8Array.</span><span style="color: #C7D2DA;">from</span><span>(</span><span style="color: #C7D2DA;">atob</span><span>(encryptedData), (c)</span><span style="color: #F7FE09;"> =&gt;</span></span>
+<span class="giallo-l"><span>    c.</span><span style="color: #C7D2DA;">charCodeAt</span><span>(</span><span style="color: #DDFC16;">0</span><span>)</span></span>
+<span class="giallo-l"><span>  );</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> salt = binaryData.</span><span style="color: #C7D2DA;">slice</span><span>(</span><span style="color: #DDFC16;">0</span><span>,</span><span style="color: #DDFC16;"> 16</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> iv = binaryData.</span><span style="color: #C7D2DA;">slice</span><span>(</span><span style="color: #DDFC16;">16</span><span>,</span><span style="color: #DDFC16;"> 28</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> ciphertextAndTag = binaryData.</span><span style="color: #C7D2DA;">slice</span><span>(</span><span style="color: #DDFC16;">28</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> key =</span><span style="color: #E1FF36;"> await</span><span style="color: #C7D2DA;"> deriveKey</span><span>(password, salt);</span></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">  decrypt</span><span>(key, iv, ciphertextAndTag);</span></span>
+<span class="giallo-l"><span>})();</span></span></code></pre><pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellsession"><span class="giallo-l"><span>Decrypted data: hello</span></span></code></pre><h2 id="argon2">argon2</h2>
+<p>オリジナルのPageCryptにはありませんが、argon2を使ったキー導出に差し替えることもできます。</p>
+<p>2015年のパスワードハッシュコンペティション<sup class="footnote-reference"><a href="#phc">4</a></sup>の優勝者であるArgon2は、PBKDF2の代替として利用可能です。
+たとえば、BitwardenだとArgon2idを実装しています<sup class="footnote-reference"><a href="#bit">5</a></sup>。</p>
+<p>以下の例でも2idを利用しています。</p>
+<p>Pythonでは<code>argon2-cffi</code><sup class="footnote-reference"><a href="#argon2_cffi">6</a></sup>、JavaScriptでは<code>argon2-browser</code><sup class="footnote-reference"><a href="#argon2-browser">7</a></sup>を利用します。</p>
+<p>基本的な部分はPBKDF2の場合と同じで、以下のように鍵を生成します。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">from</span><span> argon2.low_level</span><span style="color: #E1FF36;"> import</span><span> Type, hash_secret_raw</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F7FE09;">def</span><span style="color: #C7D2DA;"> derive_key</span><span>(password: str, salt: bytes) -&gt; bytes:</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">    return</span><span> hash_secret_raw(</span></span>
+<span class="giallo-l"><span>        secret=password.encode(),</span></span>
+<span class="giallo-l"><span>        salt=salt,</span></span>
+<span class="giallo-l"><span>        time_cost=</span><span style="color: #DDFC16;">3</span><span>,</span></span>
+<span class="giallo-l"><span>        memory_cost=</span><span style="color: #DDFC16;">65536</span><span>,</span></span>
+<span class="giallo-l"><span>        parallelism=</span><span style="color: #DDFC16;">1</span><span>,</span></span>
+<span class="giallo-l"><span>        hash_len=</span><span style="color: #DDFC16;">32</span><span>,</span></span>
+<span class="giallo-l"><span>        type=Type.ID,</span></span>
+<span class="giallo-l"><span>    )</span></span></code></pre><pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #7F8B93;"># Salt: d10b6d0d2f02808426efaedfc2453896</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># Derived Key: 3d7b67a07cb91dce957eda7b2903502de7de8e68e0fa9f616278afcfe3f8d74d</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># Base64 Encoded Data: b&#39;0QttDS8CgIQm767fwkU4lvgFvJZ95BYFJPjPa/MKXwKh0LwEuZeye2BSzMiCD5r7ZQ==&#39;</span></span></code></pre>
+<p>JavaScript側では <code>argon2-browser</code>をCDNで読み込み、同様にキーを生成することで復号可能です。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="javascript"><span class="giallo-l"><span style="color: #F7FE09;">async function</span><span style="color: #C7D2DA;"> deriveKey</span><span>(password, salt) {</span></span>
+<span class="giallo-l"><span style="color: #F7FE09;">  const</span><span> hash =</span><span style="color: #E1FF36;"> await</span><span> argon2.</span><span style="color: #C7D2DA;">hash</span><span>({</span></span>
+<span class="giallo-l"><span>    pass: password,</span></span>
+<span class="giallo-l"><span>    salt: salt,</span></span>
+<span class="giallo-l"><span>    time:</span><span style="color: #DDFC16;"> 3</span><span>,</span></span>
+<span class="giallo-l"><span>    mem:</span><span style="color: #DDFC16;"> 65536</span><span>,</span></span>
+<span class="giallo-l"><span>    hashLen:</span><span style="color: #DDFC16;"> 32</span><span>,</span></span>
+<span class="giallo-l"><span>    parallelism:</span><span style="color: #DDFC16;"> 1</span><span>,</span></span>
+<span class="giallo-l"><span>    type: argon2.ArgonType.Argon2id,</span></span>
+<span class="giallo-l"><span>  });</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">  return await</span><span> crypto.subtle.</span><span style="color: #C7D2DA;">importKey</span><span>(</span></span>
+<span class="giallo-l"><span>    &quot;</span><span style="color: #96B5B4;">raw</span><span>&quot;,</span></span>
+<span class="giallo-l"><span>    new</span><span style="color: #C7D2DA;"> Uint8Array</span><span>(hash.hash),</span></span>
+<span class="giallo-l"><span>    { name: &quot;</span><span style="color: #96B5B4;">AES-GCM</span><span>&quot;, length:</span><span style="color: #DDFC16;"> 256</span><span> },</span></span>
+<span class="giallo-l"><span style="color: #DDFC16;">    false</span><span>,</span></span>
+<span class="giallo-l"><span>    [&quot;</span><span style="color: #96B5B4;">decrypt</span><span>&quot;]</span></span>
+<span class="giallo-l"><span>  );</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellsession"><span class="giallo-l"><span>Decrypted data: hello</span></span></code></pre><h2 id="matome">まとめ</h2>
+<p>PageCryptのように、「AES-GCM + PBKDF2 でHTMLを暗号化し、クライアント側で復号する」という流れを確認しました。</p>
+<p>本家PageCrypt実装はPBKDF2のみですが、argon2にも差し替え可能であり、必要に応じて派生させられます。</p>
+<p>静的ページで手軽にパスワード保護をしたいときに役立ちます。</p>
+<h2 id="omake-zhui-jia-ren-zheng-deta-aad">(おまけ) 追加認証データ（AAD）</h2>
+<p>AES-GCMでは、「AAD（Additional Authenticated Data）」という領域に、暗号化するデータ本体以外のメタデータを載せることができます。</p>
+<p>AADは、暗号の強さ自体には影響しませんが、通信の安全性には関係します。
+例えば、プロトコルのバージョン番号や受信者のアドレスなどを AAD に含めないと、攻撃者が自由に書き換えることができてしまいます。
+その結果、古い安全性の低いバージョンのプロトコルに変更されるなどのリスクが生じます。</p>
+<p>ただ、GCM の動作を変えるような情報は、認証タグの検証より前にチェックしておく方が安全です<sup class="footnote-reference"><a href="#aad">8</a></sup>。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">import</span><span> os</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">from</span><span> Crypto.Cipher</span><span style="color: #E1FF36;"> import</span><span> AES</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>key =</span><span style="color: #F7FE09;"> b</span><span>&quot;</span><span style="color: #96B5B4;">0</span><span>&quot;*</span><span style="color: #DDFC16;">16</span></span>
+<span class="giallo-l"><span>plaintext =</span><span style="color: #F7FE09;"> b</span><span>&quot;</span><span style="color: #96B5B4;">hello</span><span>&quot;</span></span>
+<span class="giallo-l"><span>aad =</span><span style="color: #F7FE09;"> b</span><span>&quot;</span><span style="color: #96B5B4;">metadata123</span><span>&quot;</span></span>
+<span class="giallo-l"><span>iv = os.urandom(</span><span style="color: #DDFC16;">12</span><span>)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>cipher = AES.new(key, AES.MODE_GCM, nonce=iv)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>cipher.update(aad)</span></span>
+<span class="giallo-l"><span>ciphertext, tag = cipher.encrypt_and_digest(plaintext)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>cipher2 = AES.new(key, AES.MODE_GCM, nonce=iv)</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">try</span><span>:</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">    print</span><span>(cipher2.decrypt_and_verify(ciphertext, tag))</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">except</span><span> ValueError</span><span style="color: #E1FF36;"> as</span><span> e:</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">    print</span><span>(e)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>cipher3 = AES.new(key, AES.MODE_GCM, nonce=iv)</span></span>
+<span class="giallo-l"><span>cipher3.update(aad)</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">try</span><span>:</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">    print</span><span>(cipher3.decrypt_and_verify(ciphertext, tag))</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">except</span><span> ValueError</span><span style="color: #E1FF36;"> as</span><span> e:</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">    print</span><span>(e)s</span></span></code></pre><h2 id="omake-hua-xiang-nodui-ying">(おまけ) 画像の対応</h2>
+<p>HTML内の画像も暗号化したい場合、画像をbase64で埋め込む方法があります。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span>path = Path(&quot;</span><span style="color: #96B5B4;">aiueo.png</span><span>&quot;)</span></span>
+<span class="giallo-l"><span>data = base64.b64encode(path.read_bytes()).decode()</span></span>
+<span class="giallo-l"><span>element =</span><span style="color: #F7FE09;"> f</span><span style="color: #96B5B4;">&quot;data:image/png;base64,</span><span style="color: #DDFC16;">{</span><span>data</span><span style="color: #DDFC16;">}</span><span style="color: #96B5B4;">&quot;</span></span></code></pre>
+<p>あとは <code>&lt;img src="data:image/png;base64,iVBORw0KGg..." /&gt;</code> という形でHTMLに埋め込めば、ひとつのHTMLファイルで完結します。</p>
+<h2 id="can-kao">参考</h2>
+<div class="footnote-definition" id="page_crypt"><sup class="footnote-definition-label">1</sup>
+<p><a rel="external" href="https://github.com/MaxLaumeister/PageCrypt">https://github.com/MaxLaumeister/PageCrypt</a></p>
+</div>
+<div class="footnote-definition" id="pd"><sup class="footnote-definition-label">2</sup>
+<p><a rel="external" href="https://pypi.org/project/pycryptodome/">https://pypi.org/project/pycryptodome/</a></p>
+</div>
+<div class="footnote-definition" id="iv"><sup class="footnote-definition-label">3</sup>
+<p>12バイトの長さのIV(nonce)が、"NIST SP 800-38D"によって推奨されているようです。</p>
+</div>
+<div class="footnote-definition" id="phc"><sup class="footnote-definition-label">4</sup>
+<p><a rel="external" href="https://www.password-hashing.net/">Password Hashing Competition</a></p>
+</div>
+<div class="footnote-definition" id="bit"><sup class="footnote-definition-label">5</sup>
+<p><a rel="external" href="https://bitwarden.com/ja-jp/help/kdf-algorithms/">KDFアルゴリズム | Bitwarden</a></p>
+</div>
+<div class="footnote-definition" id="argon2_cffi"><sup class="footnote-definition-label">6</sup>
+<p><a rel="external" href="https://github.com/hynek/argon2-cffi?tab=readme-ov-file">hynek/argon2-cffi: Secure Password Hashes for Python</a></p>
+</div>
+<div class="footnote-definition" id="argon2-browser"><sup class="footnote-definition-label">7</sup>
+<p>WASM実装のようです。<a rel="external" href="https://cdnjs.com/libraries/argon2-browser">https://cdnjs.com/libraries/argon2-browser</a></p>
+</div>
+<div class="footnote-definition" id="aad"><sup class="footnote-definition-label">8</sup>
+<p><a rel="external" href="https://crypto.stackexchange.com/questions/35727/does-aad-make-gcm-encryption-more-secure">aes - Does AAD make GCM encryption more secure? - Cryptography Stack Exchange</a></p>
+</div>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/23.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>

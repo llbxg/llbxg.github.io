@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+  
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,maximum-scale=1.0">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&display=swap" rel="stylesheet">
+
+
+  
+  <link type="image/ico" rel="icon" href="/favicon.ico"/>
+  <link rel="shortcut icon" href="https://www.kosh.dev/favicon.ico"/>
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://www.kosh.dev/icon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href=href="https://www.kosh.dev/icon/android-chrome-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href=""/icon/icon-32x32.png", trailing_slash=false) | safe }}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/icon-16x16.png", trailing_slash=false) | safe }}"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+  
+  <link rel ="stylesheet" href="https://www.kosh.dev/main.css"/>
+
+  
+  
+  
+  <meta property="og:site_name" content="kosh.dev" />
+  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.kosh.dev/icon/og-image.png" />
+
+  
+
+  <meta property="og:url" content="https://www.kosh.dev/article&#x2F;{{page.slug}}&#x2F;" />
+  <meta property="og:title" content="Picamera2を使用したRAW撮影と現像処理の方法"/>
+  <meta name="description" content="Picamera2を用いてRAWデータの撮影を行い、DNG形式を経由して、PNG形式への現像します。" />
+  <meta property="description" content="Picamera2を用いてRAWデータの撮影を行い、DNG形式を経由して、PNG形式への現像します。" />
+  <meta property="og:type" content="article" />
+<title> Picamera2を使用したRAW撮影と現像処理の方法| kosh.dev</title>
+
+
+</head>
+
+<body>
+  <header id="header" class="pinned" ><div class="items">
+        <div class="item logo"><a href="/">kosh.dev</a></div></div>
+  </header>
+
+  <main>
+    
+
+<div class="article">
+    <h1 class="title">Picamera2を使用したRAW撮影と現像処理の方法</h1>
+    <div class='info'>
+        <div class='date'>2024-01-11</div>
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/raspberrypi/">RaspberryPi</a></div>
+            
+        
+            
+            <div class="htag"><a href="https://www.kosh.dev/tags/picamera2/">Picamera2</a></div>
+            
+        
+    </div>
+<div class="contents">
+
+<p>Picamera2を用いてRAWデータの撮影を行い、DNG形式を経由して、PNG形式への現像します。</p>
+<p>
+<div class="toc" id="toc"><ol>
+    
+        <li><a href="https://www.kosh.dev/article/18/#cuo-ying-huan-jing">撮影環境</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/18/#rawcuo-ying">raw撮影</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/18/#rawkarapng-jpeghebian-huan">rawからPNG/JPEGへ変換</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/18/#rawkaradnghenobian-huan">RAWからDNGへの変換</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/18/#dngkarapnghenobian-huan">DNGからPNGへの変換</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/18/#apple-silicon-mac-denorawpynoinsutoru">Apple Silicon Mac でのrawpyのインストール</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/18/#metadata">metadata</a></li> 
+    
+        <li><a href="https://www.kosh.dev/article/18/#can-kao-wen-xian">参考文献</a></li> 
+     
+</ol></div></p>
+<h2 id="cuo-ying-huan-jing">撮影環境</h2>
+<ul>
+<li>ボード: Raspberry Pi Zero 2 W Rev 1.0</li>
+<li>OS: Raspberry Pi OS Lite (64-bit) – 2023-10-10リリース</li>
+<li>Arducam 16MP Autofocus Camera Module <sup class="footnote-reference"><a href="#1">1</a></sup> (sizeは<code>4656×3496</code>)</li>
+<li><code>picamera2==0.3.16</code></li>
+</ul>
+<p>撮影時の具体的な設定は以下の通りです。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #7F8B93;"># picam2.create_still_configuration()[&#39;raw&#39;]</span></span>
+<span class="giallo-l"><span>config = {</span></span>
+<span class="giallo-l"><span>    &#39;</span><span style="color: #96B5B4;">format</span><span>&#39;: &#39;</span><span style="color: #96B5B4;">SRGGB10_CSI2P</span><span>&#39;,</span></span>
+<span class="giallo-l"><span>    &#39;</span><span style="color: #96B5B4;">size</span><span>&#39;: (</span><span style="color: #DDFC16;">4656</span><span>,</span><span style="color: #DDFC16;"> 3496</span><span>),</span></span>
+<span class="giallo-l"><span>    &#39;</span><span style="color: #96B5B4;">stride</span><span>&#39;:</span><span style="color: #DDFC16;"> 5824</span><span>,</span></span>
+<span class="giallo-l"><span>    &#39;</span><span style="color: #96B5B4;">framesize</span><span>&#39;:</span><span style="color: #DDFC16;"> 20360704</span><span>}</span></span></code></pre>
+<p><code>capture_buffers</code>メソッドを用いて撮影します。
+(撮影のための関数に関しては過去記事でまとめています<sup class="footnote-reference"><a href="#2">2</a></sup>。)</p>
+<h2 id="rawcuo-ying">raw撮影</h2>
+<p>RAW形式での撮影は、<code>names=[]</code>パラメータに<code>'raw'</code>を追加することで簡単に行えます。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">import</span><span> time</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E1FF36;">from</span><span> picamera2</span><span style="color: #E1FF36;"> import</span><span> Picamera2</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>picam2 = Picamera2()</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>config_capture = picam2.create_still_configuration()</span></span>
+<span class="giallo-l"><span>picam2.configure(config_capture)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>picam2.start()</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>time.sleep(</span><span style="color: #DDFC16;">2</span><span>)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>(buffer, ), metadata = picam2.capture_buffers(names=[&#39;</span><span style="color: #96B5B4;">raw</span><span>&#39;])</span></span></code></pre>
+<p><code>buffer</code>はカメラが捉えた光をデジタル情報として記録したもの、<code>metadata</code>は画像データとは別に、カメラセンサーが撮影時に記録した追加情報です。</p>
+<p>これらの情報を用いて、現像を行います。</p>
+<p>(<code>metadata</code>の中身は長いので、最後に添付しておきます。<a href="https://www.kosh.dev/article/18/#metadata">metadata</a>)</p>
+<h2 id="rawkarapng-jpeghebian-huan">rawからPNG/JPEGへ変換</h2>
+<p>現像には<code>PiDNG</code><sup class="footnote-reference"><a href="#3">3</a></sup>と<code>rawpy</code><sup class="footnote-reference"><a href="#4">4</a></sup>を使用します。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">from</span><span> pidng.camdefs</span><span style="color: #E1FF36;"> import</span><span> Picamera2Camera</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">from</span><span> pidng.core</span><span style="color: #E1FF36;"> import</span><span> PICAM2DNG</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">import</span><span> rawpy</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">from</span><span> PIL</span><span style="color: #E1FF36;"> import</span><span> Image</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># 撮影設定から幅と高さを取得</span></span>
+<span class="giallo-l"><span>w, h = config_capture[&#39;</span><span style="color: #96B5B4;">raw</span><span>&#39;][&#39;</span><span style="color: #96B5B4;">size</span><span>&#39;]</span></span>
+<span class="giallo-l"><span>stride = config_capture[&#39;</span><span style="color: #96B5B4;">raw</span><span>&#39;][&#39;</span><span style="color: #96B5B4;">stride</span><span>&#39;]</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># バッファを画像データに変形</span></span>
+<span class="giallo-l"><span>raw = buffer.reshape((h, stride))</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># RAWデータからDNGへの変換</span></span>
+<span class="giallo-l"><span>camera = Picamera2Camera(config, metadata)</span></span>
+<span class="giallo-l"><span>r = PICAM2DNG(camera)</span></span>
+<span class="giallo-l"><span>r.options(compress=</span><span style="color: #DDFC16;">0</span><span>)</span></span>
+<span class="giallo-l"><span>r.convert(raw, &quot;</span><span style="color: #96B5B4;">sample.dng</span><span>&quot;)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># DNGファイルの読み込みとPNGへの変換</span></span>
+<span class="giallo-l"><span>dng = rawpy.imread(&quot;</span><span style="color: #96B5B4;">sample.dng</span><span>&quot;)</span></span>
+<span class="giallo-l"><span>data = dng.postprocess(use_camera_wb=</span><span style="color: #DDFC16;">True</span><span>)</span></span>
+<span class="giallo-l"><span>img = Image.fromarray(data)</span></span>
+<span class="giallo-l"><span>img.save(&quot;</span><span style="color: #96B5B4;">sample.png</span><span>&quot;)</span></span></code></pre>
+<p>このプロセスでは、PiDNGを用いてRAW形式のデータをDNG形式に変換し、その後rawpyでDNGファイルを読み込んでPNG画像として保存しています。</p>
+<p>RAW画像の読み込みには、ファイルパスまたはファイルオブジェクトが必要なため、中間でDNGファイルを保存しています。</p>
+<br>
+<hr>
+<br>
+<p>以下はおまけです。</p>
+<h2 id="rawkaradnghenobian-huan">RAWからDNGへの変換</h2>
+<p>PiDNGにより行われている処理を簡単に確認します。</p>
+<p>撮影データのbufferは1次元配列ですが、撮影設定を利用して2次元配列へreshapeすることができます。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #96B5B4;">print</span><span>(buffer.shape)</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># Prints: (20360704,)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>w, h = config_capture[&#39;</span><span style="color: #96B5B4;">raw</span><span>&#39;][&#39;</span><span style="color: #96B5B4;">size</span><span>&#39;]</span></span>
+<span class="giallo-l"><span>stride = config_capture[&#39;</span><span style="color: #96B5B4;">raw</span><span>&#39;][&#39;</span><span style="color: #96B5B4;">stride</span><span>&#39;]</span></span>
+<span class="giallo-l"><span>raw = buffer.reshape((h, stride))</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #96B5B4;">print</span><span>(raw.shape)</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># Prints: (3496, 5824)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #96B5B4;">print</span><span>(raw.min(), raw.max())</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># Prints: 0 255</span></span></code></pre>
+<p>このデータは単なる数値の配列ではありますが、1ピクセルあたり8ビットのグレースケール画像として解釈することも可能です。</p>
+<p><code>seaborn</code>のヒートマップを使用してデータの概観を確認します<sup class="footnote-reference"><a href="#5">5</a></sup>。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">import</span><span> seaborn</span><span style="color: #E1FF36;"> as</span><span> sns</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>sns.heatmap(raw, square=</span><span style="color: #DDFC16;">True</span><span>, cmap=&#39;</span><span style="color: #96B5B4;">RdBu</span><span>&#39;)</span></span>
+<span class="giallo-l"><span>plt.show()</span></span></code></pre>
+<p><img src="/image/018/image_sensordata.jpg" alt="rawのヒートマップ" /></p>
+<p>Fig1の(a)は全体像を示しています。
+ぱっと見、風景が見えますが、shapeからも分かるように横に伸び、縦線が確認できます。</p>
+<p>(b)は10×10ピクセルに拡大したものです。
+4ピクセルごとに1ピクセルの縦線が入っていることが見て取れます。</p>
+<p>これは、フォーマット('SRGGB10_CSI2P')により、本来1ピクセルあたり10ビットであることを示しています。つまり、1つの縦線には他の4ピクセル分の情報が含まれています。</p>
+<p>以下は実際の処理の一部です。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">if</span><span> s_bpp ==</span><span style="color: #DDFC16;"> 10</span><span>:</span></span>
+<span class="giallo-l"><span>    data = data.astype(np.uint16) &lt;&lt;</span><span style="color: #DDFC16;"> 2</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">    for</span><span> byte</span><span style="color: #E1FF36;"> in</span><span style="color: #96B5B4;"> range</span><span>(</span><span style="color: #DDFC16;">4</span><span>):</span></span>
+<span class="giallo-l"><span>        data[:, byte::</span><span style="color: #DDFC16;">5</span><span>] |= ((data[:,</span><span style="color: #DDFC16;"> 4</span><span>::</span><span style="color: #DDFC16;">5</span><span>] &gt;&gt; ((byte+</span><span style="color: #DDFC16;">1</span><span>) *</span><span style="color: #DDFC16;"> 2</span><span>)) &amp;</span><span style="color: #F7FE09;"> 0b</span><span style="color: #DDFC16;">11</span><span>)</span></span>
+<span class="giallo-l"><span>    data = np.delete(data, np.s_[</span><span style="color: #DDFC16;">4</span><span>::</span><span style="color: #DDFC16;">5</span><span>],</span><span style="color: #DDFC16;"> 1</span><span>)</span></span></code></pre>
+<p>この処理からも分かるように、単に縦線を取り除いても画像として成立します。</p>
+<p>縦線分のデータを使用した場合と使用しない場合の比較を以下に示します。</p>
+<p><img src="/image/018/image_diff_sensordata_unpackingdata.jpg" alt="10bppと8bppの比較" /></p>
+<p>図2の(a)は1ピクセルあたり10ビットの画像、(b)は8ビットの画像を示しています。</p>
+<p>目だけでは差をはっきり認識するのは難しいですが、(c)に示される2つの画像の差分から、2ビット分の違いが確認できます。</p>
+<p>PiDNGを使用することで、フォーマットを意識せずにRAWからDNGへの変換が可能です。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">from</span><span> pidng.camdefs</span><span style="color: #E1FF36;"> import</span><span> Picamera2Camera</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">from</span><span> pidng.core</span><span style="color: #E1FF36;"> import</span><span> PICAM2DNG</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>camera = Picamera2Camera(config, metadata)</span></span>
+<span class="giallo-l"><span>r = PICAM2DNG(camera)</span></span>
+<span class="giallo-l"><span>r.options(compress=</span><span style="color: #DDFC16;">0</span><span>)</span></span>
+<span class="giallo-l"><span>r.convert(raw, &quot;</span><span style="color: #96B5B4;">sample.dng</span><span>&quot;)</span></span></code></pre>
+<p>この手順でRAWデータをDNGフォーマットに変換し、保存します。</p>
+<p>このDNGフォーマットは、多くのソフトウェアでRAW画像として認識されます。</p>
+<h2 id="dngkarapnghenobian-huan">DNGからPNGへの変換</h2>
+<p>rawpyを使用することで非常に簡単に変換できます。
+今回は完全にオートで変換を行います。</p>
+<p>rawpyライブラリを使用することで、DNGからPNGへの変換を非常に簡単に行うことができます。
+今回は、変換は完全にオートで行い、マニュアルでの調整等は行いません。</p>
+<p>変換後は、Pillowライブラリを用いて画像ファイルを保存します。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #E1FF36;">import</span><span> rawpy</span></span>
+<span class="giallo-l"><span style="color: #E1FF36;">from</span><span> PIL</span><span style="color: #E1FF36;"> import</span><span> Image</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>dng = rawpy.imread(&quot;</span><span style="color: #96B5B4;">sample.dng</span><span>&quot;)</span></span>
+<span class="giallo-l"><span>data = dng.postprocess(use_camera_wb=</span><span style="color: #DDFC16;">True</span><span>)</span></span>
+<span class="giallo-l"><span>img = Image.fromarray(data)</span></span>
+<span class="giallo-l"><span>img.save(&quot;</span><span style="color: #96B5B4;">sample.png</span><span>&quot;)</span></span></code></pre>
+<p>変換後の写真を以下に示します。</p>
+<p><img src="/image/018/image.jpg" alt="現像後の写真" /></p>
+<p>この例では、空の部分が完全に飛んでしまっています。</p>
+<p>そのため、今後はDNGからの変換処理に手を加え、改善していく予定です。</p>
+<h2 id="apple-silicon-mac-denorawpynoinsutoru">Apple Silicon Mac でのrawpyのインストール</h2>
+<p>Appleシリコン搭載のMacでは、rawpyを通常の方法でインストールすることができません。</p>
+<p>このため、GitHubのissueにあるコメント<sup class="footnote-reference"><a href="#6">6</a></sup>を参考にしてインストールを行いました。</p>
+<p>以下にインストール手順を示します。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #C7D2DA;">brew</span><span style="color: #96B5B4;"> install libraw</span></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">pip</span><span style="color: #96B5B4;"> install cython</span></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">git</span><span style="color: #96B5B4;"> clone https://github.com/letmaik/rawpy</span></span>
+<span class="giallo-l"><span style="color: #96B5B4;">cd rawpy</span></span>
+<span class="giallo-l"><span style="color: #C7D2DA;">env</span><span style="color: #96B5B4;"> RAWPY_USE_SYSTEM_LIBRAW=</span><span style="color: #DDFC16;">1</span><span style="color: #96B5B4;"> python setup.py install</span></span></code></pre>
+<p>この手順により、Appleシリコン搭載のMacでもrawpyを使用することが可能になります。</p>
+<p>(私の環境は "Apple M1 Pro" です。)</p>
+<h2 id="metadata">metadata</h2>
+<p>カメラセンサーからの撮影時の詳細な情報や撮影条件を含んだデータです。</p>
+<p>この情報には、カラーゲイン、オートフォーカスの状態、デジタルゲイン、色補正行列、露出時間、レンズの位置、光の強さ（Lux）など、画像の品質や特性を理解するのに役立つ多くの要素が含まれています。</p>
+<pre class="giallo" style="color: #FFFFFF; background-color: #000000;"><code data-lang="python"><span class="giallo-l"><span style="color: #96B5B4;">print</span><span>(json.dumps(metadata, indent=</span><span style="color: #DDFC16;">4</span><span>))</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># Prints:</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># {</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;ColourGains&quot;: [</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         2.175602436065674,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         1.464006781578064</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     ],</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;AfState&quot;: 2,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;DigitalGain&quot;: 1.0,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;ColourCorrectionMatrix&quot;: [</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         1.4823477268218994,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         -0.35153281688690186,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         -0.13082416355609894,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         -0.21499906480312347,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         1.426438570022583,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         -0.2114395648241043,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         -0.040877100080251694,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         -0.3976461887359619,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         1.4385325908660889</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     ],</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;FocusFoM&quot;: 25623,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;ColourTemperature&quot;: 5850,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;SensorTimestamp&quot;: 42583836000,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;AfPauseState&quot;: 0,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;ScalerCrop&quot;: [</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         0,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         0,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         4656,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         3496</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     ],</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;ExposureTime&quot;: 592,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;FrameDuration&quot;: 111092,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;LensPosition&quot;: 1.7826648950576782,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;AnalogueGain&quot;: 1.0,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;Lux&quot;: 112766.6953125,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;SensorBlackLevels&quot;: [</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         4096,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         4096,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         4096,</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#         4096</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     ],</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;">#     &quot;AeLocked&quot;: false</span></span>
+<span class="giallo-l"><span style="color: #7F8B93;"># }</span></span></code></pre><h2 id="can-kao-wen-xian">参考文献</h2>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p><a rel="external" href="https://www.arducam.com/product/imx519-autofocus-camera-module-for-raspberry-pi-arducam-b0371/">16MP IMX519 PDAF&amp;CDAF Autofocus Camera for Raspberry Pi and NVIDIA Jetson Nano/Xavier NX and NVIDIA Orin NX - Arducam</a></p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p><a href="../../article/14">picamera2を用いたカメラ画像の取得とLcdディスプレイへの表示</a></p>
+</div>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
+<p><a rel="external" href="https://github.com/schoolpost/PiDNG/tree/master">schoolpost/PiDNG - GitHub</a></p>
+</div>
+<div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
+<p><a rel="external" href="https://github.com/letmaik/rawpy">letmaik/rawpy - GitHub</a></p>
+</div>
+<div class="footnote-definition" id="5"><sup class="footnote-definition-label">5</sup>
+<p>画像の出力の設定等の本質的に関係ない部分は省略しています。</p>
+</div>
+<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
+<p><a rel="external" href="https://github.com/letmaik/rawpy/issues/171#issuecomment-1672586083">issuecomment-1672586083 letmaik/rawpy - GitHub</a></p>
+</div>
+
+</div>
+
+</div>
+
+
+
+<script src="https://www.kosh.dev/js/internal_external.js"></script>
+
+
+  </main>
+
+  <footer>
+    <div class="item">©&nbsp;kosh&nbsp;2025</div>
+    <div class="item"><a href='/about/'>/about</a></div>
+    <div class="item"><a href='/atom.xml'>/atom.xml</a></div>
+    
+<div class="item"><a href="https://github.com/llbxg/llbxg.github.io/blob/main/content/article/18.md">(Edit)</a></div>
+
+    
+  </footer>
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RVMB5GPN2Z"></script>
+  <script src="https://www.kosh.dev/js/google_analytics.js"></script>
+  
+
+</body>
+
+</html>
